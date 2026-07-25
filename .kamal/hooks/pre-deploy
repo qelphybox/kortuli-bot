@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Docker creates a missing bind-mount source directory as root:root. The image
+# runs as uid 1000, so without this the very first deploy comes up and then
+# dies on "unable to open database file" — a confusing way to learn about file
+# ownership. Doing it here rather than in the README means a rebuilt server
+# works without anyone having to remember.
+DATA_DIR=/srv/kortuli-bot/data
+SSH_USER="${KAMAL_SSH_USER:-root}"
+
+for host in ${KAMAL_HOSTS//,/ }; do
+  ssh -o BatchMode=yes "${SSH_USER}@${host}" \
+    "mkdir -p ${DATA_DIR} && chown -R 1000:1000 ${DATA_DIR}"
+done

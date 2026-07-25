@@ -64,11 +64,54 @@ bundle exec rake "discover:reservio[padel-club2]"
 
 ## Deploying
 
-A VPS with systemd. [deploy/booking-bot.service](deploy/booking-bot.service) is
-the unit; adjust `User` and `WorkingDirectory`, then:
+Docker on a VPS, driven by [Kamal](https://kamal-deploy.org). The config is
+[config/deploy.yml](config/deploy.yml); the image goes to GHCR.
+
+Put the real values in `.kamal/secrets` (gitignored — see
+[.kamal/secrets.example](.kamal/secrets.example)). `KAMAL_REGISTRY_PASSWORD` is
+a GitHub token with **`write:packages`**; the one `gh auth` holds does not have
+that scope.
+
+First time on a fresh server:
 
 ```bash
-sudo systemctl enable --now booking-bot && journalctl -u booking-bot -f
+bundle exec kamal setup
+```
+
+After that, every deploy is:
+
+```bash
+bundle exec kamal deploy
+```
+
+```bash
+bundle exec kamal app logs -f
+```
+
+Two things about this deploy are worth knowing, because both are load-bearing:
+
+**The role is not called `web`.** This process has no port and serves nothing,
+so it runs with `proxy: false` and `primary_role: bot`. Kamal would otherwise
+put a proxy in front of it and wait forever for an HTTP health check that
+nothing answers.
+
+**A deploy briefly runs two containers.** Kamal starts the replacement, waits
+for it to look healthy, and only then stops the old one — but Telegram allows a
+single long-poller per token and answers the second with `409`. So the new
+process waits the conflict out instead of exiting; if it exited, the old one
+would never be stopped and the deploy would block on a container that could
+never become healthy. `Telegram::Runner` is where that lives. Expect the bot to
+be unresponsive for roughly ten seconds mid-deploy.
+
+The database is a bind mount at `/srv/kortuli-bot/data` on the host, created
+with the right ownership by [.kamal/hooks/pre-deploy](.kamal/hooks/pre-deploy).
+Back it up by copying `booking.db` off that path.
+
+Poll once against a live server, which is the fastest way to tell a broken
+adapter from a quiet week:
+
+```bash
+bundle exec kamal app exec 'bundle exec rake poll'
 ```
 
 The log is the health check. Every tick prints one line per club:
@@ -83,8 +126,6 @@ poll padel-club-2: 388 free, +0 freed, -0 taken, 0 sent (held back 2026-08-03 �
 If that line stops appearing, or `free` sits at zero for hours, the adapter has
 broken — which looks exactly like "no cancellations happened" from the outside.
 Check it before concluding nobody wants the product.
-
-Back up by copying `data/booking.db`.
 
 ## The parts that will bite
 

@@ -1,8 +1,15 @@
-require "rspec/core/rake_task"
+begin
+  require "rspec/core/rake_task"
+  RSpec::Core::RakeTask.new(:spec)
+  task default: :spec
+rescue LoadError
+  # The production image is bundled without the test group. Losing `rake spec`
+  # there is fine; losing the whole Rakefile to a require error is not.
+end
 
 # Loaded per-task rather than at the top, so `rake spec` and `rake -T` stay out
-# of the database. Mirrors bin/bot: a local .env if there is one, systemd's
-# EnvironmentFile otherwise.
+# of the database. Mirrors bin/bot: a local .env if there is one, the
+# container's environment otherwise.
 def boot!
   begin
     require "dotenv/load"
@@ -11,10 +18,6 @@ def boot!
   end
   require_relative "lib/booking"
 end
-
-RSpec::Core::RakeTask.new(:spec)
-
-task default: :spec
 
 desc "Create or migrate the database"
 task :migrate do

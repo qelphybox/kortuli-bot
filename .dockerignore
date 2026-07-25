@@ -1,0 +1,28 @@
+# Secrets must never reach a layer — the image goes to a registry.
+.env
+.env.*
+!.env.example
+.kamal/secrets*
+
+# Local state. The real database arrives as a bind mount at runtime.
+data/
+*.db
+*.db-shm
+*.db-wal
+
+.git/
+.gitignore
+.github/
+
+spec/
+.rspec
+docs/
+deploy/
+README.md
+
+.bundle/
+vendor/bundle/
+tmp/
+private/
+Dockerfile
+.dockerignore

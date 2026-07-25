@@ -5,16 +5,39 @@ module Booking
     # Translates Handlers' replies into Telegram API calls, and nothing else.
     # All the decisions happened before this class was asked to speak.
     class Runner
-      def initialize(token:, handlers:, logger: nil)
+      # Telegram allows exactly one long-poller per token and answers the
+      # second one with 409.
+      CONFLICT = 409
+      RETRY_DELAY = 5
+
+      def initialize(token:, handlers:, logger: nil, client: ::Telegram::Bot::Client, retry_delay: RETRY_DELAY)
         @token = token
         @handlers = handlers
         @logger = logger || Booking.default_logger
+        @client = client
+        @retry_delay = retry_delay
       end
 
+      # A deploy runs two containers at once for a few seconds — the new one is
+      # started, and only stopped being waited on once it looks healthy, at
+      # which point the old one is told to go. Dying of the resulting 409 would
+      # mean the replacement never becomes healthy and the old one is never
+      # stopped, so the deploy would wait for something that cannot happen.
+      # Waiting the conflict out is what makes the handover terminate.
       def run
-        ::Telegram::Bot::Client.run(@token) do |bot|
-          @logger.call("telegram: listening")
-          bot.listen { |update| dispatch(bot, update) }
+        loop do
+          begin
+            return @client.run(@token) do |bot|
+              @logger.call("telegram: listening")
+              bot.listen { |update| dispatch(bot, update) }
+            end
+          rescue ::Telegram::Bot::Exceptions::ResponseError => e
+            raise unless e.error_code == CONFLICT
+
+            @logger.call("telegram: token held by another instance (409), retrying in #{@retry_delay}s")
+          end
+
+          sleep @retry_delay
         end
       end
 
