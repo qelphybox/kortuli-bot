@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "total": 4
+  },
+  "data": [
+    {
+      "type": "resource",
+      "id": "2cb9d25d-f436-4f3f-b2a4-eefdc1ffb62e",
+      "attributes": {
+        "name": "Court#1"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "f1a7baf0-bdc6-400d-aacc-310d6fb33cba",
+      "attributes": {
+        "name": "Court#2"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "8bcd11df-cc8a-4caa-bca8-edfb1d90a4ea",
+      "attributes": {
+        "name": "Court#3"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "be82d92a-62c3-473c-b307-4d810cb06a68",
+      "attributes": {
+        "name": "Court#4"
+      }
+    }
+  ]
+}

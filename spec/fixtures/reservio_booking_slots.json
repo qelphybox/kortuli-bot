@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "total": 6
+  },
+  "links": {
+    "self": null,
+    "first": null,
+    "prev": null,
+    "next": null,
+    "last": null
+  },
+  "data": [
+    {
+      "type": "timeSlot",
+      "id": "024f0843-4f7c-5903-a65e-c5376ab1b21b",
+      "attributes": {
+        "createdAt": "2026-07-25T22:25:42+04:00",
+        "start": "2026-08-01T08:00:00+04:00",
+        "end": "2026-08-01T08:59:00+04:00"
+      },
+      "relationships": {
+        "resource": {
+          "data": {
+            "type": "resource",
+            "id": "2cb9d25d-f436-4f3f-b2a4-eefdc1ffb62e"
+          }
+        }
+      }
+    },
+    {
+      "type": "timeSlot",
+      "id": "4dd1e960-97c5-531f-b289-8e5ccbccab65",
+      "attributes": {
+        "createdAt": "2026-07-25T22:25:42+04:00",
+        "start": "2026-08-01T08:00:00+04:00",
+        "end": "2026-08-01T08:59:00+04:00"
+      },
+      "relationships": {
+        "resource": {
+          "data": {
+            "type": "resource",
+            "id": "f1a7baf0-bdc6-400d-aacc-310d6fb33cba"
+          }
+        }
+      }
+    },
+    {
+      "type": "timeSlot",
+      "id": "4c7d64e2-e66f-586e-b9d9-2370d47b2834",
+      "attributes": {
+        "createdAt": "2026-07-25T22:25:42+04:00",
+        "start": "2026-08-01T08:00:00+04:00",
+        "end": "2026-08-01T08:59:00+04:00"
+      },
+      "relationships": {
+        "resource": {
+          "data": {
+            "type": "resource",
+            "id": "8bcd11df-cc8a-4caa-bca8-edfb1d90a4ea"
+          }
+        }
+      }
+    },
+    {
+      "type": "timeSlot",
+      "id": "70de1a59-1f8b-565e-916b-9901c0dcbf57",
+      "attributes": {
+        "createdAt": "2026-07-25T22:25:42+04:00",
+        "start": "2026-08-01T08:00:00+04:00",
+        "end": "2026-08-01T08:59:00+04:00"
+      },
+      "relationships": {
+        "resource": {
+          "data": {
+            "type": "resource",
+            "id": "be82d92a-62c3-473c-b307-4d810cb06a68"
+          }
+        }
+      }
+    },
+    {
+      "type": "timeSlot",
+      "id": "d4484b43-ee6e-5d65-86e7-b5ca576d5659",
+      "attributes": {
+        "createdAt": "2026-07-25T22:25:42+04:00",
+        "start": "2026-08-01T09:00:00+04:00",
+        "end": "2026-08-01T09:59:00+04:00"
+      },
+      "relationships": {
+        "resource": {
+          "data": {
+            "type": "resource",
+            "id": "2cb9d25d-f436-4f3f-b2a4-eefdc1ffb62e"
+          }
+        }
+      }
+    },
+    {
+      "type": "timeSlot",
+      "id": "7dab9e26-27c6-5991-8763-6591165b7350",
+      "attributes": {
+        "createdAt": "2026-07-25T22:25:42+04:00",
+        "start": "2026-08-01T09:00:00+04:00",
+        "end": "2026-08-01T09:59:00+04:00"
+      },
+      "relationships": {
+        "resource": {
+          "data": {
+            "type": "resource",
+            "id": "f1a7baf0-bdc6-400d-aacc-310d6fb33cba"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# Clubs are mirrored into the database on every boot, so this file is the
+# source of truth. Nothing here is secret: Reservio's ids are public.
+#
+# To add another Reservio club:  bundle exec rake "discover:reservio[subdomain]"
+
+- slug: padel-club-2
+  name: Padel Club 2
+  adapter: reservio
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    business_id: "4ead107e-6791-4f9b-95d9-3588bffe0794"
+    service_id: "1b9d8011-d73e-4810-bba8-4098b7ad536b"
+    booking_url: "https://padel-club2.reservio.com/"
+    price: "50 GEL"
+    # Only needed by adapters that identify courts by name; Reservio hands out
+    # stable ids, so this stays empty here.
+    court_aliases: {}
