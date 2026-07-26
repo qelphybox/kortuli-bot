@@ -1,0 +1,74 @@
+[
+    {
+        "time": "08:00",
+        "status": "available"
+    },
+    {
+        "time": "09:00",
+        "status": "available"
+    },
+    {
+        "time": "10:00",
+        "status": "available"
+    },
+    {
+        "time": "11:00",
+        "status": "available"
+    },
+    {
+        "time": "12:00",
+        "status": "available"
+    },
+    {
+        "time": "13:00",
+        "status": "available"
+    },
+    {
+        "time": "14:00",
+        "status": "available"
+    },
+    {
+        "time": "15:00",
+        "status": "available"
+    },
+    {
+        "time": "16:00",
+        "status": "available"
+    },
+    {
+        "time": "17:00",
+        "status": "available"
+    },
+    {
+        "time": "18:00",
+        "status": "available"
+    },
+    {
+        "time": "19:00",
+        "status": "available"
+    },
+    {
+        "time": "20:00",
+        "status": "full"
+    },
+    {
+        "time": "21:00",
+        "status": "full"
+    },
+    {
+        "time": "22:00",
+        "status": "full"
+    },
+    {
+        "time": "23:00",
+        "status": "available"
+    },
+    {
+        "time": "00:00",
+        "status": "available"
+    },
+    {
+        "time": "01:00",
+        "status": "available"
+    }
+]

@@ -154,6 +154,11 @@ returns the entire result set, and still advertises a `next` link. Following it
 downloads everything twice. The adapter trusts `meta.total` and de-duplicates by
 slot key.
 
+**A club's day does not end at midnight.** Kus Tba Padel books until 02:00 and
+lists 23:00, 00:00 and 01:00 under the *previous* date. Taken literally, a
+Tuesday 01:00 slot answers a Monday watch. The adapter rolls the day over when
+the hour goes backwards, rather than hardcoding an opening time.
+
 **Timezones.** Everything is UTC inside. Local time (Asia/Tbilisi) exists at
 exactly two edges: adapters parsing a club's clock, and messages printing one.
 
@@ -161,11 +166,17 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **One club, not two.** Only Padel Club 2 (Reservio) ships. The concept named
-  `tbilisipadel.com` as the second, but it runs BookingPress, which needs its own
-  adapter and its own reconnaissance — neither is done. Everything above the
-  adapter is club-agnostic, so that is a new file in
-  [lib/booking/adapters/](lib/booking/adapters/) and a line in `REGISTRY`.
+- **Two clubs, not three.** Padel Club 2 (Reservio) and Kus Tba Padel
+  (`turtle-booking`) ship. The concept also named `tbilisipadel.com`, but it runs
+  BookingPress, which needs its own adapter and its own reconnaissance — neither
+  is done. Everything above the adapter is club-agnostic, so that is a new file
+  in [lib/booking/adapters/](lib/booking/adapters/) and a line in `REGISTRY`.
+- **Kus Tba Padel is watched by the hour, not by the court.** Its API will name
+  the individual court, but only one hour at a time: 110 requests per poll
+  against 7. So a notification there says "a court" rather than "Court 3", and a
+  cancellation raises an event only when it reopens an hour that was sold out.
+  The reasoning, and the measurements behind it, are at the top of
+  [lib/booking/adapters/kustba.rb](lib/booking/adapters/kustba.rb).
 - **One language.** English, hardcoded. Strings are all in
   [`Messages`](lib/booking/messages.rb) so adding a second is a new file, not an
   excavation.

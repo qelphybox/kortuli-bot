@@ -5,7 +5,7 @@ module Booking
     # skip the tick, keep the snapshot, say so in the log.
     SourceUnavailable = Class.new(Error)
 
-    REGISTRY = { "reservio" => "Reservio" }.freeze
+    REGISTRY = { "reservio" => "Reservio", "kustba" => "Kustba" }.freeze
 
     def self.build(club, http:)
       name = REGISTRY[club.adapter] or raise Error, "no adapter registered for #{club.adapter.inspect}"
@@ -16,3 +16,4 @@ module Booking
 end
 
 require_relative "adapters/reservio"
+require_relative "adapters/kustba"
