@@ -1,0 +1,99 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# PROTOTYPE — throwaway TUI over Adapters::KustbaPrototype. The question it
+# exists to answer is written at the top of that file; this is only the shell
+# that lets you press [g] and watch the cost and the events change.
+#
+#   rake prototype:kustba
+
+require_relative "../lib/booking"
+require_relative "../lib/booking/adapters/kustba_prototype"
+require "io/console"
+
+BOLD = "\e[1m"
+DIM = "\e[2m"
+OFF = "\e[0m"
+GREEN = "\e[32m"
+RED = "\e[31m"
+
+probe = Booking::Adapters::KustbaPrototype.new(http: Booking::Http.new)
+differ = Booking::Differ.new
+
+granularity = :hour
+horizon = Booking::Adapters::KustbaPrototype::HORIZON_DAYS
+previous = []
+current = []
+cost = nil
+result = nil
+note = "press [f] to fetch"
+
+fetch = lambda do
+  note = "fetching…"
+  previous = current
+  current, cost = probe.snapshot(probe.dates(days: horizon), granularity:)
+  result = differ.diff(previous:, current:, known_through: previous.map(&:local_date).max)
+  note = previous.empty? ? "first fetch — nothing to diff against yet" : "diffed against the previous fetch"
+rescue Booking::Adapters::SourceUnavailable => e
+  note = "#{RED}source unavailable: #{e.message}#{OFF}"
+end
+
+# One cell per hour of the local day, so a court freeing up shows as a column
+# lighting up between two fetches.
+grid = lambda do |slots|
+  slots.group_by(&:local_date).sort.map do |date, on_that_day|
+    by_hour = on_that_day.group_by { _1.local_starts_at.hour }
+    cells = (0..23).map do |hour|
+      found = by_hour[hour]
+      next "#{DIM} ·#{OFF}" if found.nil?
+
+      granularity == :hour ? "#{GREEN} ✓#{OFF}" : format("#{GREEN}%2d#{OFF}", found.size)
+    end
+    format("  %s  %s  #{DIM}%d free#{OFF}", date.strftime("%a %d %b"), cells.join(" "), on_that_day.size)
+  end
+end
+
+loop do
+  print "\e[2J\e[H"
+  puts "#{BOLD}KUS TBA PADEL — free-slot probe#{OFF}"
+  puts "#{DIM}granularity#{OFF} #{BOLD}#{granularity}#{OFF}   " \
+       "#{DIM}horizon#{OFF} #{BOLD}#{horizon}d#{OFF}   " \
+       "#{DIM}this fetch#{OFF} #{BOLD}#{cost&.requests || 0} req#{OFF} " \
+       "#{DIM}in #{format("%.1f", cost&.seconds || 0)}s#{OFF}   " \
+       "#{DIM}session total #{probe.requests} req#{OFF}"
+  puts
+  puts "  #{DIM}#{" " * 10}#{(0..23).map { format("%2d", _1) }.join(" ")}#{OFF}"
+  puts(*grid.call(current))
+  puts "  #{DIM}(no slots yet)#{OFF}" if current.empty?
+  puts
+  puts "#{BOLD}Differ#{OFF} #{DIM}#{note}#{OFF}"
+
+  if result
+    puts "  #{GREEN}+#{result.became_available.size} freed#{OFF}   " \
+         "#{RED}-#{result.became_taken.size} taken#{OFF}   " \
+         "#{DIM}reason: #{result.reason || "ok"}   suppressed: #{result.suppressed_days.join(", ")}#{OFF}"
+    result.became_available.first(6).each do |slot|
+      puts "  #{GREEN}freed#{OFF} #{slot.court_label} #{slot.local_starts_at.strftime("%a %d %b %H:%M")}"
+    end
+  end
+
+  puts
+  puts "#{DIM}[#{OFF}f#{DIM}] fetch  [#{OFF}g#{DIM}] granularity hour/court  " \
+       "[#{OFF}+#{DIM}/#{OFF}-#{DIM}] horizon  [#{OFF}q#{DIM}] quit#{OFF}"
+
+  # getch needs a tty; getc keeps it drivable from a pipe while smoke-testing.
+  case $stdin.tty? ? $stdin.getch : $stdin.getc
+  when "f" then fetch.call
+  when "g"
+    granularity = granularity == :hour ? :court : :hour
+    previous = []
+    current = []
+    result = nil
+    note = "granularity changed — snapshots cleared, press [f]"
+  when "+", "=" then horizon += 1
+  when "-", "_" then horizon = [horizon - 1, 1].max
+  when "q", "\x03", nil then break
+  end
+end
+
+print "\e[2J\e[H"

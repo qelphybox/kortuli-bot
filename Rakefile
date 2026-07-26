@@ -47,6 +47,15 @@ task poll: :seed do
   Booking::Poller.new(repos:, notifier:, http: Booking::Http.new).tick
 end
 
+desc "PROTOTYPE — probe kustbapadel.ge for free slots (throwaway, see lib/booking/adapters/kustba_prototype.rb)"
+task :prototype do
+  exec("ruby", File.expand_path("bin/prototype-kustba", __dir__))
+end
+
+namespace :prototype do
+  task kustba: :prototype
+end
+
 namespace :discover do
   desc "Find the ids needed for a Reservio club: rake 'discover:reservio[padel-club2]'"
   task :reservio, [:subdomain] do |_, args|
