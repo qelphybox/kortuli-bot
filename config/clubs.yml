@@ -31,3 +31,36 @@
     # This adapter reports availability per hour, not per court — nothing to
     # alias.
     court_aliases: {}
+
+# GymBreeze runs two sites at opposite ends of town, so they are two clubs
+# rather than one: a watcher wanting Radio City is not served by Ninoshvili.
+# Both share one backend, told apart by location_id.
+- slug: gymbreeze-ninoshvili
+  name: GymBreeze Ninoshvili
+  adapter: gymbreeze
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    location_id: "63f663fa-1852-5bde-bf94-dee5b176de1d"
+    booking_url: "https://gymbreeze.ge/eng"
+    # Varies by hour and weekday (60 before 11:00, 40 midday, 60 after 18:00).
+    # The rates are published at /facilities/locations/<id>/ if this is ever
+    # worth computing per slot rather than printing as a range.
+    price: "40–60 GEL"
+    # Dates the club's own widget offers, counting today. The API answers well
+    # past it, reporting whole days free because nothing out there is bookable.
+    max_days: 8
+    # Availability is reported per hour, not per court — nothing to alias.
+    court_aliases: {}
+
+- slug: gymbreeze-radio-city
+  name: GymBreeze Radio City
+  adapter: gymbreeze
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    location_id: "752155d7-39aa-53d9-bc18-682695f85244"
+    booking_url: "https://gymbreeze.ge/eng"
+    price: "30–40 GEL"
+    max_days: 8
+    court_aliases: {}

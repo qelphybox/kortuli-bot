@@ -157,7 +157,16 @@ slot key.
 **A club's day does not end at midnight.** Kus Tba Padel books until 02:00 and
 lists 23:00, 00:00 and 01:00 under the *previous* date. Taken literally, a
 Tuesday 01:00 slot answers a Monday watch. The adapter rolls the day over when
-the hour goes backwards, rather than hardcoding an opening time.
+the hour goes backwards, rather than hardcoding an opening time. GymBreeze
+closes at 01:00 and has the same shape, but dates those hours correctly itself —
+so check before porting the workaround; applying it there would shift every
+late slot a day forward.
+
+**A booking window is not the same as an answer.** Both Kus Tba and GymBreeze
+answer for any date they are asked about, including ones past the window their
+own widget offers — and everything out there reads free, because nobody can
+reserve it yet. Those slots would never transition, so both adapters clamp the
+range to a `max_days` from settings rather than trusting `HORIZON_DAYS`.
 
 **Timezones.** Everything is UTC inside. Local time (Asia/Tbilisi) exists at
 exactly two edges: adapters parsing a club's clock, and messages printing one.
@@ -166,17 +175,26 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **Two clubs, not three.** Padel Club 2 (Reservio) and Kus Tba Padel
-  (`turtle-booking`) ship. The concept also named `tbilisipadel.com`, but it runs
-  BookingPress, which needs its own adapter and its own reconnaissance — neither
-  is done. Everything above the adapter is club-agnostic, so that is a new file
-  in [lib/booking/adapters/](lib/booking/adapters/) and a line in `REGISTRY`.
-- **Kus Tba Padel is watched by the hour, not by the court.** Its API will name
-  the individual court, but only one hour at a time: 110 requests per poll
-  against 7. So a notification there says "a court" rather than "Court 3", and a
-  cancellation raises an event only when it reopens an hour that was sold out.
-  The reasoning, and the measurements behind it, are at the top of
-  [lib/booking/adapters/kustba.rb](lib/booking/adapters/kustba.rb).
+- **Three sources, four clubs.** Padel Club 2 (Reservio), Kus Tba Padel
+  (`turtle-booking`) and GymBreeze, whose two locations are configured as two
+  clubs because they sit at opposite ends of town. The concept also named
+  `tbilisipadel.com`, but it runs BookingPress, which needs its own adapter and
+  its own reconnaissance — neither is done. Everything above the adapter is
+  club-agnostic, so that is a new file in
+  [lib/booking/adapters/](lib/booking/adapters/) and a line in `REGISTRY`.
+- **Kus Tba and GymBreeze are watched by the hour, not by the court.** Both
+  report whether *some* court is free that hour, so a notification says "a
+  court" rather than "Court 3", and a cancellation raises an event only when it
+  reopens an hour that was sold out. For Kus Tba that is a choice: its API will
+  name the court, but only one hour per request — 110 per poll against 7, and
+  the measurements are at the top of
+  [lib/booking/adapters/kustba.rb](lib/booking/adapters/kustba.rb). For
+  GymBreeze it is not: passing `court_id` is answered with "no longer supported,
+  use location_id".
+- **GymBreeze prices are printed as a range.** They move with the hour and the
+  weekday (40 GEL midday, 60 either side at Ninoshvili). The real rates are
+  published at `/facilities/locations/<id>/`, so computing one per slot is a
+  second request away if the range ever proves too vague.
 - **One language.** English, hardcoded. Strings are all in
   [`Messages`](lib/booking/messages.rb) so adding a second is a new file, not an
   excavation.
