@@ -1,15 +1,68 @@
 <%#
-  Everything this person has asked to be told about. Standing and Dated alike,
-  because downstream they are one thing — the difference on screen is that a
-  Dated watch names its one day, and says so.
+  Everything this person has asked to be told about, and the form that adds
+  another. Standing and Dated are one thing downstream, so they list together —
+  the difference on screen is that a Dated watch names its one day, and says so.
 %>
 <%= erb :tabs, layout: false, locals: { here: :watches } %>
 
+<% if @refusals.any? %>
+  <ul class="refusals">
+    <% @refusals.each do |reason| %>
+      <li><%= reason %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<%# One step, not four messages: clubs, weekdays and both ends of the range go
+    up together. Checkboxes rather than a typed list, so a club that is not
+    watched cannot be asked for. What was picked is rendered back, because a
+    refusal that also empties the form punishes the person for reading it. %>
+<form class="new-watch" method="post" action="/watches">
+  <fieldset>
+    <legend>Clubs</legend>
+    <% @clubs.each do |club| %>
+      <label class="choice">
+        <input type="checkbox" name="club_slugs[]" value="<%= club.slug %>"<%= " checked" if picked_club?(club.slug) %>>
+        <%= club.name %>
+      </label>
+    <% end %>
+  </fieldset>
+
+  <fieldset>
+    <legend>Days</legend>
+    <% weekday_choices.each do |day, name| %>
+      <label class="choice">
+        <input type="checkbox" name="weekdays[]" value="<%= day %>"<%= " checked" if picked_day?(day) %>>
+        <%= name %>
+      </label>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="range">
+    <legend>Hours</legend>
+    <%# Whole hours, matching how the slots themselves are sold. `to` runs to
+        24:00 because a club open until midnight sells the 23:00 hour. %>
+    <label>From
+      <select name="from_hour">
+        <% start_hours.each do |hour| %>
+          <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :from_hour) %>><%= clock(hour) %></option>
+        <% end %>
+      </select>
+    </label>
+    <label>Until
+      <select name="to_hour">
+        <% end_hours.each do |hour| %>
+          <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :to_hour) %>><%= clock(hour) %></option>
+        <% end %>
+      </select>
+    </label>
+  </fieldset>
+
+  <button>Add watch</button>
+</form>
+
 <% if @watches.empty? %>
-  <%# Creating one from here is a later ticket, so this points at the way that
-      works today rather than at a button that is not there yet. %>
-  <%# Qualified: a template's constant lookup starts at Object, not at Booking. %>
-  <p class="muted empty"><%= Booking::Messages.no_watches %></p>
+  <p class="muted empty"><%= Booking::Messages.no_watches_in_app %></p>
 <% else %>
   <ul class="watches">
     <% @watches.each do |watch| %>

@@ -212,6 +212,10 @@ RSpec.describe Booking::Web::App do
       )
     end
 
+    # The create form names every club, so "is this watch on the screen" has to
+    # ask the list rather than the page. Empty when there is no list at all.
+    def listed = last_response.body[%r{<ul class="watches">.*</ul>}m].to_s
+
     it "is not served to somebody without a session" do
       get "/watches"
 
@@ -231,12 +235,15 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include('href="/"')
     end
 
-    it "says so when there is nothing to show" do
+    # The form is right there on the same screen, so an empty list must not
+    # send anyone back to the chat to use the wizard.
+    it "says so when there is nothing to show, and points at the form" do
       sign_in(user_id: 42)
 
       get "/watches"
 
       expect(last_response.body).to include("No watches yet")
+      expect(last_response.body).not_to include("/watch to add one")
     end
 
     it "names the clubs a watch covers" do
@@ -245,7 +252,7 @@ RSpec.describe Booking::Web::App do
 
       get "/watches"
 
-      expect(last_response.body).to include("Padel Club 2")
+      expect(listed).to include("Padel Club 2")
     end
 
     it "spells out a standing watch's days and hours" do
@@ -278,7 +285,7 @@ RSpec.describe Booking::Web::App do
 
       get "/watches"
 
-      expect(last_response.body).not_to include("Padel Club 2")
+      expect(listed).not_to include("Padel Club 2")
     end
 
     it "keeps a dated watch whose hour is still to come" do
@@ -287,7 +294,7 @@ RSpec.describe Booking::Web::App do
 
       get "/watches"
 
-      expect(last_response.body).to include("Padel Club 2")
+      expect(listed).to include("Padel Club 2")
     end
 
     it "does not call a standing watch dated" do
@@ -308,7 +315,7 @@ RSpec.describe Booking::Web::App do
 
       get "/watches"
 
-      expect(last_response.body).not_to include("Kus Tba Padel")
+      expect(listed).not_to include("Kus Tba Padel")
     end
 
     describe "pausing" do
@@ -362,7 +369,7 @@ RSpec.describe Booking::Web::App do
         post "/watches/#{watch.id}/delete"
         follow_redirect!
 
-        expect(last_response.body).not_to include("Padel Club 2")
+        expect(listed).not_to include("Padel Club 2")
       end
     end
 
@@ -397,6 +404,165 @@ RSpec.describe Booking::Web::App do
         post "/watches/#{watch.id}/delete"
 
         expect(watches.find(watch.id)).not_to be_nil
+      end
+    end
+
+    # One form instead of four messages: clubs, weekdays and both ends of an
+    # hour range, submitted in a single step.
+    describe "the create form" do
+      def submit(**overrides)
+        post "/watches", {
+          club_slugs: ["padel-club-2"], weekdays: %w[1 5], from_hour: "19", to_hour: "22"
+        }.merge(overrides)
+      end
+
+      it "offers the watched clubs as choices rather than asking for a name" do
+        sign_in(user_id: 42)
+
+        get "/watches"
+
+        expect(last_response.body).to include('value="padel-club-2"').and include('value="kus-tba-padel"')
+        expect(last_response.body).to include("Padel Club 2").and include("Kus Tba Padel")
+      end
+
+      it "offers the weekdays and both ends of the range on the same form" do
+        sign_in(user_id: 42)
+
+        get "/watches"
+
+        form = last_response.body[%r{<form class="new-watch".*?</form>}m].to_s
+        expect(form).to include('name="weekdays[]"').and include("Mon").and include("Sun")
+        expect(form).to include('name="from_hour"').and include('name="to_hour"')
+        # The whole point of the ticket: one submit, not four messages.
+        expect(form.scan(/<button|type="submit"/).size).to eq(1)
+      end
+
+      it "takes clubs, weekdays and both ends of the range in one step" do
+        sign_in(user_id: 42)
+
+        submit
+        follow_redirect!
+
+        expect(listed).to include("Padel Club 2").and include("Mon, Fri · 19:00–22:00")
+      end
+
+      # "Begins matching on the next tick" — `active` is the list the Matcher is
+      # handed, so being in it is the whole of that claim.
+      it "begins matching straight away" do
+        sign_in(user_id: 42)
+
+        submit
+
+        expect(watches.active.size).to eq(1)
+      end
+
+      it "belongs to whoever submitted it" do
+        sign_in(user_id: 7)
+
+        submit
+
+        expect(watches.for_user(7).size).to eq(1)
+      end
+
+      it "cannot be created without a session" do
+        submit
+
+        expect(watches.active).to be_empty
+      end
+
+      # A watch that can never fire is worse than no watch: it sits in the list
+      # looking like cover. Each of these is refused with the reason, not
+      # accepted quietly.
+      describe "a submission that could never fire" do
+        it "refuses one with no clubs" do
+          sign_in(user_id: 42)
+
+          submit(club_slugs: [])
+
+          expect(watches.for_user(42)).to be_empty
+          expect(last_response.body).to include("at least one club")
+        end
+
+        it "refuses one with no days" do
+          sign_in(user_id: 42)
+
+          submit(weekdays: [])
+
+          expect(watches.for_user(42)).to be_empty
+          expect(last_response.body).to include("at least one day")
+        end
+
+        it "refuses a range that ends where it starts" do
+          sign_in(user_id: 42)
+
+          submit(from_hour: "19", to_hour: "19")
+
+          expect(watches.for_user(42)).to be_empty
+          expect(last_response.body).to include("after")
+        end
+
+        it "refuses a range that ends before it starts" do
+          sign_in(user_id: 42)
+
+          submit(from_hour: "22", to_hour: "19")
+
+          expect(watches.for_user(42)).to be_empty
+          expect(last_response.body).to include("after")
+        end
+
+        # The select only offers hours in range, so anything else was not typed
+        # by a person using the screen — but the reason still has to be true of
+        # what happened, and "the end must be after the start" is not true of
+        # the word "tea time".
+        it "refuses hours that were never on offer, and says that rather than something else" do
+          sign_in(user_id: 42)
+
+          submit(from_hour: "tea time", to_hour: "99")
+
+          expect(watches.for_user(42)).to be_empty
+          expect(last_response.status).to eq(422)
+          expect(last_response.body).to include("from the list")
+          expect(last_response.body).not_to include("after its start")
+        end
+
+        # A refusal that also empties the form punishes the person for reading
+        # it — and the whole point of the ticket is one step, not a retype.
+        it "hands back everything that was picked" do
+          sign_in(user_id: 42)
+
+          submit(club_slugs: %w[padel-club-2 kus-tba-padel], weekdays: [], from_hour: "20", to_hour: "23")
+
+          form = last_response.body[%r{<form class="new-watch".*?</form>}m].to_s
+          expect(form).to include('value="padel-club-2" checked').and include('value="kus-tba-padel" checked')
+          expect(form).to include('value="20" selected').and include('value="23" selected')
+        end
+
+        it "does not re-tick a club that was not picked" do
+          sign_in(user_id: 42)
+
+          submit(club_slugs: ["padel-club-2"], weekdays: [])
+
+          form = last_response.body[%r{<form class="new-watch".*?</form>}m].to_s
+          expect(form).to include('value="kus-tba-padel">')
+        end
+
+        it "refuses a club that is not watched" do
+          sign_in(user_id: 42)
+
+          submit(club_slugs: ["some-club-we-do-not-poll"])
+
+          expect(watches.for_user(42)).to be_empty
+          expect(last_response.body).to include("at least one club")
+        end
+
+        it "still shows the watches that already exist" do
+          standing
+          sign_in(user_id: 42)
+
+          submit(weekdays: [])
+
+          expect(listed).to include("Padel Club 2")
+        end
       end
     end
   end

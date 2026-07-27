@@ -84,6 +84,30 @@ module Booking
         # Reads as both the class and the label, so the two cannot drift apart.
         def watch_kind(watch) = watch.dated? ? "dated" : "standing"
 
+        # The form renders from the same lists Submission validates against, so
+        # the two cannot answer differently about what was on offer.
+        def weekday_choices = MONDAY_FIRST.map { [_1, Messages::DAY_NAMES[_1]] }
+
+        def start_hours = START_HOURS
+        def end_hours = END_HOURS
+
+        def clock(hour) = Messages.clock(hour * 60)
+
+        # Nothing is picked until something has been refused; a first visit has
+        # no submission to remember.
+        def picked_club?(slug) = !!@submitted&.picked_club?(slug)
+        def picked_day?(day) = !!@submitted&.picked_day?(day)
+        def picked_hour?(hour, which) = @submitted&.public_send(which) == hour
+
+        # The whole screen, so a refusal can re-render it without the route
+        # having to remember what the GET assembles.
+        def watches_screen(refusals = [])
+          @refusals = refusals
+          @watches = settings.repos.watches.for_user(visitor_id).reject(&:expired?)
+          @clubs = settings.repos.clubs.enabled
+          erb :watches, layout: :layout
+        end
+
         # A Dated watch names its one day; a Standing one names the weekdays it
         # keeps coming back on. Reading either tells you which it is before the
         # badge next to it does.
@@ -144,11 +168,22 @@ module Booking
       get "/watches" do
         require_visitor!
 
-        # Expired Dated watches are filtered here rather than deleted: they have
-        # already stopped matching, and a reaper would be machinery earning
-        # nothing.
-        @watches = settings.repos.watches.for_user(visitor_id).reject(&:expired?)
-        erb :watches, layout: :layout
+        watches_screen
+      end
+
+      post "/watches" do
+        require_visitor!
+
+        @submitted = Submission.from(params, watched_slugs: settings.repos.clubs.enabled.map(&:slug))
+        refusals = @submitted.refusals
+
+        # Re-rendered rather than redirected, so the reason arrives attached to
+        # the submission that earned it — and so the choices survive being
+        # refused, which redirecting would throw away.
+        halt(422, watches_screen(refusals)) if refusals.any?
+
+        settings.repos.watches.create(user_id: visitor_id, **@submitted.to_watch)
+        redirect(to("/watches"))
       end
 
       # Post-redirect-get throughout, so a watch is never paused twice by a

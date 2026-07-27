@@ -92,6 +92,18 @@ module Booking
 
     def pick_at_least_one_day = "Pick at least one day first."
 
+    # Not "invalid range": the point is that such a watch would sit in the list
+    # looking like cover while never being able to match anything.
+    def pick_a_later_end = "The end of the range has to be after its start, or nothing can match."
+
+    # Only reachable by a stale page or a hand-made post — the screen offers a
+    # fixed list — but a reason is still owed.
+    def pick_hours_on_offer = "Pick both hours from the list."
+
+    # The app has the form on the same screen, so it points up rather than at a
+    # chat command the way the bot's own list does.
+    def no_watches_in_app = "No watches yet — the form above makes one."
+
     def no_clubs_configured = "No clubs are configured yet."
   end
 end

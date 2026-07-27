@@ -93,9 +93,15 @@ with pause, resume and delete. A standing watch names the weekdays it keeps
 coming back on; a dated one names its single day and says `Dated`. Pausing
 stops a watch matching without losing it, and a dated watch drops off the list
 once its hour has gone by — nothing reaps it, it simply stops mattering.
-Creating a watch is still the chat wizard's job for now.
 
-In the chat, for now:
+The same screen creates one: tick the clubs, tick the days, pick both ends of
+an hour range, submit once. A watch that could never fire — no clubs, no days,
+or an end that is not after its start — is refused with the reason and hands
+back everything you picked, rather than being stored where it would sit in the
+list looking like cover.
+
+The chat wizard still works and still writes the same table, but it is on its
+way out. In the chat, for now:
 
 - `/watch` — build a watch: clubs → days → hours
 - `/list` — your watches, with pause and delete buttons
