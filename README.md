@@ -25,19 +25,20 @@ Five loosely coupled parts, in the order data moves through them:
 | **Notifier** | [lib/booking/notifier.rb](lib/booking/notifier.rb) | Sends each slot to each watcher exactly once. |
 | **Poller** | [lib/booking/poller.rb](lib/booking/poller.rb) | Drives the four above, one club after another. |
 
-The Telegram layer is thin on purpose: [`Handlers`](lib/booking/telegram/handlers.rb)
-returns *replies* rather than calling the API, and the step-by-step watch builder
-is a pure state machine in [`Wizard`](lib/booking/telegram/wizard.rb). Both are
-fully testable without a token or a network. The mini app under
-[lib/booking/web/](lib/booking/web/) follows the same rule and is driven end to
-end by `Rack::Test`.
+The Telegram layer is thin on purpose:
+[`Handlers`](lib/booking/telegram/handlers.rb) returns a *reply* rather than
+calling the API, so the whole conversation is testable without a token or a
+network. It is a short file, because the bot no longer builds anything — a
+watch is made in the app, and there is exactly one code path that writes one.
+The mini app under [lib/booking/web/](lib/booking/web/) follows the same rule
+and is driven end to end by `Rack::Test`.
 
 Everything runs as **three processes** built from one image, sharing one SQLite
 file and nothing else:
 
 | Process | Entrypoint | Job |
 |---|---|---|
-| **bot** | [bin/bot](bin/bot) | Long-polls Telegram and answers commands. |
+| **bot** | [bin/bot](bin/bot) | Long-polls Telegram, greets, and sets the menu button. The only one that never touches the database. |
 | **poller** | [bin/poller](bin/poller) | Owns club config, walks every club on a schedule, sends notifications. |
 | **web** | [bin/web](bin/web) | Serves the Telegram Mini App over Puma. |
 
@@ -61,10 +62,13 @@ bundle exec bin/poller
 bundle exec bin/web
 ```
 
-Only `bin/web` needs `SESSION_SECRET`; the other two ignore it. Locally the mini
+Each entrypoint asks only for what it uses: `bin/web` needs `SESSION_SECRET` and
+`bin/bot` needs `APP_URL`, and neither looks at the other's. Locally the mini
 app comes up on `http://localhost:8080`, where it will redirect you to `/start`
 and then tell you to open it from Telegram — the signed payload it needs only
-exists inside a Telegram client.
+exists inside a Telegram client. `APP_URL` has to be the deployed HTTPS one
+even when you are running the bot locally: Telegram will not open a `web_app`
+button over plain HTTP.
 
 Poll once in the foreground, without starting the bot — the quickest way to see
 whether an adapter still works:
@@ -106,12 +110,15 @@ or an end that is not after its start — is refused with the reason and hands
 back everything you picked, rather than being stored where it would sit in the
 list looking like cover.
 
-The chat wizard still works and still writes the same table, but it is on its
-way out. In the chat, for now:
+The **chat** is where you are told, not where you ask. Say anything to the bot
+in a direct message and it answers once, with a button that opens the app;
+after that it only speaks when something you asked about has freed up. There
+are no commands and no keyboards — a watch is made in one place, so a chat form
+and a web form cannot drift apart. In a group it says nothing at all: Telegram
+refuses to open a mini app from there, so a greeting could only be a dead end.
 
-- `/watch` — build a watch: clubs → days → hours
-- `/list` — your watches, with pause and delete buttons
-- `/help` — what the bot does
+The app itself is reachable from Telegram's menu button, which the bot sets for
+itself every time it boots.
 
 ## Deploying
 
@@ -142,10 +149,10 @@ bundle exec kamal app logs -f
 Three things about this deploy are worth knowing, because all three are
 load-bearing:
 
-**`bot` is the primary role, not `web`.** Kamal insists on knowing which role
-gates a deploy and would otherwise hunt for one called `web`. Of the three only
-the mini app has a port; `bot` and `poller` serve nothing and say so with
-`proxy: false`.
+**`web` is the primary role.** Kamal only puts a proxy in front of the primary
+role by default, and of the three only the mini app has a port — `bot` and
+`poller` serve nothing and say so with `proxy: false`. A non-primary role that
+merely omits `proxy` gets none at all, silently.
 
 **TLS is `kamal-proxy`'s job.** It obtains and renews the certificate over
 HTTP-01, so the hostname must already resolve to the server before the first
@@ -162,7 +169,12 @@ be unresponsive for roughly ten seconds mid-deploy.
 
 Two steps happen outside the repository and cannot be automated from it: point
 a DNS A record at the server, and register the mini app's URL once with
-`@BotFather`.
+`@BotFather`. The menu button that opens it is *not* one of them — the bot sets
+that for itself on every boot from `APP_URL`, and says so in the log:
+
+```
+telegram: menu button -> https://kortuli-tgapp.qelphybox.space
+```
 
 The database is a bind mount at `/srv/kortuli-bot/data` on the host, created
 with the right ownership by [.kamal/hooks/pre-deploy](.kamal/hooks/pre-deploy).
@@ -265,8 +277,6 @@ This is an MVP, deliberately:
 - **`poll_interval_seconds` per club is stored but not used.** One global
   interval drives a sequential pass over all clubs — deliberate, so a handful of
   clubs on shared hosting never get hit in parallel.
-- **Wizard drafts live in memory.** A restart mid-form means tapping `/watch`
-  again.
 - **Snapshots are not kept.** Current state plus a transition log, not full
   history — enough for "when do evening slots free up?", not enough to replay an
   arbitrary past moment.

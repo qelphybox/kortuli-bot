@@ -2,7 +2,7 @@ require "telegram/bot"
 
 module Booking
   module Telegram
-    # Translates Handlers' replies into Telegram API calls, and nothing else.
+    # Translates Handlers' reply into a Telegram API call, and nothing else.
     # All the decisions happened before this class was asked to speak.
     class Runner
       # Telegram allows exactly one long-poller per token and answers the
@@ -43,58 +43,50 @@ module Booking
 
       private
 
+      PRIVATE = "private".freeze
+
       def dispatch(bot, update)
         case update
-        when ::Telegram::Bot::Types::Message then handle_message(bot, update)
-        when ::Telegram::Bot::Types::CallbackQuery then handle_callback(bot, update)
+        when ::Telegram::Bot::Types::Message then greet(bot, update)
+        when ::Telegram::Bot::Types::CallbackQuery then bury(bot, update)
         end
       rescue StandardError => e
         # One malformed update must not take down a long-running process.
         @logger.call("telegram: update failed — #{e.class}: #{e.message}")
       end
 
-      def handle_message(bot, message)
-        return if message.text.nil?
+      # Private chats only. The one button the bot has opens the mini app, and
+      # Telegram refuses a web_app button anywhere else — so in a group the
+      # greeting could only be a dead end, and saying nothing is the honest
+      # version of that. Notifications go to a person, not a room, regardless.
+      def greet(bot, message)
+        return if message.text.nil? || message.chat.type != PRIVATE
 
-        perform(bot, message.chat.id, @handlers.on_message(user_id: message.from.id, text: message.text))
+        say(bot, message.chat.id, @handlers.on_message(user_id: message.from.id))
       end
 
-      def handle_callback(bot, query)
-        replies = @handlers.on_callback(
-          user_id: query.from.id,
-          data: query.data,
-          message_id: query.message&.message_id
+      # Nothing reports back to the bot any more, but the wizard's keyboards are
+      # still on screen in chats that predate this. Answering with nothing stops
+      # the button spinning forever; it routes nothing, and nothing routes it.
+      def bury(bot, query)
+        bot.api.answer_callback_query(callback_query_id: query.id)
+      end
+
+      def say(bot, chat_id, reply)
+        bot.api.send_message(chat_id:, text: reply.text, parse_mode: "HTML", reply_markup: markup(reply.app_url))
+      end
+
+      # One button, and `web_app` rather than `url` because that opens the app
+      # inside Telegram. A plain link would hand the person to a browser, where
+      # the signed payload the app authenticates on does not exist.
+      def markup(app_url)
+        return nil if app_url.nil?
+
+        button = ::Telegram::Bot::Types::InlineKeyboardButton.new(
+          text: Messages.open_app,
+          web_app: ::Telegram::Bot::Types::WebAppInfo.new(url: app_url)
         )
-        alert = replies.find { _1.kind == :alert }
-        # Always answer, even with nothing to say: otherwise the button keeps
-        # spinning on the user's screen.
-        bot.api.answer_callback_query(callback_query_id: query.id, text: alert&.text, show_alert: !alert.nil?)
-        perform(bot, query.message&.chat&.id, replies.reject { _1.kind == :alert })
-      end
-
-      def perform(bot, chat_id, replies)
-        return if chat_id.nil?
-
-        replies.each do |reply|
-          case reply.kind
-          when :send
-            bot.api.send_message(chat_id:, text: reply.text, parse_mode: "HTML", reply_markup: markup(reply.keyboard))
-          when :edit
-            bot.api.edit_message_text(
-              chat_id:, message_id: reply.message_id, text: reply.text,
-              parse_mode: "HTML", reply_markup: markup(reply.keyboard)
-            )
-          end
-        end
-      end
-
-      def markup(keyboard)
-        return nil if keyboard.nil? || keyboard.empty?
-
-        rows = keyboard.map do |row|
-          row.map { ::Telegram::Bot::Types::InlineKeyboardButton.new(text: _1.text, callback_data: _1.data) }
-        end
-        ::Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: rows)
+        ::Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [[button]])
       end
     end
   end

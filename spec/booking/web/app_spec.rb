@@ -273,15 +273,15 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include('href="/"')
     end
 
-    # The form is right there on the same screen, so an empty list must not
-    # send anyone back to the chat to use the wizard.
+    # The form is right there on the same screen, so an empty list must point
+    # at it rather than back at the chat, which has nothing to offer any more.
     it "says so when there is nothing to show, and points at the form" do
       sign_in(user_id: 42)
 
       get "/watches"
 
       expect(last_response.body).to include("No watches yet")
-      expect(last_response.body).not_to include("/watch to add one")
+      expect(last_response.body).to include("the form above")
     end
 
     it "names the clubs a watch covers" do

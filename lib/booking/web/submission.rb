@@ -6,8 +6,7 @@ module Booking
     # A form is a suggestion, not a promise: the page it came from may be old,
     # or may not have been our page at all. So every value is checked against
     # the same lists the screen renders from — asking one place is what keeps
-    # the form and the guard from drifting apart, which is the mistake the chat
-    # wizard's `set_to` already warns about.
+    # the form and the guard from answering differently about what was offered.
     # What the form offers, and therefore what a submission is checked against.
     # Module-level rather than inside the Data.define below, because a constant
     # assigned in that block would land here anyway — Ruby binds it lexically,

@@ -34,59 +34,27 @@ module Booking
       days.sort_by { (_1 + 6) % 7 }.map { DAY_NAMES[_1] }.join(", ")
     end
 
+    # The bot's whole vocabulary now: it says this, and then only speaks again
+    # when something is Freed.
     def welcome
       <<~TEXT.strip
         🎾 <b>Padel slot watcher</b>
 
-        Evening courts in Tbilisi get taken a day or two ahead and only come back when somebody cancels. This bot watches for those cancellations and pings you the moment one happens.
+        Evening courts in Tbilisi get taken a day or two ahead and only come back when somebody cancels. This watches for those cancellations and pings you the moment one happens.
 
-        /watch — set up a new watch
-        /list — your watches
-        /help — how this works
+        Open the app to see the week and to say which hours you want watching. It does not book or pay for anything — you get a link and take it from there.
       TEXT
     end
 
-    def help
-      <<~TEXT.strip
-        Tell the bot which clubs, which days and which hours you care about. It checks every few minutes and messages you when a slot in that window frees up.
-
-        It does not book or pay for anything — you get a link and take it from there.
-
-        /watch — set up a new watch
-        /list — your watches
-      TEXT
-    end
+    # Both the menu button and the greeting's button, so the two ways in cannot
+    # end up named differently.
+    def open_app = "Open the app"
 
     # A watch outlives a club being switched off, and the slug is a better
     # answer than a blank line.
     def clubs_phrase(watch, club_names) = watch.club_slugs.map { club_names.fetch(_1, _1) }.sort.join(", ")
 
-    def watch_summary(watch, club_names)
-      status = watch.active? ? "" : " · paused"
-      "#{clubs_phrase(watch, club_names)}\n#{days_phrase(watch.weekdays)} · #{time_range(watch)}#{status}"
-    end
-
-    def watch_created(watch, club_names) = "✅ Watching:\n\n#{watch_summary(watch, club_names)}"
-
-    def no_watches = "No watches yet. /watch to add one."
-
-    # No paused/resumed confirmations: toggling rewrites the summary in place,
-    # and the summary already says "· paused".
-    def watch_deleted = "🗑 Deleted."
-
     def not_for_you = "This bot is running as a private experiment."
-
-    def wizard_cancelled = "Cancelled."
-
-    def wizard_expired = "That form is gone — /watch to start again."
-
-    def pick_clubs = "Which clubs?"
-
-    def pick_days = "Which days?"
-
-    def pick_from = "From what time?"
-
-    def pick_to(from_minute) = "Until what time? (from #{clock(from_minute)})"
 
     def pick_at_least_one_club = "Pick at least one club first."
 
@@ -100,10 +68,7 @@ module Booking
     # fixed list — but a reason is still owed.
     def pick_hours_on_offer = "Pick both hours from the list."
 
-    # The app has the form on the same screen, so it points up rather than at a
-    # chat command the way the bot's own list does.
+    # The form is on the same screen, so this points up at it.
     def no_watches_in_app = "No watches yet — the form above makes one."
-
-    def no_clubs_configured = "No clubs are configured yet."
   end
 end

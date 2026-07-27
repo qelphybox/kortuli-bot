@@ -9,6 +9,10 @@ module Booking
     # three need the token: the bot to poll, the poll loop to send, and the web
     # to verify the signature Telegram puts on initData.
     REQUIRED = %w[TELEGRAM_TOKEN].freeze
+    # The bot additionally needs somewhere to point its menu button and its
+    # greeting. Without a URL it has nothing to say: the app is the only place a
+    # Watch is made, so a bot that cannot open it is not worth starting.
+    REQUIRED_FOR_BOT = (REQUIRED + %w[APP_URL]).freeze
     # The web additionally signs its own session cookies. Deliberately its own
     # secret rather than something derived from the token, so it can be rotated
     # — logging everyone out — without touching the bot.
@@ -23,6 +27,10 @@ module Booking
     def database_url = ENV.fetch("DATABASE_URL", "sqlite://data/booking.db")
 
     def telegram_token = ENV.fetch("TELEGRAM_TOKEN")
+
+    # Where the mini app is served — the same host the proxy holds a
+    # certificate for. Telegram opens `web_app` buttons over HTTPS only.
+    def app_url = ENV.fetch("APP_URL")
 
     # Only this user may talk to the bot while it is a single-user experiment.
     def owner_id = ENV["OWNER_TELEGRAM_ID"]&.to_i

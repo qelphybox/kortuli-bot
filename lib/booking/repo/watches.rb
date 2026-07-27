@@ -6,8 +6,8 @@ module Booking
       def initialize(db) = @db = db
 
       # `date` is what makes the watch Dated; leaving it out makes a Standing
-      # one. One path, because two ways to write this table is how a chat
-      # wizard and a web form drift apart.
+      # one. The only path that writes this table — the chat wizard that was
+      # the second one is gone, and a second one is how the two drift apart.
       def create(user_id:, club_slugs:, weekdays:, from_minute:, to_minute:, date: nil)
         id = @db[:watches].insert(
           user_id:,
