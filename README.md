@@ -28,10 +28,27 @@ Five loosely coupled parts, in the order data moves through them:
 The Telegram layer is thin on purpose: [`Handlers`](lib/booking/telegram/handlers.rb)
 returns *replies* rather than calling the API, and the step-by-step watch builder
 is a pure state machine in [`Wizard`](lib/booking/telegram/wizard.rb). Both are
-fully testable without a token or a network.
+fully testable without a token or a network. The mini app under
+[lib/booking/web/](lib/booking/web/) follows the same rule and is driven end to
+end by `Rack::Test`.
 
-Everything runs in **one process**: the Telegram loop on the main thread, the
-poll loop on a rufus-scheduler thread, one SQLite file between them.
+Everything runs as **three processes** built from one image, sharing one SQLite
+file and nothing else:
+
+| Process | Entrypoint | Job |
+|---|---|---|
+| **bot** | [bin/bot](bin/bot) | Long-polls Telegram and answers commands. |
+| **poller** | [bin/poller](bin/poller) | Owns club config, walks every club on a schedule, sends notifications. |
+| **web** | [bin/web](bin/web) | Serves the Telegram Mini App over Puma. |
+
+Splitting them means deploying a screen no longer interrupts polling.
+[ADR-0001](docs/adr/0001-poller-is-a-process-not-a-queue.md) records why the
+poll loop stayed a scheduler rather than becoming job-queue work.
+
+Two of the three write to the database — the poller writes slots and club
+state, the web writes watches. WAL and a busy timeout make that safe across
+processes as well as threads, because the containers share a kernel and a
+filesystem. It is the one genuinely new operational risk in this shape.
 
 ## Getting it running
 
@@ -39,8 +56,15 @@ poll loop on a rufus-scheduler thread, one SQLite file between them.
 bundle install
 cp .env.example .env   # then fill in TELEGRAM_TOKEN and OWNER_TELEGRAM_ID
 bundle exec rake seed
-bundle exec bin/bot
+bundle exec bin/bot      # and, in their own shells:
+bundle exec bin/poller
+bundle exec bin/web
 ```
+
+Only `bin/web` needs `SESSION_SECRET`; the other two ignore it. Locally the mini
+app comes up on `http://localhost:8080`, where it will redirect you to `/start`
+and then tell you to open it from Telegram — the signed payload it needs only
+exists inside a Telegram client.
 
 Poll once in the foreground, without starting the bot — the quickest way to see
 whether an adapter still works:
@@ -88,12 +112,18 @@ bundle exec kamal deploy
 bundle exec kamal app logs -f
 ```
 
-Two things about this deploy are worth knowing, because both are load-bearing:
+Three things about this deploy are worth knowing, because all three are
+load-bearing:
 
-**The role is not called `web`.** This process has no port and serves nothing,
-so it runs with `proxy: false` and `primary_role: bot`. Kamal would otherwise
-put a proxy in front of it and wait forever for an HTTP health check that
-nothing answers.
+**`bot` is the primary role, not `web`.** Kamal insists on knowing which role
+gates a deploy and would otherwise hunt for one called `web`. Of the three only
+the mini app has a port; `bot` and `poller` serve nothing and say so with
+`proxy: false`.
+
+**TLS is `kamal-proxy`'s job.** It obtains and renews the certificate over
+HTTP-01, so the hostname must already resolve to the server before the first
+deploy — otherwise the challenge cannot complete and the deploy stalls on
+certificate issuance. There is no certbot and no renewal cron to forget about.
 
 **A deploy briefly runs two containers.** Kamal starts the replacement, waits
 for it to look healthy, and only then stops the old one — but Telegram allows a
@@ -102,6 +132,10 @@ process waits the conflict out instead of exiting; if it exited, the old one
 would never be stopped and the deploy would block on a container that could
 never become healthy. `Telegram::Runner` is where that lives. Expect the bot to
 be unresponsive for roughly ten seconds mid-deploy.
+
+Two steps happen outside the repository and cannot be automated from it: point
+a DNS A record at the server, and register the mini app's URL once with
+`@BotFather`.
 
 The database is a bind mount at `/srv/kortuli-bot/data` on the host, created
 with the right ownership by [.kamal/hooks/pre-deploy](.kamal/hooks/pre-deploy).

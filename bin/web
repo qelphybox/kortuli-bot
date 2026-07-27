@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Puma reads config.ru, which is where the app gets its token and its session
+# secret. Exec rather than spawn so signals from Docker reach Puma directly and
+# a deploy can stop the container cleanly.
+exec("bundle", "exec", "puma", "--config", File.expand_path("../config/puma.rb", __dir__))

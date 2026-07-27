@@ -1,0 +1,38 @@
+<%#
+  Nothing here is meant to be read. Telegram puts initData in the URL
+  fragment, which browsers never send upstream, so the only way the server
+  can see it is if this page posts it back. Then we reload, and the real page
+  is served on the session that exchange produced.
+
+  The script is inline rather than in app.js so the exchange costs no extra
+  round trip before anyone is signed in.
+%>
+<main class="waiting">
+  <p id="status">Opening…</p>
+  <noscript>This app needs JavaScript to tell Telegram who you are.</noscript>
+</main>
+
+<script>
+  (function () {
+    var payload = window.Telegram && Telegram.WebApp && Telegram.WebApp.initData;
+    if (!payload) {
+      document.getElementById("status").textContent = "Open this from the bot in Telegram.";
+      return;
+    }
+
+    fetch("/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "init_data=" + encodeURIComponent(payload)
+    }).then(function (r) {
+      if (r.ok) {
+        // Replace rather than assign: this page must not sit in the back stack.
+        window.location.replace("/");
+      } else {
+        document.getElementById("status").textContent = "Telegram did not vouch for this session.";
+      }
+    }).catch(function () {
+      document.getElementById("status").textContent = "Could not reach the server.";
+    });
+  })();
+</script>

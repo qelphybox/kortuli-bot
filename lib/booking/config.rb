@@ -4,11 +4,25 @@ module Booking
   module Config
     module_function
 
-    # Without these the process cannot start, so bin/bot asks before booting
-    # rather than letting an ENV.fetch blow up somewhere deeper.
+    # Without these a process cannot start, so each entrypoint asks before
+    # booting rather than letting an ENV.fetch blow up somewhere deeper. All
+    # three need the token: the bot to poll, the poll loop to send, and the web
+    # to verify the signature Telegram puts on initData.
     REQUIRED = %w[TELEGRAM_TOKEN].freeze
+    # The web additionally signs its own session cookies. Deliberately its own
+    # secret rather than something derived from the token, so it can be rotated
+    # — logging everyone out — without touching the bot.
+    REQUIRED_FOR_WEB = (REQUIRED + %w[SESSION_SECRET]).freeze
 
-    def missing_environment = REQUIRED.reject { ENV[_1] }
+    def missing_environment(required = REQUIRED) = required.reject { ENV[_1] }
+
+    def session_secret = ENV.fetch("SESSION_SECRET")
+
+    # The hostname Telegram was told to open. Used to narrow Sinatra's host
+    # check; unset means "accept anything", which is what the specs want.
+    def app_host = ENV["APP_HOST"]
+
+    def web_port = Integer(ENV.fetch("PORT", "8080"))
 
     def database_url = ENV.fetch("DATABASE_URL", "sqlite://data/booking.db")
 

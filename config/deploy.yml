@@ -1,11 +1,14 @@
 service: kortuli-bot
 image: qelphybox/kortuli-bot
 
-# There is no "web" role to be primary, so say which role is. Kamal would
-# otherwise look for one called "web" and refuse to start. The primary role is
-# the one that would normally get a proxy, which is exactly why `proxy: false`
-# below is load-bearing rather than decorative: this process has no port and
-# serves nothing.
+# Three processes from one image, sharing one SQLite file and nothing else: the
+# Telegram long-poller, the poll loop, and the mini app. Splitting them means
+# deploying a screen no longer interrupts polling. ADR-0001 records why the poll
+# loop is a process rather than queue work.
+#
+# `bot` stays primary because Kamal would otherwise hunt for a role called
+# `web`. Only the mini app has a port; the other two serve nothing, which is
+# what `proxy: false` says on each of them.
 primary_role: bot
 servers:
   bot:
@@ -13,6 +16,27 @@ servers:
       - 204.168.193.130
     cmd: bundle exec bin/bot
     proxy: false
+  poller:
+    hosts:
+      - 204.168.193.130
+    cmd: bundle exec bin/poller
+    proxy: false
+  web:
+    hosts:
+      - 204.168.193.130
+    cmd: bundle exec bin/web
+
+# kamal-proxy terminates TLS and obtains the certificate over HTTP-01, which is
+# why the hostname has to resolve to this server before the first deploy. No
+# certbot and no renewal cron.
+proxy:
+  host: kortuli-tgapp.qelphybox.space
+  ssl: true
+  app_port: 8080
+  # Sessionless and independent of the database on purpose: a deploy blocks
+  # until this answers, so it must not be able to fail for an unrelated reason.
+  healthcheck:
+    path: /up
 
 registry:
   server: ghcr.io
@@ -29,17 +53,27 @@ builder:
 # mount rather than a named volume so `data/booking.db` can be copied off the
 # host with scp, the way the README says to back it up. The directory has to
 # exist on the host and be owned by uid 1000 before the first deploy — see
-# "Deploying" in the README.
+# .kamal/hooks/pre-deploy.
+#
+# Two of the three processes write to it: the poll loop writes Slots and club
+# state, the mini app writes Watches. WAL and the busy timeout set in DB make
+# that safe across processes as well as threads, because the containers share a
+# kernel and a filesystem.
 volumes:
   - "/srv/kortuli-bot/data:/app/data"
 
 env:
   clear:
     DATABASE_URL: sqlite://data/booking.db
+    # Narrows Sinatra's host check to the name Telegram was told to open.
+    APP_HOST: kortuli-tgapp.qelphybox.space
   secret:
     - TELEGRAM_TOKEN
     - OWNER_TELEGRAM_ID
     - CONTACT_EMAIL
+    # Signs the mini app's own session cookies. Rotating it logs everyone out
+    # and touches nothing else.
+    - SESSION_SECRET
 
 # The log is the health check, so keep enough of it to see a night's polling.
 logging:
@@ -48,12 +82,11 @@ logging:
     max-size: 20m
     max-file: "5"
 
-# A deploy runs the new container alongside the old for a few seconds. Telegram
-# permits one long-poller per token and answers the loser with 409, so the new
-# process waits the conflict out rather than dying — see Telegram::Runner. This
-# is the readiness window it waits through.
+# A deploy runs the new bot container alongside the old for a few seconds.
+# Telegram permits one long-poller per token and answers the loser with 409, so
+# the new process waits the conflict out rather than dying — see
+# Telegram::Runner. This is the readiness window it waits through.
 readiness_delay: 5
 deploy_timeout: 60
 
-# Nothing here needs a database container or a key-value store: one process,
-# one file.
+# Still no database container and no key-value store: three processes, one file.

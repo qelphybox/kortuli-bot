@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1
 
-# There is no web server here — this image runs one long-lived process that
-# polls Telegram and a few booking sites. No ports are exposed and nothing
-# listens, which is why the Kamal role sets `proxy: false`.
+# One image, three entrypoints: bin/bot long-polls Telegram, bin/poller walks
+# the clubs, bin/web serves the mini app. Only the last one listens, which is
+# why the other two Kamal roles set `proxy: false` and this exposes a port that
+# two of the three ignore.
 ARG RUBY_VERSION=4.0.0
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 
@@ -41,7 +42,14 @@ RUN groupadd --system --gid 1000 booking && \
 
 USER booking:booking
 
-# No HEALTHCHECK on purpose. The honest one — "is the poll loop still
-# ticking?" — needs a heartbeat the MVP deliberately does not have, and a
-# process-is-alive check would only restate what Docker already reports.
+EXPOSE 8080
+
+# No HEALTHCHECK on purpose. The mini app answers /up and kamal-proxy asks it,
+# which covers the process that can be asked. For the other two the honest
+# check — "is the poll loop still ticking?" — needs a heartbeat the MVP
+# deliberately does not have, and a process-is-alive check would only restate
+# what Docker already reports.
+#
+# The default is the bot because Kamal's other two roles name their own
+# command; this is only what you get running the image bare.
 CMD ["bundle", "exec", "bin/bot"]

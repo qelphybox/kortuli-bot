@@ -1,0 +1,34 @@
+/* Telegram publishes the current client theme as CSS variables, so following
+   them is how the app stops looking like a website in a frame. The fallbacks
+   are for a browser opened outside Telegram, which is mostly how it gets
+   debugged. */
+:root {
+  color-scheme: light dark;
+  --bg: var(--tg-theme-bg-color, Canvas);
+  --fg: var(--tg-theme-text-color, CanvasText);
+  --muted: var(--tg-theme-hint-color, #7a7a7a);
+}
+
+body {
+  margin: 0;
+  padding: 1.25rem;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+h1 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.waiting {
+  display: grid;
+  place-items: center;
+  min-height: 60vh;
+  color: var(--muted);
+}

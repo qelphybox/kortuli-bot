@@ -1,21 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-begin
-  require "dotenv/load" # honours a local .env; deployment gets its environment from systemd
-rescue LoadError
-  # Not installed in production, where the gem would have nothing to read.
-end
+require_relative "../lib/booking/boot"
 
-require_relative "../lib/booking"
-
-missing = Booking::Config.missing_environment
-unless missing.empty?
-  warn "missing environment: #{missing.join(", ")}"
-  warn "see .env.example"
-  exit 1
-end
-
-$stdout.sync = true # journald should see each line as it happens, not on flush
-
-Booking::App.run
+Booking::Boot.call
+Booking::App::Bot.run
