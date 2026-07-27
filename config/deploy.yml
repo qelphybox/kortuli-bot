@@ -6,10 +6,13 @@ image: qelphybox/kortuli-bot
 # deploying a screen no longer interrupts polling. ADR-0001 records why the poll
 # loop is a process rather than queue work.
 #
-# `bot` stays primary because Kamal would otherwise hunt for a role called
-# `web`. Only the mini app has a port; the other two serve nothing, which is
-# what `proxy: false` says on each of them.
-primary_role: bot
+# `web` is primary because it is the only role that listens, and because Kamal
+# only puts a proxy in front of the primary role by default: a non-primary role
+# that merely omits `proxy` gets none at all, silently (see
+# Kamal::Configuration::Role#initialize_specialized_proxy). Naming a role `web`
+# also retires the old reason `bot` was primary — Kamal used to hunt for a role
+# by that name and find nothing.
+primary_role: web
 servers:
   bot:
     hosts:
