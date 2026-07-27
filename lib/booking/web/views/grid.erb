@@ -3,6 +3,8 @@
   different hours, so the columns are the union of all of them and a row
   simply has no cell where its club is shut.
 %>
+<%= erb :tabs, layout: false, locals: { here: :grid } %>
+
 <nav class="days">
   <% @dates.each do |d| %>
     <a class="day<%= " is-on" if d == @date %>" href="/?date=<%= d %>"><%= day_label(d) %></a>

@@ -59,6 +59,40 @@ module Booking
 
         def hour_label(starts_at) = format("%02d", Clock.to_local(starts_at).hour)
 
+        # The id arrives from the page, so ownership is checked rather than
+        # assumed: the session says who is asking, never what is theirs. Not
+        # 403 — that would confirm the watch exists to somebody who cannot see
+        # it, and there is nothing they could do with the knowledge anyway.
+        def own_watch!(id)
+          require_visitor!
+          watch = settings.repos.watches.find(Integer(id.to_s, exception: false))
+          halt(404) unless watch && watch.user_id == visitor_id
+
+          watch
+        end
+
+        def set_active!(id, active)
+          settings.repos.watches.set_active(own_watch!(id).id, active)
+          redirect(to("/watches"))
+        end
+
+        # Memoised per request: every watch on the screen asks for it.
+        def club_names = @club_names ||= settings.repos.clubs.enabled.to_h { [_1.slug, _1.name] }
+
+        def watch_clubs(watch) = Messages.clubs_phrase(watch, club_names)
+
+        # Reads as both the class and the label, so the two cannot drift apart.
+        def watch_kind(watch) = watch.dated? ? "dated" : "standing"
+
+        # A Dated watch names its one day; a Standing one names the weekdays it
+        # keeps coming back on. Reading either tells you which it is before the
+        # badge next to it does.
+        def watch_when(watch)
+          days = watch.dated? ? day_label(watch.date) : Messages.days_phrase(watch.weekdays)
+
+          "#{days} · #{Messages.time_range(watch)}"
+        end
+
         def day_label(date) = date.strftime("%a %-d %b")
       end
 
@@ -105,6 +139,31 @@ module Booking
 
         @table = Grid.build(clubs: settings.repos.clubs.enabled, slots: settings.repos.slots.all, date: @date)
         erb :grid, layout: :layout
+      end
+
+      get "/watches" do
+        require_visitor!
+
+        # Expired Dated watches are filtered here rather than deleted: they have
+        # already stopped matching, and a reaper would be machinery earning
+        # nothing.
+        @watches = settings.repos.watches.for_user(visitor_id).reject(&:expired?)
+        erb :watches, layout: :layout
+      end
+
+      # Post-redirect-get throughout, so a watch is never paused twice by a
+      # refresh, and the screen a person lands on is the list they changed.
+      post "/watches/:id/pause" do
+        set_active!(params[:id], false)
+      end
+
+      post "/watches/:id/resume" do
+        set_active!(params[:id], true)
+      end
+
+      post "/watches/:id/delete" do
+        settings.repos.watches.delete(own_watch!(params[:id]).id)
+        redirect(to("/watches"))
       end
     end
   end

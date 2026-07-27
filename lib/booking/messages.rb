@@ -57,10 +57,13 @@ module Booking
       TEXT
     end
 
+    # A watch outlives a club being switched off, and the slug is a better
+    # answer than a blank line.
+    def clubs_phrase(watch, club_names) = watch.club_slugs.map { club_names.fetch(_1, _1) }.sort.join(", ")
+
     def watch_summary(watch, club_names)
-      clubs = watch.club_slugs.map { club_names.fetch(_1, _1) }.sort.join(", ")
       status = watch.active? ? "" : " · paused"
-      "#{clubs}\n#{days_phrase(watch.weekdays)} · #{time_range(watch)}#{status}"
+      "#{clubs_phrase(watch, club_names)}\n#{days_phrase(watch.weekdays)} · #{time_range(watch)}#{status}"
     end
 
     def watch_created(watch, club_names) = "✅ Watching:\n\n#{watch_summary(watch, club_names)}"

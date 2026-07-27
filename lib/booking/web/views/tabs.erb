@@ -1,0 +1,8 @@
+<%#
+  The whole navigation. There is no link to keep and no menu but Telegram's,
+  so these two are how the app is moved around.
+%>
+<nav class="tabs">
+  <a class="tab<%= " is-on" if here == :grid %>" href="/">Week</a>
+  <a class="tab<%= " is-on" if here == :watches %>" href="/watches">Watches</a>
+</nav>

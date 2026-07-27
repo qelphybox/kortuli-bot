@@ -1,6 +1,8 @@
 module Booking
   # Idempotent schema. Small enough that `create_table?` beats a migration
-  # directory; revisit if the shape ever has to change under live data.
+  # directory, with one guarded `alter_table` below for the column that arrived
+  # after there was live data. The day there are three of those, this becomes a
+  # migration directory.
   module Schema
     def self.apply(db)
       db.create_table?(:clubs) do
@@ -54,6 +56,11 @@ module Booking
         Integer :to_minute, null: false
         TrueClass :active, null: false, default: true
         DateTime :created_at, null: false
+        # Set only for a Dated watch, which is a narrowing rather than a second
+        # kind of thing: the same record, with its weekdays set to this date's
+        # weekday and its hours to a single hour. Null is what makes a watch
+        # Standing.
+        Date :date
         index [:user_id]
       end
 
@@ -66,6 +73,11 @@ module Booking
         DateTime :sent_at, null: false
         unique %i[watch_id slot_key]
       end
+
+      # `create_table?` does nothing to a table that already exists, and by the
+      # time the Dated watch arrived there were watches in the file. Guarded so
+      # it is as re-runnable as everything above it.
+      db.alter_table(:watches) { add_column :date, Date } unless db[:watches].columns.include?(:date)
     end
   end
 end

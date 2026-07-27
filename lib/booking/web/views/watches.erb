@@ -1,0 +1,38 @@
+<%#
+  Everything this person has asked to be told about. Standing and Dated alike,
+  because downstream they are one thing — the difference on screen is that a
+  Dated watch names its one day, and says so.
+%>
+<%= erb :tabs, layout: false, locals: { here: :watches } %>
+
+<% if @watches.empty? %>
+  <%# Creating one from here is a later ticket, so this points at the way that
+      works today rather than at a button that is not there yet. %>
+  <%# Qualified: a template's constant lookup starts at Object, not at Booking. %>
+  <p class="muted empty"><%= Booking::Messages.no_watches %></p>
+<% else %>
+  <ul class="watches">
+    <% @watches.each do |watch| %>
+      <li class="watch<%= " is-paused" unless watch.active? %>">
+        <p class="clubs">
+          <span class="kind <%= watch_kind(watch) %>"><%= watch_kind(watch).capitalize %></span>
+          <%= watch_clubs(watch) %>
+        </p>
+        <p class="muted when">
+          <%= watch_when(watch) %><%= " · Paused" unless watch.active? %>
+        </p>
+        <%# Ordinary form posts rather than fetch(): the session cookie is
+            SameSite=Lax, so a form on somebody else's site cannot carry it,
+            and the app needs no JavaScript to manage a watch. %>
+        <div class="actions">
+          <% if watch.active? %>
+            <form method="post" action="/watches/<%= watch.id %>/pause"><button>Pause</button></form>
+          <% else %>
+            <form method="post" action="/watches/<%= watch.id %>/resume"><button>Resume</button></form>
+          <% end %>
+          <form method="post" action="/watches/<%= watch.id %>/delete"><button class="danger">Delete</button></form>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

@@ -88,6 +88,13 @@ outside a club's opening hours is left blank rather than drawn as taken. Clubs
 whose source names the court say how many of them are free (`2/4`); the rest
 can only say that something is (`✓`).
 
+Its second screen is **Watches**: everything you have asked to be told about,
+with pause, resume and delete. A standing watch names the weekdays it keeps
+coming back on; a dated one names its single day and says `Dated`. Pausing
+stops a watch matching without losing it, and a dated watch drops off the list
+once its hour has gone by — nothing reaps it, it simply stops mattering.
+Creating a watch is still the chat wizard's job for now.
+
 In the chat, for now:
 
 - `/watch` — build a watch: clubs → days → hours
