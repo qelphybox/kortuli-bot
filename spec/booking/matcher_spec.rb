@@ -42,6 +42,36 @@ RSpec.describe Booking::Watch do
       expect(watch(days: [0], from: "00:00", to: "02:00")).to be_covers(late)
       expect(watch(days: [6], from: "00:00", to: "02:00")).not_to be_covers(late)
     end
+
+    # A Dated watch is the same record with a date attached, so it goes through
+    # this same predicate — the only difference being that the date has to
+    # match too. Nothing else in the pipeline learns a second kind of watch.
+    describe "when it carries a date" do
+      # 2026-08-01 and 2026-08-08 are both Saturdays at the same hour, which is
+      # exactly the pair a weekday-only check cannot tell apart.
+      def dated = watch(date: "2026-08-01", days: [6], from: "19:00", to: "20:00")
+
+      it "covers the hour on the date it was made for" do
+        expect(dated).to be_covers(slot(at: "2026-08-01 19:00"))
+      end
+
+      it "refuses the same weekday and hour a week later" do
+        expect(dated).not_to be_covers(slot(at: "2026-08-08 19:00"))
+      end
+
+      it "refuses a date before its own" do
+        expect(dated).not_to be_covers(slot(at: "2026-07-25 19:00"))
+      end
+
+      # The date is judged in Tbilisi, like everything else a person reads: the
+      # 00:00 hour of Sunday the 2nd is still 20:00 UTC on Saturday the 1st, so
+      # a UTC comparison would file it under the wrong day and refuse it.
+      it "judges the date locally, not in UTC" do
+        after_midnight = watch(date: "2026-08-02", days: [0], from: "00:00", to: "01:00")
+
+        expect(after_midnight).to be_covers(slot(at: "2026-08-02 00:00"))
+      end
+    end
   end
 
   # Nothing reaps an expired Dated watch — the Matcher discards slots that have
@@ -97,12 +127,12 @@ end
 RSpec.describe Booking::Matcher do
   subject(:matcher) { described_class.new }
 
-  def watch(id:, user_id: 42, clubs: ["reservio-demo"], days: [6], active: true)
+  def watch(id:, user_id: 42, clubs: ["reservio-demo"], days: [6], active: true, date: nil, to: "22:00")
     Booking::Watch.new(
       id:, user_id:, club_slugs: clubs, weekdays: days,
       from_minute: Booking::Watch.minute_of_day("19:00"),
-      to_minute: Booking::Watch.minute_of_day("22:00"),
-      active:
+      to_minute: Booking::Watch.minute_of_day(to),
+      active:, date:
     )
   end
 
@@ -130,6 +160,31 @@ RSpec.describe Booking::Matcher do
     after_the_slot = Booking::Clock.local_to_utc("2026-08-01 19:30")
 
     candidates = matcher.match(events: [freed], watches: [watch(id: 1)], now: after_the_slot)
+
+    expect(candidates).to be_empty
+  end
+
+  # Why there is no reaper: a Dated watch is still in the table, still active,
+  # and still handed to the Matcher after its hour — it simply cannot be
+  # paired with anything, because the only slot it covers has started.
+  it "pairs nothing with a dated watch whose hour has gone by, though nothing removed it" do
+    expired = watch(id: 1, date: "2026-08-01", to: "20:00")
+
+    candidates = matcher.match(
+      events: [freed], watches: [expired], now: Booking::Clock.local_to_utc("2026-08-01 19:30")
+    )
+
+    expect(expired).to be_active
+    expect(candidates).to be_empty
+  end
+
+  # The other half of the same claim: the watch is not merely being ignored
+  # because its hour passed — it is still refused for a slot on another date
+  # that has not.
+  it "pairs nothing with a dated watch when the freed slot is on another date" do
+    dated = watch(id: 1, date: "2026-08-08", to: "20:00")
+
+    candidates = matcher.match(events: [freed], watches: [dated], now: before_the_slot)
 
     expect(candidates).to be_empty
   end

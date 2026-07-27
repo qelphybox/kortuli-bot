@@ -126,6 +126,12 @@ RSpec.describe Booking::Web::App do
   end
 
   describe "the grid" do
+    # Every hour the page invites a tap on. Reading them back is how "the grid
+    # offers exactly what the route accepts" gets checked from the outside.
+    def offered_hours
+      last_response.body.scan(/name="starts_at" value="([^"]+)"/).flatten.map { Time.iso8601(_1) }
+    end
+
     it "shows a row for every enabled club" do
       sign_in
       get "/"
@@ -161,6 +167,38 @@ RSpec.describe Booking::Web::App do
         get "/"
 
         expect(last_response.body).not_to include("data-external")
+      end
+
+      # The main scenario, in one tap: you see the hour is gone everywhere, and
+      # you ask to be told when it is not — without leaving the screen.
+      it "offers a watch on exactly that hour" do
+        sign_in
+        get "/", date: (today + 1).to_s
+
+        expect(last_response.body).to include('action="/watches/dated"')
+        expect(last_response.body).to include(Booking::Clock.local_to_utc("#{today + 1} 19:00").iso8601)
+      end
+
+      # Today's row still shows the hours that have been and gone. Nothing can
+      # be asked about them, so they are drawn without a button rather than
+      # with one that would refuse.
+      it "offers nothing on an hour that has already started" do
+        sign_in
+        get "/"
+
+        expect(last_response.body).to include('class="taken"')
+        expect(offered_hours).to all(be > Booking::Clock.now)
+      end
+
+      # Kus Tba's day runs to 02:00, so the last page of the horizon draws
+      # hours that fall on the day *after* it — which nobody has polled. The
+      # button must not be offered where the tap would only be refused.
+      it "offers nothing on an hour beyond the horizon, even where the grid draws it" do
+        sign_in
+        get "/", date: (today + Booking::Config.horizon_days - 1).to_s
+
+        expect(last_response.body).to include('class="taken"')
+        expect(offered_hours.map { Booking::Clock.local_date(_1) }).to all(be <= today + Booking::Config.horizon_days - 1)
       end
     end
 
@@ -404,6 +442,152 @@ RSpec.describe Booking::Web::App do
         post "/watches/#{watch.id}/delete"
 
         expect(watches.find(watch.id)).not_to be_nil
+      end
+    end
+
+    # Tapping a taken Cell. A Dated watch is a narrowing of the Watch that
+    # already exists, so what this checks is that the narrowing is right: the
+    # date's weekday, that single hour, and the date itself.
+    describe "asking about one taken hour" do
+      # Tomorrow rather than today, so the hour is still ahead however late in
+      # the day the suite runs — an hour that has started is one the list
+      # rightly stops showing.
+      let(:on) { today + 1 }
+      let(:at) { Booking::Clock.local_to_utc("#{on} 19:00") }
+
+      def tap_cell(club_slug: "padel-club-2", starts_at: at.iso8601)
+        post "/watches/dated", club_slug:, starts_at:
+      end
+
+      it "needs no further configuration" do
+        sign_in(user_id: 42)
+
+        tap_cell
+
+        watch = watches.for_user(42).first
+        expect(watch).to be_dated
+        expect(watch.club_slugs).to eq(Set["padel-club-2"])
+        expect(watch.date).to eq(on)
+        expect(watch.weekdays).to eq(Set[on.wday])
+        expect(watch.from_minute).to eq(19 * 60)
+        expect(watch.to_minute).to eq(20 * 60)
+      end
+
+      it "shows up in the list, told apart from a standing watch" do
+        sign_in(user_id: 42)
+
+        tap_cell
+        get "/watches"
+
+        expect(listed).to include("Dated")
+      end
+
+      # Two watches on one hour would mean two messages about it, which the
+      # notifications index cannot prevent — it dedupes per watch.
+      it "does not stack up when the same hour is tapped twice" do
+        sign_in(user_id: 42)
+
+        tap_cell
+        tap_cell
+
+        expect(watches.for_user(42).size).to eq(1)
+      end
+
+      it "lets a different hour be asked about separately" do
+        sign_in(user_id: 42)
+
+        tap_cell
+        tap_cell(starts_at: Booking::Clock.local_to_utc("#{on} 20:00").iso8601)
+
+        expect(watches.for_user(42).size).to eq(2)
+      end
+
+      it "refuses a club that is not watched" do
+        sign_in(user_id: 42)
+
+        tap_cell(club_slug: "some-club-we-do-not-poll")
+
+        expect(watches.for_user(42)).to be_empty
+        expect(last_response.status).to eq(422)
+      end
+
+      it "refuses an hour nobody has polled" do
+        sign_in(user_id: 42)
+
+        tap_cell(starts_at: Booking::Clock.local_to_utc("#{today + 90} 19:00").iso8601)
+
+        expect(watches.for_user(42)).to be_empty
+        expect(last_response.status).to eq(422)
+      end
+
+      it "refuses something that is not a time at all" do
+        sign_in(user_id: 42)
+
+        tap_cell(starts_at: "half past whenever")
+
+        expect(watches.for_user(42)).to be_empty
+        expect(last_response.status).to eq(422)
+      end
+
+      # An hour that has started cannot be played, so a watch on it would be
+      # created already expired — invisible in the list and unmatchable by the
+      # Matcher. A tap that silently does nothing is worse than a refusal.
+      it "refuses an hour that has already started" do
+        sign_in(user_id: 42)
+
+        tap_cell(starts_at: (Booking::Clock.now - 3600).iso8601)
+
+        expect(watches.for_user(42)).to be_empty
+        expect(last_response.status).to eq(422)
+      end
+
+      it "cannot be done without a session" do
+        tap_cell
+
+        expect(watches.active).to be_empty
+      end
+
+      # Tapping means "tell me about this hour". Finding a paused watch already
+      # on it and doing nothing would answer with a success the person cannot
+      # see, so the tap resumes it instead of quietly no-opping.
+      it "wakes a paused watch on that hour rather than doing nothing" do
+        sign_in(user_id: 42)
+        tap_cell
+        paused = watches.for_user(42).first
+        watches.set_active(paused.id, false)
+
+        tap_cell
+
+        expect(watches.for_user(42).size).to eq(1)
+        expect(watches.find(paused.id)).to be_active
+      end
+
+      # Kus Tba runs to 02:00, so its 00:00 and 01:00 cells are drawn under the
+      # evening they belong to — the page date and the hour's own date differ.
+      describe "an hour after midnight" do
+        let(:after_midnight) { Booking::Clock.local_to_utc("#{today + 2} 01:00") }
+
+        it "is filed under its own date, not the page it was tapped from" do
+          sign_in(user_id: 42)
+
+          post "/watches/dated",
+               club_slug: "kus-tba-padel", starts_at: after_midnight.iso8601, date: (today + 1).to_s
+
+          watch = watches.for_user(42).first
+          expect(watch.date).to eq(today + 2)
+          expect(watch.weekdays).to eq(Set[(today + 2).wday])
+          expect(watch.from_minute).to eq(60)
+          expect(watch.to_minute).to eq(120)
+        end
+
+        it "returns to the page it was tapped from" do
+          sign_in(user_id: 42)
+
+          post "/watches/dated",
+               club_slug: "kus-tba-padel", starts_at: after_midnight.iso8601, date: (today + 1).to_s
+
+          expect(last_response.location).to end_with("/?date=#{today + 1}")
+        end
       end
     end
 

@@ -51,6 +51,10 @@ module Booking
 
     def covers?(slot)
       return false unless club_slugs.include?(slot.club_slug)
+      # The whole of what makes a Dated watch different. Its weekday set already
+      # matches this date's weekday, so without this the same hour next week
+      # would answer a request that was only ever about one evening.
+      return false if dated? && slot.local_date != date
 
       local = slot.local_starts_at
       return false unless weekdays.include?(local.wday)

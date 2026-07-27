@@ -88,9 +88,15 @@ outside a club's opening hours is left blank rather than drawn as taken. Clubs
 whose source names the court say how many of them are free (`2/4`); the rest
 can only say that something is (`✓`).
 
+Tapping an hour that is **gone** asks to be told when it comes back: one tap,
+no form, a watch on exactly that club and that hour. Hours that have already
+started, and hours past the booking horizon, are drawn without a button —
+nothing can free them up any more, or nobody has polled them.
+
 Its second screen is **Watches**: everything you have asked to be told about,
 with pause, resume and delete. A standing watch names the weekdays it keeps
-coming back on; a dated one names its single day and says `Dated`. Pausing
+coming back on; a dated one — the kind a tapped hour makes — names its single
+day and says `Dated`. Pausing
 stops a watch matching without losing it, and a dated watch drops off the list
 once its hour has gone by — nothing reaps it, it simply stops mattering.
 

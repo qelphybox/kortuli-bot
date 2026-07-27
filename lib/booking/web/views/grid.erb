@@ -39,7 +39,23 @@
                 </a>
               </td>
             <% else %>
-              <td class="taken" aria-label="taken">·</td>
+              <%# Nothing to book, so the only useful thing a tap can do is ask
+                  to be told when there is. One button, no form to fill in —
+                  and none at all on an hour that has already been and gone,
+                  which nothing can free up any more. %>
+              <td class="taken">
+                <% if askable?(at) %>
+                  <form method="post" action="/watches/dated">
+                    <input type="hidden" name="club_slug" value="<%= row.club_slug %>">
+                    <input type="hidden" name="starts_at" value="<%= at.iso8601 %>">
+                    <%# The page, which an hour after midnight does not share. %>
+                    <input type="hidden" name="date" value="<%= @date %>">
+                    <button aria-label="Ask about <%= row.club_name %> at <%= hour_label(at) %>:00">·</button>
+                  </form>
+                <% else %>
+                  <span aria-label="taken">·</span>
+                <% end %>
+              </td>
             <% end %>
           <% end %>
         </tr>

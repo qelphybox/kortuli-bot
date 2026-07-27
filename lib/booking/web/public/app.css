@@ -136,7 +136,29 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* A taken hour is a button now — tapping it asks to be told when it frees up.
+   It has to keep reading as a dot rather than as a control, or eighteen
+   columns of chrome would drown the free hours the eye is actually hunting. */
 .grid td.taken { color: var(--muted); }
+.grid td.taken form { margin: 0; }
+
+.grid td.taken button {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 0;
+  border: 0;
+  border-radius: 0.375rem;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.grid td.taken button:hover,
+.grid td.taken button:focus-visible {
+  background: color-mix(in srgb, var(--muted) 20%, transparent);
+  color: var(--fg);
+}
 
 /* A club that is shut simply has nothing here — deliberately not styled as
    taken, because nobody took it. */

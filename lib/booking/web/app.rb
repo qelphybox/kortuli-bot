@@ -99,6 +99,22 @@ module Booking
         def picked_day?(day) = !!@submitted&.picked_day?(day)
         def picked_hour?(hour, which) = @submitted&.public_send(which) == hour
 
+        # The grid asks this before drawing a button, so it never offers a tap
+        # the route would only refuse.
+        def askable?(at) = TappedHour.askable?(at, horizon:)
+
+        # Tapping means "tell me about this hour", so an existing watch on it is
+        # woken rather than duplicated. Two watches on one hour would mean two
+        # messages about it, which the notifications index cannot prevent
+        # because it dedupes per watch — and doing nothing at all would answer
+        # with a success the person has no way of seeing.
+        def ask_about(tapped)
+          existing = settings.repos.watches.for_user(visitor_id).find { tapped.asked_by?(_1) }
+          return settings.repos.watches.create(user_id: visitor_id, **tapped.to_watch) unless existing
+
+          settings.repos.watches.set_active(existing.id, true) unless existing.active?
+        end
+
         # The whole screen, so a refusal can re-render it without the route
         # having to remember what the GET assembles.
         def watches_screen(refusals = [])
@@ -184,6 +200,23 @@ module Booking
 
         settings.repos.watches.create(user_id: visitor_id, **@submitted.to_watch)
         redirect(to("/watches"))
+      end
+
+      # The main scenario, and deliberately the shortest route in the file: an
+      # hour is gone, and you want to be told when it is not. Everything the
+      # watch needs is already in the Cell that was tapped.
+      post "/watches/dated" do
+        require_visitor!
+
+        tapped = TappedHour.from(params, watched_slugs: settings.repos.clubs.enabled.map(&:slug), horizon:)
+        halt(422) unless tapped
+
+        ask_about(tapped)
+        # Back to the page it was tapped on rather than to the list — the hour
+        # next to it is usually the next thing a person wants. The page is not
+        # always the hour's own date: one after midnight is drawn under the
+        # evening it belongs to.
+        redirect(to("/?date=#{requested_date(params[:date]) || horizon.first}"))
       end
 
       # Post-redirect-get throughout, so a watch is never paused twice by a
