@@ -19,6 +19,7 @@ module Booking
       # this app does not use and which would ask for a secret of its own.
       set :telegram_token, nil
       set :visitor_sessions, nil
+      set :repos, nil
       # Sinatra's own session middleware is not used — ours is one signed
       # cookie and nothing else — and its default error page leaks the app's
       # internals, so both stay off.
@@ -38,6 +39,27 @@ module Booking
         def require_visitor!
           redirect(to("/start")) unless visitor_id
         end
+
+        # The dates the poller actually knows about. Anything outside this
+        # would draw a grid nobody has polled, which reads as a club that shut
+        # down rather than as a question we cannot answer.
+        def horizon
+          today = Clock.local_date(Clock.now)
+
+          (0...Config.horizon_days).map { today + _1 }
+        end
+
+        def requested_date(raw)
+          date = Date.iso8601(raw.to_s)
+
+          horizon.include?(date) ? date : nil
+        rescue Date::Error
+          nil
+        end
+
+        def hour_label(starts_at) = format("%02d", Clock.to_local(starts_at).hour)
+
+        def day_label(date) = date.strftime("%a %-d %b")
       end
 
       # kamal-proxy holds a deploy open until this answers, so it must never
@@ -73,7 +95,16 @@ module Booking
 
       get "/" do
         require_visitor!
-        erb :home, layout: :layout
+
+        @dates = horizon
+        @date = requested_date(params[:date])
+        # Bounce rather than quietly substituting today, so the address bar and
+        # the screen never disagree about which day is on show.
+        redirect(to("/")) if params[:date] && @date.nil?
+        @date ||= @dates.first
+
+        @table = Grid.build(clubs: settings.repos.clubs.enabled, slots: settings.repos.slots.all, date: @date)
+        erb :grid, layout: :layout
       end
     end
   end

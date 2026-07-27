@@ -10,6 +10,11 @@ module Booking
         @db[:slots].where(club_slug: club_slug.to_s).order(:starts_at, :court_ref).map { to_slot(_1) }
       end
 
+      # Every club at once, for the Grid. The whole snapshot is a few hundred
+      # rows across four clubs, so narrowing it to one screen's dates would buy
+      # nothing but a chance to get the boundary wrong.
+      def all = @db[:slots].order(:club_slug, :starts_at, :court_ref).map { to_slot(_1) }
+
       # The snapshot is replaced wholesale: the adapter's answer is the truth,
       # and reconciling row-by-row buys nothing at this size.
       def replace(club_slug, slots)

@@ -13,6 +13,16 @@
     service_id: "1b9d8011-d73e-4810-bba8-4098b7ad536b"
     booking_url: "https://padel-club2.reservio.com/"
     price: "50 GEL"
+    # Declared rather than observed: Reservio publishes neither opening hours
+    # nor bookings, so there is nothing to read them from. `to` is when the
+    # club shuts, so the last bookable hour starts at 23:00.
+    opening_hours:
+      from: "08:00"
+      to: "24:00"
+    # Present only for a court-level club — its source names the individual
+    # court, so a cell can say how many of these are free. Its absence is what
+    # makes the other three hour-level.
+    courts: 4
     # Only needed by adapters that identify courts by name; Reservio hands out
     # stable ids, so this stays empty here.
     court_aliases: {}
@@ -25,6 +35,11 @@
   settings:
     booking_url: "https://kustbapadel.ge/book/"
     price: "80 GEL"
+    # Books until 02:00, so the day runs past midnight and the last hour anyone
+    # can start is 01:00.
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
     # The booking widget's own max_days. The API answers past it, but nothing
     # out there is bookable yet, so everything reads free and never changes.
     max_days: 7
@@ -47,6 +62,10 @@
     # The rates are published at /facilities/locations/<id>/ if this is ever
     # worth computing per slot rather than printing as a range.
     price: "40–60 GEL"
+    # Their own working_hours say 08:00–01:00 every day, both locations.
+    opening_hours:
+      from: "08:00"
+      to: "01:00"
     # Dates the club's own widget offers, counting today. The API answers well
     # past it, reporting whole days free because nothing out there is bookable.
     max_days: 8
@@ -62,5 +81,8 @@
     location_id: "752155d7-39aa-53d9-bc18-682695f85244"
     booking_url: "https://gymbreeze.ge/eng"
     price: "30–40 GEL"
+    opening_hours:
+      from: "08:00"
+      to: "01:00"
     max_days: 8
     court_aliases: {}

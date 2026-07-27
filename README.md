@@ -82,6 +82,14 @@ bundle exec rake "discover:reservio[padel-club2]"
 
 ## Using it
 
+The **mini app** shows the week: one row per club, one column per hour, one
+page per date. A free hour links out to that club's booking page; an hour
+outside a club's opening hours is left blank rather than drawn as taken. Clubs
+whose source names the court say how many of them are free (`2/4`); the rest
+can only say that something is (`✓`).
+
+In the chat, for now:
+
 - `/watch` — build a watch: clubs → days → hours
 - `/list` — your watches, with pause and delete buttons
 - `/help` — what the bot does
