@@ -18,10 +18,6 @@ module Booking
 
     def session_secret = ENV.fetch("SESSION_SECRET")
 
-    # The hostname Telegram was told to open. Used to narrow Sinatra's host
-    # check; unset means "accept anything", which is what the specs want.
-    def app_host = ENV["APP_HOST"]
-
     def web_port = Integer(ENV.fetch("PORT", "8080"))
 
     def database_url = ENV.fetch("DATABASE_URL", "sqlite://data/booking.db")

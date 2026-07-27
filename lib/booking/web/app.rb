@@ -24,10 +24,12 @@ module Booking
       # internals, so both stay off.
       set :show_exceptions, false
       set :logging, false
-      # Sinatra 4 refuses unknown Host headers, which is a sensible default for
-      # an app exposed directly and a nuisance for one behind a proxy that
-      # already routes by name. Left open here; bin/web narrows it to the real
-      # hostname, which is the only place that knows what it is.
+      # Sinatra 4 refuses unknown Host headers. That belongs to kamal-proxy
+      # here: it is the only thing the outside world can reach, and it forwards
+      # nothing whose Host is not the app's. Narrowing it a second time in here
+      # buys nothing and costs a deploy — the proxy health-checks the container
+      # by its *container id*, so a permitted-hosts list rejects the one
+      # request that decides whether a release goes live.
       set :host_authorization, { permitted_hosts: [] }
 
       helpers do

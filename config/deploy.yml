@@ -68,8 +68,6 @@ volumes:
 env:
   clear:
     DATABASE_URL: sqlite://data/booking.db
-    # Narrows Sinatra's host check to the name Telegram was told to open.
-    APP_HOST: kortuli-tgapp.qelphybox.space
   secret:
     - TELEGRAM_TOKEN
     - OWNER_TELEGRAM_ID
