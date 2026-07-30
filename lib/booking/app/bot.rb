@@ -26,7 +26,8 @@ module Booking
 
         Telegram::Runner.new(
           token: Config.telegram_token,
-          handlers: Telegram::Handlers.new(app_url: Config.app_url),
+          handlers: Telegram::Handlers.new(app_url: Config.app_url, owner_id: Config.owner_id),
+          owner_id: Config.owner_id,
           logger: @logger
         ).run
       end

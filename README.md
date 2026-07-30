@@ -62,12 +62,13 @@ bundle exec bin/poller
 bundle exec bin/web
 ```
 
-Each entrypoint asks only for what it uses: `bin/web` needs `SESSION_SECRET` and
-`bin/bot` needs `APP_URL`, and neither looks at the other's. Locally the mini
-app comes up on `http://localhost:8080`, where it will redirect you to `/start`
-and then tell you to open it from Telegram — the signed payload it needs only
-exists inside a Telegram client. `APP_URL` has to be the deployed HTTPS one
-even when you are running the bot locally: Telegram will not open a `web_app`
+Each entrypoint asks only for what it uses: `bin/web` needs `SESSION_SECRET`
+and `BOT_USERNAME`, `bin/bot` needs `APP_URL`, `BOT_USERNAME` and
+`OWNER_TELEGRAM_ID`. Only the token is shared. Locally the mini app comes up
+on `http://localhost:8080`, where it will redirect you to `/start` and then
+tell you to open it from Telegram — the signed payload it needs only exists
+inside a Telegram client. `APP_URL` has to be the deployed HTTPS one even
+when you are running the bot locally: Telegram will not open a `web_app`
 button over plain HTTP.
 
 Poll once in the foreground, without starting the bot — the quickest way to see
@@ -110,12 +111,17 @@ or an end that is not after its start — is refused with the reason and hands
 back everything you picked, rather than being stored where it would sit in the
 list looking like cover.
 
-The **chat** is where you are told, not where you ask. Say anything to the bot
-in a direct message and it answers once, with a button that opens the app;
-after that it only speaks when something you asked about has freed up. There
-are no commands and no keyboards — a watch is made in one place, so a chat form
-and a web form cannot drift apart. In a group it says nothing at all: Telegram
-refuses to open a mini app from there, so a greeting could only be a dead end.
+The **chat** is where you are told, not where you ask. `/start` greets you
+with a button that opens the app; after that the bot speaks on its own only
+when something you asked about has freed up. Writing anything else to the bot
+sends it to the owner as feedback: `/feedback` and the app's "Tell us" pill
+prompt for it, but the bot forwards any private message it does not recognise
+as a command — text, photo, voice, whatever comes. See
+[ADR-0002](docs/adr/0002-feedback-goes-back-through-the-bot.md) for why this
+surface exists at all when watches are made in the app. In a group it says
+nothing: Telegram refuses to open a mini app from there, so a greeting could
+only be a dead end, and forwarding a message from a shared room would leak
+the ack back into it.
 
 The app itself is reachable from Telegram's menu button, which the bot sets for
 itself every time it boots.

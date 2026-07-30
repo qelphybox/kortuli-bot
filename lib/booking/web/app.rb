@@ -20,6 +20,10 @@ module Booking
       set :telegram_token, nil
       set :visitor_sessions, nil
       set :repos, nil
+      # The bot's public @handle, used to build the feedback pill's deeplink
+      # into the bot chat. Injected rather than read from Config so the app is
+      # renderable in specs without touching ENV.
+      set :bot_username, nil
       # Sinatra's own session middleware is not used — ours is one signed
       # cookie and nothing else — and its default error page leaks the app's
       # internals, so both stay off.
@@ -35,6 +39,13 @@ module Booking
 
       helpers do
         def visitor_id = settings.visitor_sessions.user_id(request.cookies[COOKIE])
+
+        # The feedback pill's deeplink into the bot chat. `start=feedback`
+        # arrives at the bot as `/start feedback`, which the handler answers
+        # with the feedback prompt — the pill is a one-tap invitation to a
+        # conversation, not a "please write /feedback" instruction card. See
+        # ADR-0002.
+        def feedback_url = "https://t.me/#{settings.bot_username}?start=feedback"
 
         def require_visitor!
           redirect(to("/start")) unless visitor_id

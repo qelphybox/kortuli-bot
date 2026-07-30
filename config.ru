@@ -7,6 +7,7 @@ Booking::Boot.call(Booking::Config::REQUIRED_FOR_WEB)
 
 app = Booking::Web::App
 app.set :telegram_token, Booking::Config.telegram_token
+app.set :bot_username, Booking::Config.bot_username
 app.set :visitor_sessions, Booking::Web::Session.new(secret: Booking::Config.session_secret)
 # Read-only from here: the poller owns everything the grid displays.
 app.set :repos, Booking::App.repos

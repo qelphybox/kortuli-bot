@@ -37,6 +37,7 @@ RSpec.describe Booking::Web::App do
   def app
     described_class.tap do |a|
       a.set :telegram_token, token
+      a.set :bot_username, "kortuli_test_bot"
       a.set :visitor_sessions, sessions
       a.set :repos, repos
     end
@@ -142,6 +143,17 @@ RSpec.describe Booking::Web::App do
 
       expect(last_response.body).to include('href="/watches/new"')
     end
+
+    # The escape hatch out of the app and into the bot chat. See ADR-0002 —
+    # the pill has to carry `start=feedback` so the bot answers with the
+    # feedback prompt on arrival rather than the plain welcome.
+    it "offers a feedback pill that deep-links into the bot chat" do
+      sign_in
+      get "/"
+
+      expect(last_response.body).to include('href="https://t.me/kortuli_test_bot?start=feedback"')
+      expect(last_response.body).to include(Booking::Messages.feedback_pill_dates)
+    end
   end
 
   describe "the clubs screen" do
@@ -157,6 +169,13 @@ RSpec.describe Booking::Web::App do
       get "/date/#{today}"
 
       expect(last_response.body).to include(%(href="/date/#{today}/club/padel-club-2"))
+    end
+
+    it "carries a feedback pill with the missing-club prompt" do
+      sign_in
+      get "/date/#{today}"
+
+      expect(last_response.body).to include(Booking::Messages.feedback_pill_clubs)
     end
 
     # A hand-typed date outside the window would render a page nobody polled,
@@ -191,6 +210,13 @@ RSpec.describe Booking::Web::App do
       get "/date/#{today + 1}/club/kus-tba-padel"
 
       expect(last_response.body).to include("08:00").and include("19:00")
+    end
+
+    it "carries a feedback pill with the wrong-times prompt" do
+      sign_in
+      get "/date/#{today + 1}/club/kus-tba-padel"
+
+      expect(last_response.body).to include(Booking::Messages.feedback_pill_slots)
     end
 
     it "is 404 when the club is not among the enabled ones" do

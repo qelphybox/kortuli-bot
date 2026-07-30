@@ -69,5 +69,50 @@ module Booking
     # The form has its own screen now, so this points down at the button
     # that opens it.
     def no_watches_in_app = "No watches yet — the button below makes one."
+
+    # Sent when the app's Contact pill hands somebody off to the bot, and when
+    # `/feedback` is typed by hand. Spells out three things at once: any format
+    # is welcome (that is the reason feedback lives in the bot chat rather than
+    # in an in-app textarea, see ADR-0002), no reply is promised, and the
+    # message does reach a person.
+    def feedback_prompt
+      "Write anything — text, photo, video, voice — I'll read it. " \
+        "No promise of a reply, but every message gets to the owner."
+    end
+
+    # Reply sent after each forwarded feedback message. Random from a pool
+    # rather than a fixed string, so a person who writes three thoughts in a
+    # row does not read the same sentence three times and start to wonder if
+    # the bot heard them at all. Half of the phrases proactively spell out the
+    # one-way contract; the other half stay short.
+    FEEDBACK_ACKS = [
+      "Got it, thanks.",
+      "Thanks — noted and passed to the owner.",
+      "Received. Will be read.",
+      "Thanks. Write again any time.",
+      "Copy that.",
+      "Thanks, filed.",
+      "Got it. The owner will see this.",
+      "Received — no reply promised, but read for sure.",
+      "Thanks. Added to the pile.",
+      "Got it. Send more if you think of more."
+    ].freeze
+
+    def feedback_ack = FEEDBACK_ACKS.sample
+
+    # Prefix on the bot's own message just before the forwarded edit lands in
+    # the owner's chat. Reads as "the message below is an edit, not a fresh
+    # one" — matters when the same person sends "wrong price at 19:00" and
+    # then changes it to "20:00".
+    def feedback_edited = "↑ edited"
+
+    # The pill's copy is a hint about which kind of feedback the screen is
+    # best placed to catch. Kept per-screen rather than a single generic line
+    # so a person on Slots sees the invitation their frustration matches.
+    def feedback_pill_dates = "Ideas or bugs? Tell us"
+
+    def feedback_pill_clubs = "Missing a club? Tell us"
+
+    def feedback_pill_slots = "Times look wrong? Tell us"
   end
 end
