@@ -73,6 +73,11 @@ env:
     # Telegram opens a web_app button over HTTPS or not at all.
     BOT_USERNAME: kortuli_bot
     APP_URL: https://kortuli-tgapp.qelphybox.space
+    # The Telegram user_id that receives forwarded feedback (ADR-0002).
+    # Semi-public: a numeric id is not a secret, and hard-coding it here keeps
+    # the deploy self-contained. Change it and the next release starts sending
+    # feedback to somebody else.
+    OWNER_TELEGRAM_ID: 408551275
   secret:
     - TELEGRAM_TOKEN
     - CONTACT_EMAIL
