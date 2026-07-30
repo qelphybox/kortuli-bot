@@ -32,9 +32,6 @@ module Booking
     # certificate for. Telegram opens `web_app` buttons over HTTPS only.
     def app_url = ENV.fetch("APP_URL")
 
-    # Only this user may talk to the bot while it is a single-user experiment.
-    def owner_id = ENV["OWNER_TELEGRAM_ID"]&.to_i
-
     def horizon_days = Integer(ENV.fetch("HORIZON_DAYS", "7"))
 
     def poll_interval = ENV.fetch("POLL_INTERVAL", "4m")

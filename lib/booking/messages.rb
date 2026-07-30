@@ -54,8 +54,6 @@ module Booking
     # answer than a blank line.
     def clubs_phrase(watch, club_names) = watch.club_slugs.map { club_names.fetch(_1, _1) }.sort.join(", ")
 
-    def not_for_you = "This bot is running as a private experiment."
-
     def pick_at_least_one_club = "Pick at least one club first."
 
     def pick_at_least_one_day = "Pick at least one day first."

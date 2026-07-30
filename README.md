@@ -55,7 +55,7 @@ filesystem. It is the one genuinely new operational risk in this shape.
 
 ```bash
 bundle install
-cp .env.example .env   # then fill in TELEGRAM_TOKEN and OWNER_TELEGRAM_ID
+cp .env.example .env   # then fill in TELEGRAM_TOKEN
 bundle exec rake seed
 bundle exec bin/bot      # and, in their own shells:
 bundle exec bin/poller

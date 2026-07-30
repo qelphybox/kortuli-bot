@@ -10,25 +10,20 @@ module Booking
       # routed and there is no callback layer under this any more.
       Reply = Data.define(:text, :app_url)
 
-      def initialize(app_url:, owner_id: Config.owner_id)
+      def initialize(app_url:)
         @app_url = app_url
-        @owner_id = owner_id
       end
 
-      # Every message gets the same answer, whatever it said. The bot stopped
-      # being a form: there is nothing left to ask it that the app does not
-      # answer better, so a command surface would only be a way to get it wrong.
+      # Every message gets the same answer, whatever it said and whoever sent
+      # it. The bot stopped being a form: there is nothing left to ask it that
+      # the app does not answer better, so a command surface would only be a
+      # way to get it wrong. The runner passes `user_id:` in from the update;
+      # kept on the signature so a single-user gate could come back one day
+      # without changing the caller.
       def on_message(user_id:)
-        return Reply.new(text: Messages.not_for_you, app_url: nil) unless allowed?(user_id)
-
+        _ = user_id
         Reply.new(text: Messages.welcome, app_url: @app_url)
       end
-
-      private
-
-      # A single-user experiment: with no owner set the bot is open, which is
-      # only sensible while the token is not public.
-      def allowed?(user_id) = @owner_id.nil? || user_id == @owner_id
     end
   end
 end

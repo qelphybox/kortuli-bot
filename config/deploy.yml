@@ -74,7 +74,6 @@ env:
     APP_URL: https://kortuli-tgapp.qelphybox.space
   secret:
     - TELEGRAM_TOKEN
-    - OWNER_TELEGRAM_ID
     - CONTACT_EMAIL
     # Signs the mini app's own session cookies. Rotating it logs everyone out
     # and touches nothing else.

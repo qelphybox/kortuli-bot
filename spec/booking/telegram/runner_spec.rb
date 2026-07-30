@@ -6,7 +6,7 @@ RSpec.describe Booking::Telegram::Runner do
   let(:client) { FakeClient.new(raises, updates) }
   let(:raises) { [] }
   let(:updates) { [] }
-  let(:handlers) { Booking::Telegram::Handlers.new(app_url: "https://app.test", owner_id: nil) }
+  let(:handlers) { Booking::Telegram::Handlers.new(app_url: "https://app.test") }
 
   # Stands in for Telegram::Bot::Client. Each entry in `raises` is thrown by one
   # call to .run; once they are exhausted the block is invoked normally and the
@@ -128,15 +128,6 @@ RSpec.describe Booking::Telegram::Runner do
       expect(button.url).to be_nil
     end
 
-    it "sends no keyboard at all to somebody who is not allowed in" do
-      owned = described_class.new(
-        token: "t", handlers: Booking::Telegram::Handlers.new(app_url: "https://app.test", owner_id: 7),
-        logger:, client:, retry_delay: 0
-      )
-      owned.run
-
-      expect(client.bot.api.sent.first[:reply_markup]).to be_nil
-    end
   end
 
   describe "an update that is not a text message" do
