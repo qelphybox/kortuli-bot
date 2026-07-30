@@ -71,6 +71,7 @@ env:
     # The bot's only way of pointing anyone at the app, so it has to match the
     # host below — that is the name the proxy holds a certificate for, and
     # Telegram opens a web_app button over HTTPS or not at all.
+    BOT_USERNAME: kortuli_bot
     APP_URL: https://kortuli-tgapp.qelphybox.space
   secret:
     - TELEGRAM_TOKEN
