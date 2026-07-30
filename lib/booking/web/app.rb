@@ -37,8 +37,22 @@ module Booking
       # request that decides whether a release goes live.
       set :host_authorization, { permitted_hosts: [] }
 
+      # Cheap cache-buster for static assets: mtime at boot, one integer, same
+      # across the process's lifetime. Telegram's in-app webview caches CSS
+      # and JS by URL and does not consult validators — a deploy that changes
+      # only styles leaves every existing session on the old file until the
+      # user manually clears the cache. Appending `?v=…` makes the URL new
+      # for every deploy without asking Sinatra to compute anything per
+      # request.
+      ASSET_VERSION = [
+        File.mtime(File.expand_path("public/app.css", __dir__)),
+        File.mtime(File.expand_path("public/app.js", __dir__))
+      ].max.to_i.to_s.freeze
+
       helpers do
         def visitor_id = settings.visitor_sessions.user_id(request.cookies[COOKIE])
+
+        def asset_url(path) = "#{path}?v=#{ASSET_VERSION}"
 
         # The feedback pill's deeplink into the bot chat. `start=feedback`
         # arrives at the bot as `/start feedback`, which the handler answers
