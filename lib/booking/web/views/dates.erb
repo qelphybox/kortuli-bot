@@ -1,0 +1,42 @@
+<%#
+  The home screen. One row per day of the horizon, from today outward. Each
+  row is a link into the day: tapping it opens the list of clubs that have
+  anything open then. A day with nothing open is dimmed rather than hidden,
+  so the eye reads "we did look and there was nothing" rather than "this
+  club shut down".
+%>
+<header class="app-head">
+  <div class="app-head__row">
+    <span class="brand">kortuli</span>
+  </div>
+  <p class="tagline">Open courts in Tbilisi. We watch, you book.</p>
+  <a class="cta" href="/watches/new">+ Watch a slot</a>
+  <% if @watches_count.positive? %>
+    <a class="watches-link" href="/watches">
+      <span><%= @watches_count %> <%= @watches_count == 1 ? "active watch" : "active watches" %></span>
+      <span aria-hidden="true">›</span>
+    </a>
+  <% end %>
+</header>
+
+<ul class="dates">
+  <% @dates.each do |d| %>
+    <li>
+      <a class="date-row<%= " is-empty" unless d[:any_free] %>" href="/date/<%= d[:date] %>">
+        <span class="date-row__day">
+          <span class="date-row__weekday">
+            <span><%= d[:weekday] %></span>
+            <% if d[:today] %><span class="badge">Today</span><% end %>
+          </span>
+          <span class="date-row__date"><%= d[:date_label] %></span>
+        </span>
+        <span class="date-row__meta">
+          <span class="date-row__headline<%= " is-empty" unless d[:any_free] %>"><%= d[:headline] %></span>
+          <% if d[:sub] %>
+            <span class="date-row__sub"><%= d[:sub] %></span>
+          <% end %>
+        </span>
+      </a>
+    </li>
+  <% end %>
+</ul>

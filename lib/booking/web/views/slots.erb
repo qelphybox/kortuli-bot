@@ -1,0 +1,38 @@
+<%#
+  Hourly slots for one club on one date. A free hour links out to the
+  club's booking page; a taken hour that is still ahead offers a one-tap
+  Watch — one message when it frees up. An hour already begun cannot be
+  played and offers nothing, rather than a button that would refuse.
+%>
+<header class="app-head app-head--sub">
+  <a class="back" href="/date/<%= @date %>" aria-label="Back to clubs">←</a>
+  <span class="app-head__title">
+    <span class="app-head__club"><%= @club_name %></span>
+    <span class="app-head__sub"><%= @weekday %> · <%= @date_label %></span>
+  </span>
+</header>
+
+<ul class="slots">
+  <% @slots.each do |s| %>
+    <li class="slot-row <%= s[:free] ? "is-free" : "is-taken" %>">
+      <span class="slot-row__body">
+        <span class="slot-row__time"><%= s[:time] %></span>
+        <span class="slot-row__state"><%= s[:state] %></span>
+      </span>
+      <% if s[:free] %>
+        <a class="slot-row__book" data-external href="<%= s[:deeplink] %>"
+           aria-label="<%= @club_name %> at <%= s[:time] %>, book">Book ↗</a>
+      <% elsif s[:askable] %>
+        <form method="post" action="/watches/dated">
+          <input type="hidden" name="club_slug" value="<%= @club_slug %>">
+          <input type="hidden" name="starts_at" value="<%= s[:starts_at] %>">
+          <input type="hidden" name="date" value="<%= @date %>">
+          <button class="slot-row__watch<%= " is-on" if s[:watching] %>"<%= " disabled" if s[:watching] %>
+                  aria-label="Watch <%= @club_name %> at <%= s[:time] %>">
+            <%= s[:watching] ? "Watching" : "Watch" %>
+          </button>
+        </form>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

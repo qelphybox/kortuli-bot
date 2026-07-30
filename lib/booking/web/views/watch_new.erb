@@ -1,0 +1,63 @@
+<%#
+  One step, not four messages: clubs, weekdays and both ends of the range
+  go up together. Checkboxes rather than a typed list, so a club that is
+  not watched cannot be asked for. What was picked is rendered back,
+  because a refusal that also empties the form punishes the person for
+  reading it.
+%>
+<header class="app-head app-head--sub">
+  <a class="back" href="/" aria-label="Back to dates">←</a>
+  <span class="app-head__title-solo">Watch a slot</span>
+</header>
+
+<% if @refusals.any? %>
+  <ul class="refusals">
+    <% @refusals.each do |reason| %>
+      <li><%= reason %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+<form class="new-watch" method="post" action="/watches">
+  <fieldset>
+    <legend>Clubs</legend>
+    <% @clubs.each do |club| %>
+      <label class="choice">
+        <input type="checkbox" name="club_slugs[]" value="<%= club.slug %>"<%= " checked" if picked_club?(club.slug) %>>
+        <%= club.name %>
+      </label>
+    <% end %>
+  </fieldset>
+
+  <fieldset>
+    <legend>Days</legend>
+    <% weekday_choices.each do |day, name| %>
+      <label class="choice">
+        <input type="checkbox" name="weekdays[]" value="<%= day %>"<%= " checked" if picked_day?(day) %>>
+        <%= name %>
+      </label>
+    <% end %>
+  </fieldset>
+
+  <fieldset class="range">
+    <legend>Time window</legend>
+    <label>From
+      <select name="from_hour">
+        <% start_hours.each do |hour| %>
+          <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :from_hour) %>><%= clock(hour) %></option>
+        <% end %>
+      </select>
+    </label>
+    <span class="dash" aria-hidden="true">–</span>
+    <label>Until
+      <select name="to_hour">
+        <% end_hours.each do |hour| %>
+          <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :to_hour) %>><%= clock(hour) %></option>
+        <% end %>
+      </select>
+    </label>
+  </fieldset>
+
+  <button class="cta">Start watching</button>
+  <p class="disclaimer">kortuli never books or pays. You get a message with a link.</p>
+</form>

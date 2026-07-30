@@ -1,0 +1,15 @@
+<%#
+  The moment after the form is accepted, before the list. Post-redirect-get
+  lands here rather than at the list itself so the affirmation — "we will
+  ping you" — arrives attached to what was just created, and a refresh
+  quietly re-renders the card rather than creating a second watch.
+%>
+<div class="confirm">
+  <div class="confirm__card">
+    <span class="confirm__tick" aria-hidden="true">✓</span>
+    <p class="confirm__lede">We'll ping you on Telegram when a slot opens</p>
+    <p class="confirm__sub"><%= @summary %></p>
+  </div>
+  <a class="btn-secondary" href="/watches">Manage watches</a>
+  <a class="btn-tertiary" href="/">Back to dates</a>
+</div>

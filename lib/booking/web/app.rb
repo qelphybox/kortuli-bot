@@ -41,7 +41,7 @@ module Booking
         end
 
         # The dates the poller actually knows about. Anything outside this
-        # would draw a grid nobody has polled, which reads as a club that shut
+        # would draw a page nobody has polled, which reads as a club that shut
         # down rather than as a question we cannot answer.
         def horizon
           today = Clock.local_date(Clock.now)
@@ -49,7 +49,7 @@ module Booking
           (0...Config.horizon_days).map { today + _1 }
         end
 
-        def requested_date(raw)
+        def parse_date(raw)
           date = Date.iso8601(raw.to_s)
 
           horizon.include?(date) ? date : nil
@@ -99,8 +99,8 @@ module Booking
         def picked_day?(day) = !!@submitted&.picked_day?(day)
         def picked_hour?(hour, which) = @submitted&.public_send(which) == hour
 
-        # The grid asks this before drawing a button, so it never offers a tap
-        # the route would only refuse.
+        # The Slots screen asks this before drawing a Watch button, so it
+        # never offers a tap the route would only refuse.
         def askable?(at) = TappedHour.askable?(at, horizon:)
 
         # Tapping means "tell me about this hour", so an existing watch on it is
@@ -115,15 +115,6 @@ module Booking
           settings.repos.watches.set_active(existing.id, true) unless existing.active?
         end
 
-        # The whole screen, so a refusal can re-render it without the route
-        # having to remember what the GET assembles.
-        def watches_screen(refusals = [])
-          @refusals = refusals
-          @watches = settings.repos.watches.for_user(visitor_id).reject(&:expired?)
-          @clubs = settings.repos.clubs.enabled
-          erb :watches, layout: :layout
-        end
-
         # A Dated watch names its one day; a Standing one names the weekdays it
         # keeps coming back on. Reading either tells you which it is before the
         # badge next to it does.
@@ -134,6 +125,135 @@ module Booking
         end
 
         def day_label(date) = date.strftime("%a %-d %b")
+
+        def weekday_short(date) = Messages::DAY_NAMES[date.wday]
+
+        def date_label(date) = date.strftime("%b %-d")
+
+        # The list of Grid Tables the drill-down draws from. Built once per
+        # request rather than per screen so the Dates counts, the Clubs sub-
+        # lines and the Slots rows all read the same snapshot — a poll that
+        # finishes mid-render cannot change what the person sees on one page.
+        def horizon_tables
+          @horizon_tables ||= begin
+            clubs = settings.repos.clubs.enabled
+            slots = settings.repos.slots.all
+            horizon.to_h { [_1, Grid.build(clubs:, slots:, date: _1)] }
+          end
+        end
+
+        def any_free?(table) = table.rows.any? { |row| row.cells.any?(&:free?) }
+
+        # One dict per horizon date, in the shape the Dates template reads.
+        # A day with anything free names the number of clubs and the number
+        # of hours; a day with nothing shows "fully booked" and dims itself.
+        def dates_view
+          horizon_tables.map do |date, table|
+            open_clubs = table.rows.count { |row| row.cells.any?(&:free?) }
+            free_cells = table.rows.sum { |row| row.cells.count(&:free?) }
+            any_free = open_clubs.positive?
+
+            {
+              date: date.to_s,
+              weekday: weekday_short(date),
+              date_label: date_label(date),
+              today: date == horizon.first,
+              any_free:,
+              headline: any_free ? "#{open_clubs} #{open_clubs == 1 ? "club" : "clubs"}" : "fully booked",
+              sub: any_free ? "#{free_cells} #{free_cells == 1 ? "slot" : "slots"}" : nil
+            }
+          end
+        end
+
+        # One dict per Club on the selected date. Clubs with anything free
+        # come first, then the fully-booked ones — dimmed rather than hidden,
+        # so the eye reads "we did look" rather than "the club is gone".
+        def clubs_view(date)
+          table = horizon_tables.fetch(date)
+          rows = table.rows.map do |row|
+            free_cells = row.cells.select(&:free?)
+            any_free = free_cells.any?
+            earliest = free_cells.first
+            sub =
+              if any_free
+                "from #{hour_label(earliest.starts_at)}:00 · #{free_cells.size} #{free_cells.size == 1 ? "slot" : "slots"} left"
+              else
+                "fully booked"
+              end
+            {
+              slug: row.club_slug,
+              name: row.club_name,
+              any_free:,
+              sub:
+            }
+          end
+
+          rows.sort_by { |c| c[:any_free] ? 0 : 1 }
+        end
+
+        # One dict per hour on the selected club-and-date. "Watching" is
+        # queried once per screen from the user's own list, so a slot that
+        # already has a Dated watch on it renders as such.
+        def slots_view(date, row)
+          watching = watched_hours(date, row.club_slug)
+
+          row.cells.map do |cell|
+            starts_at = cell.starts_at
+            hour = hour_label(starts_at).to_i
+            time = "#{format("%02d", hour)}:00 – #{format("%02d", hour + 1)}:00"
+            watching_this = watching.include?(Clock.to_local(starts_at).hour * 60 + Clock.to_local(starts_at).min)
+            state = cell.free? ? "free" : watching_this ? "watching" : "taken"
+
+            {
+              time:,
+              starts_at: starts_at.iso8601,
+              free: cell.free?,
+              askable: !cell.free? && askable?(starts_at),
+              watching: watching_this,
+              state:,
+              deeplink: cell.deeplink
+            }
+          end
+        end
+
+        # The minutes-of-day this person has an active, not-yet-expired dated
+        # watch on for a given (date, club). The Slots screen renders those
+        # as "watching" rather than as a fresh Watch button.
+        def watched_hours(date, club_slug)
+          settings.repos.watches.for_user(visitor_id).each_with_object(Set.new) do |w, out|
+            next unless w.dated? && w.date == date && w.active? && !w.expired?
+            next unless w.club_slugs.include?(club_slug)
+
+            out << w.from_minute
+          end
+        end
+
+        def visible_watches
+          settings.repos.watches.for_user(visitor_id).reject(&:expired?)
+        end
+
+        # The whole screen, so a refusal can re-render it without the route
+        # having to remember what the GET assembles.
+        def watches_screen
+          @watches = visible_watches
+          erb :watches, layout: :layout
+        end
+
+        def watch_new_screen(refusals = [])
+          @refusals = refusals
+          @clubs = settings.repos.clubs.enabled
+          erb :watch_new, layout: :layout
+        end
+
+        # Reads back the watch that was just created, in the same voice the
+        # rest of the screens use: a Standing one names its days, a Dated one
+        # names its date.
+        def confirm_summary(watch)
+          clubs = watch_clubs(watch)
+          when_line = watch_when(watch)
+
+          "#{clubs} · #{when_line}"
+        end
       end
 
       # kamal-proxy holds a deploy open until this answers, so it must never
@@ -167,24 +287,65 @@ module Booking
         status 204
       end
 
+      # The home screen: one row per day of the horizon, with a headline
+      # count of clubs and hours that are open.
       get "/" do
         require_visitor!
 
-        @dates = horizon
-        @date = requested_date(params[:date])
-        # Bounce rather than quietly substituting today, so the address bar and
-        # the screen never disagree about which day is on show.
-        redirect(to("/")) if params[:date] && @date.nil?
-        @date ||= @dates.first
+        @dates = dates_view
+        @watches_count = visible_watches.size
+        erb :dates, layout: :layout
+      end
 
-        @table = Grid.build(clubs: settings.repos.clubs.enabled, slots: settings.repos.slots.all, date: @date)
-        erb :grid, layout: :layout
+      # The clubs open on one date. Reached from a Dates row; sends on to a
+      # Slots screen when a club is tapped.
+      get "/date/:date" do
+        require_visitor!
+
+        date = parse_date(params[:date])
+        redirect(to("/")) if date.nil?
+
+        @date = date.to_s
+        @weekday = weekday_short(date)
+        @date_label = date_label(date)
+        @clubs = clubs_view(date)
+        erb :clubs, layout: :layout
+      end
+
+      # The hours a single club sells on one date, tapped from the Clubs
+      # screen. Free hours link out; taken hours that are still ahead offer
+      # a one-tap Watch.
+      get "/date/:date/club/:slug" do
+        require_visitor!
+
+        date = parse_date(params[:date])
+        redirect(to("/")) if date.nil?
+
+        table = horizon_tables.fetch(date)
+        row = table.rows.find { _1.club_slug == params[:slug] }
+        halt(404) unless row
+
+        @date = date.to_s
+        @weekday = weekday_short(date)
+        @date_label = date_label(date)
+        @club_slug = row.club_slug
+        @club_name = row.club_name
+        @slots = slots_view(date, row)
+        erb :slots, layout: :layout
       end
 
       get "/watches" do
         require_visitor!
 
         watches_screen
+      end
+
+      # The Watch form is its own screen now — the Manage list points at it
+      # rather than carrying the form on the same page.
+      get "/watches/new" do
+        require_visitor!
+
+        watch_new_screen
       end
 
       post "/watches" do
@@ -196,15 +357,31 @@ module Booking
         # Re-rendered rather than redirected, so the reason arrives attached to
         # the submission that earned it — and so the choices survive being
         # refused, which redirecting would throw away.
-        halt(422, watches_screen(refusals)) if refusals.any?
+        halt(422, watch_new_screen(refusals)) if refusals.any?
 
-        settings.repos.watches.create(user_id: visitor_id, **@submitted.to_watch)
-        redirect(to("/watches"))
+        watch = settings.repos.watches.create(user_id: visitor_id, **@submitted.to_watch)
+        # Post-redirect-get: a refresh on the confirm page re-reads the same
+        # watch rather than creating a second one.
+        redirect(to("/watches/created?id=#{watch.id}"))
       end
 
-      # The main scenario, and deliberately the shortest route in the file: an
-      # hour is gone, and you want to be told when it is not. Everything the
-      # watch needs is already in the Cell that was tapped.
+      # The moment after a watch is created. The id in the URL lets a
+      # refresh re-render the same card rather than making a second watch,
+      # and belongs-to is checked so an id in somebody else's inbox does
+      # nothing.
+      get "/watches/created" do
+        require_visitor!
+
+        watch = settings.repos.watches.find(Integer(params[:id].to_s, exception: false))
+        redirect(to("/watches")) unless watch && watch.user_id == visitor_id
+
+        @summary = confirm_summary(watch)
+        erb :confirm, layout: :layout
+      end
+
+      # The main scenario, and deliberately the shortest route in the file:
+      # an hour is gone, and you want to be told when it is not. Everything
+      # the watch needs is already in the Cell that was tapped.
       post "/watches/dated" do
         require_visitor!
 
@@ -212,11 +389,13 @@ module Booking
         halt(422) unless tapped
 
         ask_about(tapped)
-        # Back to the page it was tapped on rather than to the list — the hour
-        # next to it is usually the next thing a person wants. The page is not
+
+        # Back to the Slots screen it was tapped on, so the newly-watched
+        # hour renders as "Watching" without a second click. The page is not
         # always the hour's own date: one after midnight is drawn under the
         # evening it belongs to.
-        redirect(to("/?date=#{requested_date(params[:date]) || horizon.first}"))
+        page_date = parse_date(params[:date]) || horizon.first
+        redirect(to("/date/#{page_date}/club/#{tapped.club_slug}"))
       end
 
       # Post-redirect-get throughout, so a watch is never paused twice by a

@@ -73,7 +73,7 @@ RSpec.describe Booking::Web::App do
     it "is not served the page itself" do
       get "/"
 
-      expect(last_response.body).not_to include('class="days"')
+      expect(last_response.body).not_to include('class="dates"')
     end
 
     # Telegram puts initData in the URL fragment, which never reaches us, so
@@ -97,7 +97,7 @@ RSpec.describe Booking::Web::App do
 
       get "/"
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to include('class="days"')
+      expect(last_response.body).to include('class="dates"')
     end
 
     it "refuses a payload signed with a different token" do
@@ -125,36 +125,90 @@ RSpec.describe Booking::Web::App do
     end
   end
 
-  describe "the grid" do
-    # Every hour the page invites a tap on. Reading them back is how "the grid
-    # offers exactly what the route accepts" gets checked from the outside.
-    def offered_hours
-      last_response.body.scan(/name="starts_at" value="([^"]+)"/).flatten.map { Time.iso8601(_1) }
-    end
-
-    it "shows a row for every enabled club" do
+  describe "the dates screen" do
+    it "offers every date across the booking horizon" do
       sign_in
       get "/"
+
+      horizon = (0...Booking::Config.horizon_days).map { (today + _1).to_s }
+      expect(horizon.all? { last_response.body.include?(_1) }).to be(true)
+    end
+
+    # There is no menu but Telegram's own, so the CTA on the home screen has
+    # to be the way in to making a watch.
+    it "reaches the create-a-watch form" do
+      sign_in
+      get "/"
+
+      expect(last_response.body).to include('href="/watches/new"')
+    end
+  end
+
+  describe "the clubs screen" do
+    it "lists every enabled club for that date" do
+      sign_in
+      get "/date/#{today}"
 
       expect(last_response.body).to include("Padel Club 2").and include("Kus Tba Padel")
     end
 
-    it "labels the hours of the day" do
+    it "sends on to a single club's slots" do
       sign_in
-      get "/"
+      get "/date/#{today}"
 
-      expect(last_response.body).to include("19").and include("08")
+      expect(last_response.body).to include(%(href="/date/#{today}/club/padel-club-2"))
+    end
+
+    # A hand-typed date outside the window would render a page nobody polled,
+    # which reads as a club that shut down rather than as a bad request.
+    it "falls back to the dates screen when handed a date beyond the horizon" do
+      sign_in
+      get "/date/#{today + 90}"
+
+      expect(last_response.status).to eq(302)
+      expect(last_response.location).to end_with("/")
+    end
+
+    it "falls back to the dates screen when handed something that is not a date" do
+      sign_in
+      get "/date/tuesday-ish"
+
+      expect(last_response.status).to eq(302)
+      expect(last_response.location).to end_with("/")
+    end
+  end
+
+  describe "the slots screen" do
+    # Every hour the page invites a tap on. Reading them back is how "the
+    # screen offers exactly what the route accepts" gets checked from the
+    # outside.
+    def offered_hours
+      last_response.body.scan(/name="starts_at" value="([^"]+)"/).flatten.map { Time.iso8601(_1) }
+    end
+
+    it "labels the hours the club sells" do
+      sign_in
+      get "/date/#{today + 1}/club/kus-tba-padel"
+
+      expect(last_response.body).to include("08:00").and include("19:00")
+    end
+
+    it "is 404 when the club is not among the enabled ones" do
+      sign_in
+      get "/date/#{today}/club/no-such-club"
+
+      expect(last_response.status).to eq(404)
     end
 
     describe "a free hour" do
-      let(:free_slots) { [slot(club: "kus-tba-padel", court: "any", at: "#{today} 19:00")] }
+      let(:free_slots) { [slot(club: "kus-tba-padel", court: "any", at: "#{today + 1} 19:00")] }
 
       # Tapping a free Cell has to leave the app entirely — we do not book, we
       # hand over. The link is marked so the client opens it through Telegram
       # rather than inside the mini app's own webview.
       it "links out to the club that owns it" do
         sign_in
-        get "/"
+        get "/date/#{today + 1}/club/kus-tba-padel"
 
         expect(last_response.body).to include("https://example.test/book")
         expect(last_response.body).to include("data-external")
@@ -164,16 +218,16 @@ RSpec.describe Booking::Web::App do
     describe "an hour with nothing free" do
       it "is drawn, but goes nowhere" do
         sign_in
-        get "/"
+        get "/date/#{today}/club/padel-club-2"
 
         expect(last_response.body).not_to include("data-external")
       end
 
-      # The main scenario, in one tap: you see the hour is gone everywhere, and
-      # you ask to be told when it is not — without leaving the screen.
+      # The main scenario, in one tap: you see the hour is gone, and you ask
+      # to be told when it is not — without leaving the screen.
       it "offers a watch on exactly that hour" do
         sign_in
-        get "/", date: (today + 1).to_s
+        get "/date/#{today + 1}/club/padel-club-2"
 
         expect(last_response.body).to include('action="/watches/dated"')
         expect(last_response.body).to include(Booking::Clock.local_to_utc("#{today + 1} 19:00").iso8601)
@@ -184,54 +238,19 @@ RSpec.describe Booking::Web::App do
       # with one that would refuse.
       it "offers nothing on an hour that has already started" do
         sign_in
-        get "/"
+        get "/date/#{today}/club/padel-club-2"
 
-        expect(last_response.body).to include('class="taken"')
         expect(offered_hours).to all(be > Booking::Clock.now)
       end
 
       # Kus Tba's day runs to 02:00, so the last page of the horizon draws
       # hours that fall on the day *after* it — which nobody has polled. The
       # button must not be offered where the tap would only be refused.
-      it "offers nothing on an hour beyond the horizon, even where the grid draws it" do
+      it "offers nothing on an hour beyond the horizon, even where the screen draws it" do
         sign_in
-        get "/", date: (today + Booking::Config.horizon_days - 1).to_s
+        get "/date/#{today + Booking::Config.horizon_days - 1}/club/kus-tba-padel"
 
-        expect(last_response.body).to include('class="taken"')
         expect(offered_hours.map { Booking::Clock.local_date(_1) }).to all(be <= today + Booking::Config.horizon_days - 1)
-      end
-    end
-
-    describe "moving between dates" do
-      it "offers every date across the booking horizon" do
-        sign_in
-        get "/"
-
-        horizon = (0...Booking::Config.horizon_days).map { (today + _1).to_s }
-        expect(horizon.all? { last_response.body.include?(_1) }).to be(true)
-      end
-
-      it "renders the date it was asked for" do
-        sign_in
-        get "/", date: (today + 2).to_s
-
-        expect(last_response.body).to include((today + 2).to_s)
-      end
-
-      # A hand-typed date outside the window would render a grid nobody polled,
-      # which reads as a club that shut down rather than as a bad request.
-      it "falls back to today when handed a date beyond the horizon" do
-        sign_in
-        get "/", date: (today + 90).to_s
-
-        expect(last_response.status).to eq(302)
-      end
-
-      it "falls back to today when handed something that is not a date" do
-        sign_in
-        get "/", date: "tuesday-ish"
-
-        expect(last_response.status).to eq(302)
       end
     end
   end
@@ -263,7 +282,8 @@ RSpec.describe Booking::Web::App do
 
     # There is no link to keep anywhere and no menu but Telegram's own, so the
     # two screens have to reach each other.
-    it "is reachable from the grid, and reaches it back" do
+    it "is reachable from the dates screen once a watch exists, and reaches it back" do
+      standing
       sign_in(user_id: 42)
 
       get "/"
@@ -273,15 +293,15 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include('href="/"')
     end
 
-    # The form is right there on the same screen, so an empty list must point
-    # at it rather than back at the chat, which has nothing to offer any more.
-    it "says so when there is nothing to show, and points at the form" do
+    # The form has its own screen now, so an empty list points at the button
+    # that opens it rather than at a form above.
+    it "says so when there is nothing to show, and points at the button" do
       sign_in(user_id: 42)
 
       get "/watches"
 
-      expect(last_response.body).to include("No watches yet")
-      expect(last_response.body).to include("the form above")
+      expect(last_response.body).to include(Booking::Messages.no_watches_in_app)
+      expect(last_response.body).to include('href="/watches/new"')
     end
 
     it "names the clubs a watch covers" do
@@ -586,7 +606,7 @@ RSpec.describe Booking::Web::App do
           post "/watches/dated",
                club_slug: "kus-tba-padel", starts_at: after_midnight.iso8601, date: (today + 1).to_s
 
-          expect(last_response.location).to end_with("/?date=#{today + 1}")
+          expect(last_response.location).to end_with("/date/#{today + 1}/club/kus-tba-padel")
         end
       end
     end
@@ -603,7 +623,7 @@ RSpec.describe Booking::Web::App do
       it "offers the watched clubs as choices rather than asking for a name" do
         sign_in(user_id: 42)
 
-        get "/watches"
+        get "/watches/new"
 
         expect(last_response.body).to include('value="padel-club-2"').and include('value="kus-tba-padel"')
         expect(last_response.body).to include("Padel Club 2").and include("Kus Tba Padel")
@@ -612,7 +632,7 @@ RSpec.describe Booking::Web::App do
       it "offers the weekdays and both ends of the range on the same form" do
         sign_in(user_id: 42)
 
-        get "/watches"
+        get "/watches/new"
 
         form = last_response.body[%r{<form class="new-watch".*?</form>}m].to_s
         expect(form).to include('name="weekdays[]"').and include("Mon").and include("Sun")
@@ -625,9 +645,24 @@ RSpec.describe Booking::Web::App do
         sign_in(user_id: 42)
 
         submit
-        follow_redirect!
+        # A successful submit lands on the confirm screen; the list is one
+        # more click on from there.
+        get "/watches"
 
         expect(listed).to include("Padel Club 2").and include("Mon, Fri · 19:00–22:00")
+      end
+
+      # The moment after the form is accepted. Post-redirect-get lands
+      # here rather than on the list itself so the affirmation arrives
+      # attached to what was just created.
+      it "lands on a confirmation screen naming what was created" do
+        sign_in(user_id: 42)
+
+        submit
+        follow_redirect!
+
+        expect(last_response.body).to include("Padel Club 2")
+        expect(last_response.body).to include("19:00–22:00")
       end
 
       # "Begins matching on the next tick" — `active` is the list the Matcher is
@@ -739,14 +774,6 @@ RSpec.describe Booking::Web::App do
           expect(last_response.body).to include("at least one club")
         end
 
-        it "still shows the watches that already exist" do
-          standing
-          sign_in(user_id: 42)
-
-          submit(weekdays: [])
-
-          expect(listed).to include("Padel Club 2")
-        end
       end
     end
   end

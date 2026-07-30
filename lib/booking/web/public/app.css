@@ -1,343 +1,546 @@
 /* Telegram publishes the current client theme as CSS variables, so following
    them is how the app stops looking like a website in a frame. The fallbacks
    are for a browser opened outside Telegram, which is mostly how it gets
-   debugged. */
+   debugged — the warm cream palette is where the design starts. */
 :root {
   color-scheme: light dark;
-  --bg: var(--tg-theme-bg-color, Canvas);
-  --fg: var(--tg-theme-text-color, CanvasText);
-  --muted: var(--tg-theme-hint-color, #7a7a7a);
-  --accent: var(--tg-theme-button-color, #2f7de1);
-  --on-accent: var(--tg-theme-button-text-color, #fff);
-  --danger: var(--tg-theme-destructive-text-color, #d7443e);
-  --line: color-mix(in srgb, var(--muted) 30%, transparent);
+  --bg: var(--tg-theme-bg-color, #f6f5f2);
+  --surface: var(--tg-theme-secondary-bg-color, #ffffff);
+  --fg: var(--tg-theme-text-color, #17160f);
+  --muted: var(--tg-theme-hint-color, #84817a);
+  --accent: var(--tg-theme-button-color, #0f9e69);
+  --on-accent: var(--tg-theme-button-text-color, #ffffff);
+  --danger: var(--tg-theme-destructive-text-color, #e5484d);
+  --line: rgba(0, 0, 0, 0.09);
+  --chip: #ecebe6;
 }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--tg-theme-bg-color, #101012);
+    --surface: var(--tg-theme-secondary-bg-color, #191a1d);
+    --fg: var(--tg-theme-text-color, #f1f0eb);
+    --muted: var(--tg-theme-hint-color, #8a8880);
+    --accent: var(--tg-theme-button-color, #22b97e);
+    --line: rgba(255, 255, 255, 0.10);
+    --chip: #23242a;
+  }
+}
+
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  padding: 1rem 0.75rem 2rem;
   background: var(--bg);
   color: var(--fg);
-  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font: 400 15px/1.5 "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
+
+input, select, button, a { font-family: inherit; }
+button { color: inherit; }
 
 .muted { color: var(--muted); }
 
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  overflow: hidden; clip-path: inset(50%);
+}
+
 .waiting {
-  display: grid;
-  place-items: center;
-  min-height: 60vh;
+  display: grid; place-items: center;
+  min-height: 60vh; color: var(--muted);
+}
+
+/* --- Sticky header. Same box on every screen, laid out one of two ways:
+       the home screen has brand + tagline + CTA; every other screen has a
+       back arrow and a title. --------------------------------------------- */
+.app-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding: calc(14px + env(safe-area-inset-top)) 20px 14px;
+}
+
+.app-head__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  font: 600 12px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.tagline {
+  margin: 10px 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+  max-width: 30ch;
+  text-wrap: pretty;
+}
+
+.app-head--sub {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: calc(12px + env(safe-area-inset-top)) 20px 14px;
+}
+
+.back {
+  color: var(--fg);
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 2px;
+  text-decoration: none;
+}
+.back:hover, .back:focus-visible { color: var(--accent); }
+
+.app-head__title { display: flex; flex-direction: column; gap: 3px; }
+.app-head__title-solo { font: 600 18px/1.1 "IBM Plex Sans", sans-serif; letter-spacing: -0.015em; }
+
+.app-head__weekday {
+  font: 500 10.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px; height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
+.app-head__date {
+  font: 600 19px/1.1 "IBM Plex Sans", sans-serif;
+  letter-spacing: -0.015em;
 }
 
-.tabs {
+.app-head__club {
+  font: 600 17px/1.15 "IBM Plex Sans", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.app-head__sub {
+  font: 400 11.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* --- Primary and secondary buttons. ---------------------------------- */
+.cta {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 600 15px/1 "IBM Plex Sans", sans-serif;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.cta:active { transform: scale(0.985); }
+
+.watches-link {
+  margin-top: 10px;
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.875rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px;
+  color: var(--muted);
+  font: 500 12.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  text-decoration: none;
+}
+.watches-link:hover, .watches-link:focus-visible { color: var(--fg); }
+
+.footer-cta { padding: 20px; }
+
+/* --- Vertical list shared across the three drill-down screens. Rows are
+       either <a>s (dates, clubs) or <li>s (slots); the padding and divider
+       are the same either way, so the eye reads them as one list. ------- */
+.dates, .clubs, .slots {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 40px;
+}
+
+.date-row, .club-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 20px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  text-align: left;
+  text-decoration: none;
+}
+.date-row:hover, .date-row:focus-visible,
+.club-row:hover, .club-row:focus-visible { background: var(--chip); }
+
+.date-row.is-empty, .club-row.is-empty { opacity: 0.45; }
+
+/* --- Dates screen ---------------------------------------------------- */
+.date-row__day { display: flex; flex-direction: column; gap: 4px; }
+
+.date-row__weekday {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 500 10.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.badge {
+  font: 500 9.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 3px 5px 2px;
+}
+
+.date-row__date {
+  font: 600 21px/1.1 "IBM Plex Sans", sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.date-row__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+}
+
+.date-row__headline {
+  font: 500 13px/1 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--accent);
+}
+.date-row__headline.is-empty { color: var(--muted); }
+
+.date-row__sub {
+  font: 400 12px/1 "IBM Plex Sans", sans-serif;
+  color: var(--muted);
+}
+
+/* --- Clubs screen ---------------------------------------------------- */
+.club-row__body { display: flex; flex-direction: column; gap: 5px; }
+.club-row__name { font: 600 16px/1.2 "IBM Plex Sans", sans-serif; }
+.club-row__sub {
+  font: 400 12.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--accent);
+}
+.club-row.is-empty .club-row__sub { color: var(--muted); }
+.chev { font-size: 19px; color: var(--muted); }
+
+/* --- Slots screen ---------------------------------------------------- */
+.slots { padding-top: 4px; }
+
+.slot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 20px;
   border-bottom: 1px solid var(--line);
 }
 
-.tab {
-  padding: 0 0 0.5rem;
+.slot-row__body { display: flex; flex-direction: column; gap: 4px; }
+
+.slot-row.is-taken .slot-row__body { opacity: 0.55; }
+
+.slot-row__time {
+  font: 500 17px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.slot-row__state {
+  font: 400 11px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
   color: var(--muted);
+}
+.slot-row.is-free .slot-row__state { color: var(--accent); }
+
+.slot-row__book {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-radius: 9px;
+  padding: 9px 18px;
+  font: 600 13.5px/1 "IBM Plex Sans", sans-serif;
   text-decoration: none;
-  font-size: 0.9375rem;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-}
-
-.tab.is-on {
-  color: var(--fg);
-  border-bottom-color: var(--accent);
-}
-
-/* Days scroll sideways rather than wrapping, so the grid below never jumps
-   down the screen as the week changes length. */
-.days {
-  display: flex;
-  gap: 0.375rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  scrollbar-width: none;
-}
-.days::-webkit-scrollbar { display: none; }
-
-.day {
-  flex: 0 0 auto;
-  padding: 0.375rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  color: var(--fg);
-  text-decoration: none;
-  font-size: 0.875rem;
   white-space: nowrap;
 }
+.slot-row__book:active { transform: scale(0.97); }
 
-.day.is-on {
+.slot-row form { margin: 0; }
+.slot-row__watch {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--fg);
+  border-radius: 9px;
+  padding: 8px 15px;
+  font: 500 13px/1 "IBM Plex Sans", sans-serif;
+  cursor: pointer;
+}
+.slot-row__watch:active { transform: scale(0.97); }
+.slot-row__watch.is-on {
+  border-color: transparent;
+  background: var(--chip);
+  color: var(--muted);
+  cursor: default;
+}
+
+/* --- New watch form -------------------------------------------------- */
+.refusals {
+  margin: 16px 20px 0;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  font-size: 13px;
+  list-style: none;
+}
+.refusals li + li { margin-top: 6px; }
+
+.new-watch {
+  padding: 22px 20px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.new-watch fieldset:not(.range) {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.new-watch legend {
+  flex-basis: 100%;
+  padding: 0;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font: 500 10.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* The checkbox itself is hidden and the label becomes the target — a 16px
+   box is not a thumb-sized thing to hit on a phone. */
+.choice {
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font: 500 13px/1 "IBM Plex Sans", sans-serif;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+}
+.choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.choice:has(input:checked) {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
 }
-
-/* The table is wider than a phone on purpose — eighteen hours will not fit —
-   so it scrolls inside its own box while the page itself never does. */
-.grid-scroll {
-  overflow-x: auto;
-  margin-top: 0.75rem;
-  -webkit-overflow-scrolling: touch;
+.choice:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-.grid {
-  border-collapse: collapse;
-  font-size: 0.8125rem;
-}
-
-.grid th,
-.grid td {
-  padding: 0.25rem;
-  text-align: center;
-  min-width: 2.25rem;
-}
-
-.grid thead th {
-  color: var(--muted);
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-
-/* The club column stays put while the hours scroll under it, otherwise you
-   lose track of which row you are reading. */
-.grid th.club {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  background: var(--bg);
-  text-align: left;
-  font-weight: 500;
-  white-space: nowrap;
-  padding-right: 0.75rem;
-  min-width: 0;
-}
-
-.grid td.free a {
-  display: block;
-  padding: 0.25rem 0;
-  border-radius: 0.375rem;
-  background: var(--accent);
-  color: var(--on-accent);
-  text-decoration: none;
-  font-variant-numeric: tabular-nums;
-}
-
-/* A taken hour is a button now — tapping it asks to be told when it frees up.
-   It has to keep reading as a dot rather than as a control, or eighteen
-   columns of chrome would drown the free hours the eye is actually hunting. */
-.grid td.taken { color: var(--muted); }
-.grid td.taken form { margin: 0; }
-
-.grid td.taken button {
-  display: block;
-  width: 100%;
-  padding: 0.25rem 0;
+.new-watch .range {
+  padding: 0;
   border: 0;
-  border-radius: 0.375rem;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 10px;
+}
+.new-watch .range legend {
+  grid-column: 1 / -1;
+  margin-bottom: 6px;
+}
+.new-watch .range label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font: 500 10.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.new-watch .range .dash {
+  color: var(--muted);
+  align-self: end;
+  padding-bottom: 13px;
+  font: 400 14px/1 "IBM Plex Mono", ui-monospace, monospace;
 }
 
-.grid td.taken button:hover,
-.grid td.taken button:focus-visible {
-  background: color-mix(in srgb, var(--muted) 20%, transparent);
+.new-watch select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
   color: var(--fg);
+  font: 500 15px/1 "IBM Plex Mono", ui-monospace, monospace;
 }
 
-/* A club that is shut simply has nothing here — deliberately not styled as
-   taken, because nobody took it. */
-.grid td.shut { color: transparent; }
+.new-watch .cta { margin-top: 4px; }
 
-.legend {
-  margin-top: 1rem;
-  font-size: 0.8125rem;
-}
-
-.swatch {
-  display: inline-block;
-  min-width: 1.25rem;
+.disclaimer {
+  margin: 0;
   text-align: center;
-  border-radius: 0.25rem;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+  text-wrap: pretty;
 }
 
-.swatch.free {
+/* --- Confirm screen -------------------------------------------------- */
+.confirm {
+  padding: calc(24px + env(safe-area-inset-top)) 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.confirm__card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.confirm__tick {
+  width: 34px; height: 34px;
+  border-radius: 999px;
   background: var(--accent);
   color: var(--on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 600 16px/1 "IBM Plex Sans", sans-serif;
+}
+.confirm__lede {
+  margin: 0;
+  font: 600 20px/1.25 "IBM Plex Sans", sans-serif;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+.confirm__sub {
+  margin: 0;
+  color: var(--muted);
+  font: 400 13px/1.5 "IBM Plex Mono", ui-monospace, monospace;
+  text-wrap: pretty;
 }
 
+.btn-secondary {
+  display: block;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--fg);
+  text-align: center;
+  text-decoration: none;
+  font: 500 14px/1 "IBM Plex Sans", sans-serif;
+}
+.btn-secondary:hover, .btn-secondary:focus-visible { border-color: var(--fg); }
+
+.btn-tertiary {
+  display: block;
+  padding: 6px;
+  color: var(--muted);
+  text-align: center;
+  text-decoration: none;
+  font: 500 13px/1 "IBM Plex Sans", sans-serif;
+}
+.btn-tertiary:hover, .btn-tertiary:focus-visible { color: var(--fg); }
+
+/* --- Manage / Watches list ------------------------------------------ */
 .watches {
   list-style: none;
   margin: 0;
   padding: 0;
 }
-
 .watch {
-  padding: 0.75rem 0;
+  padding: 15px 20px;
   border-bottom: 1px solid var(--line);
 }
+.watch__body p { margin: 0 0 5px; }
 
-.watch p { margin: 0 0 0.25rem; }
-
-/* A paused watch is still there and still yours, so it fades rather than
-   disappears. */
 .watch.is-paused .clubs,
 .watch.is-paused .when { opacity: 0.55; }
 
-/* Standing or Dated at a glance, before the line under it is read. */
 .kind {
   display: inline-block;
-  margin-right: 0.375rem;
-  padding: 0.0625rem 0.375rem;
+  margin-right: 6px;
+  padding: 2px 6px;
   border-radius: 999px;
-  font-size: 0.6875rem;
+  font: 500 9.5px/1 "IBM Plex Mono", ui-monospace, monospace;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  vertical-align: 0.0625rem;
+  letter-spacing: 0.11em;
+  vertical-align: 2px;
   border: 1px solid var(--line);
   color: var(--muted);
 }
-
 .kind.dated {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--on-accent);
 }
 
-.actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+.watch .clubs { font: 600 15px/1.3 "IBM Plex Sans", sans-serif; }
+.watch .when {
+  font: 400 12px/1.35 "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--muted);
 }
 
-.actions button {
-  padding: 0.3125rem 0.875rem;
-  border-radius: 999px;
+.watch .actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.watch .actions form { margin: 0; }
+.watch .actions button {
   border: 1px solid var(--line);
   background: transparent;
   color: var(--fg);
-  font: inherit;
-  font-size: 0.8125rem;
+  border-radius: 9px;
+  padding: 8px 13px;
+  font: 500 12.5px/1 "IBM Plex Sans", sans-serif;
   cursor: pointer;
 }
-
-/* Deleting is the one action that cannot be undone from this screen. */
-.actions button.danger { color: var(--danger); }
-
-.empty { margin-top: 1.5rem; }
-
-.new-watch {
-  margin: 0 0 1.5rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--line);
-}
-
-.new-watch fieldset {
-  margin: 0 0 0.875rem;
-  padding: 0;
-  border: 0;
-}
-
-.new-watch legend {
-  /* flex-basis so the label keeps its own line once the fieldset below turns
-     into a flex row. */
-  flex-basis: 100%;
-  padding: 0;
-  margin-bottom: 0.5rem;
-  color: var(--muted);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-/* Wraps rather than scrolls: unlike the week, every choice here has to be
-   visible at once to be picked from. */
-.new-watch fieldset:not(.range) {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-}
-
-/* The checkbox itself is hidden and the label becomes the target — a 16px box
-   is not a thumb-sized thing to hit on a phone. */
-.choice {
-  padding: 0.375rem 0.75rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-size: 0.875rem;
-  cursor: pointer;
-  user-select: none;
-}
-
-.choice input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.choice:has(input:checked) {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
-}
-
-/* Keyboard users get nothing from a hidden checkbox otherwise. */
-.choice:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-.new-watch .range {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: baseline;
-}
-
-.new-watch .range label {
-  color: var(--muted);
-  font-size: 0.875rem;
-}
-
-.new-watch select {
-  margin-left: 0.25rem;
-  padding: 0.3125rem 0.5rem;
-  border: 1px solid var(--line);
-  border-radius: 0.5rem;
-  background: var(--bg);
-  color: var(--fg);
-  font: inherit;
-  font-size: 0.875rem;
-}
-
-.new-watch > button {
-  padding: 0.5rem 1.25rem;
-  border: 0;
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--on-accent);
-  font: inherit;
-  font-size: 0.9375rem;
-  cursor: pointer;
-}
-
-.refusals {
-  margin: 0 0 1rem;
-  padding: 0.625rem 0.875rem 0.625rem 2rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--danger);
+.watch .actions button.danger { color: var(--muted); }
+.watch .actions button.danger:hover,
+.watch .actions button.danger:focus-visible {
   color: var(--danger);
-  font-size: 0.875rem;
+  border-color: var(--danger);
+}
+
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--muted);
 }

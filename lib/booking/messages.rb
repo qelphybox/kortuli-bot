@@ -68,7 +68,8 @@ module Booking
     # fixed list — but a reason is still owed.
     def pick_hours_on_offer = "Pick both hours from the list."
 
-    # The form is on the same screen, so this points up at it.
-    def no_watches_in_app = "No watches yet — the form above makes one."
+    # The form has its own screen now, so this points down at the button
+    # that opens it.
+    def no_watches_in_app = "No watches yet — the button below makes one."
   end
 end
