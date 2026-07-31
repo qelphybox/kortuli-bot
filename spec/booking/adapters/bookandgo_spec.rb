@@ -17,8 +17,12 @@ class FakeBookandgoHttp
   end
 end
 
+# The source keeps offering hours that have already gone, so every example
+# has to say when "now" is.
+FakeClock = Struct.new(:now)
+
 RSpec.describe Booking::Adapters::Bookandgo do
-  subject(:adapter) { described_class.new(club, http:) }
+  subject(:adapter) { described_class.new(club, http:, clock: FakeClock.new(before_the_day)) }
 
   let(:http) { FakeBookandgoHttp.new }
   let(:club) do
@@ -40,7 +44,9 @@ RSpec.describe Booking::Adapters::Bookandgo do
   # example asks for it.
   let(:before_the_day) { Booking::Clock.local_to_utc("2026-08-01 12:00") }
 
-  def fetch(range = one_day, now: before_the_day) = adapter.fetch(range, now:)
+  def fetch(range = one_day, now: before_the_day)
+    described_class.new(club, http:, clock: FakeClock.new(now)).fetch(range)
+  end
 
   # Krtsanisi's two recorded courts offer 00:00, 08:00, 09:00, 10:00 and
   # 08:00, 11:00 on the hour.
@@ -74,10 +80,11 @@ RSpec.describe Booking::Adapters::Bookandgo do
   # The same court and hour appears three times over, once per bookable
   # duration. Emitting all of them would hand the differ three overlapping
   # slots for one hour.
-  it "takes the hour-long booking and ignores the 90- and 120-minute rows" do
+  it "takes the hour-long booking and ignores the 90- and 120-minute ones" do
     expect(fetch.map(&:duration_minutes).uniq).to eq([60])
-    # 13:00 exists only on the 90-minute row of the recorded day.
-    expect(fetch.map { _1.local_starts_at.hour }).not_to include(13)
+    # On the recorded day 13:00 is offered only at 90 minutes, and 15:00 and
+    # 16:00 only at 120 — all on a court whose hour-long row we do read.
+    expect(fetch.map { _1.local_starts_at.hour }).not_to include(13, 15, 16)
   end
 
   # A Slot is one bookable *hour*, and the Grid draws one column per hour, so a
@@ -158,5 +165,12 @@ RSpec.describe Booking::Adapters::Bookandgo do
     bare = Booking::Club.new(slug: "x", name: "X", adapter: "bookandgo", settings: {})
 
     expect { described_class.new(bare, http:) }.to raise_error(KeyError)
+  end
+
+  # The documented contract is `fetch(date_range)`; the clock is a constructor
+  # dependency so the poller keeps calling adapters the one documented way.
+  it "reads the wall clock itself when nobody supplies one" do
+    expect(described_class.new(club, http:).fetch(one_day))
+      .to eq(fetch(now: Booking::Clock.now))
   end
 end

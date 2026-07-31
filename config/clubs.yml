@@ -21,7 +21,7 @@
       to: "24:00"
     # Present only for a court-level club — its source names the individual
     # court, so a cell can say how many of these are free. Its absence is what
-    # makes the other three hour-level.
+    # makes a club hour-level.
     courts: 4
     # Only needed by adapters that identify courts by name; Reservio hands out
     # stable ids, so this stays empty here.
@@ -100,15 +100,21 @@
     location_id: 163
     booking_url: "https://app.padelbade.com/"
     price: "80 GEL"
-    # Observed rather than published: the platform reports no opening hours, so
-    # this is the span of starts the feed offers on a day far enough out that
-    # nothing is booked yet. Last start 00:00, so the club shuts at 01:00.
+    # Declared, as every club's hours are — but derived from an observation
+    # rather than a published schedule, because the platform publishes none
+    # (a timing's `start_time`/`end_time` are a flat 00:00–24:00 and say
+    # nothing about when the club is open). This is the span of starts the
+    # feed offers on a date far enough out that nothing is booked yet:
+    # last start 00:00, so the club shuts at 01:00.
     opening_hours:
       from: "08:00"
       to: "01:00"
-    # The shortest per-court `app_bookable_days_in_future` at this location;
-    # three of the five courts stop at 22 while two run to 29–30.
-    max_days: 22
+    # The longest per-court `app_bookable_days_in_future` here: two courts run
+    # to 29–30 while the other three stop at 22. Capping at the shortest would
+    # never poll the best courts' last week. Overshooting costs nothing —
+    # past a court's own window the feed returns an empty list of starts
+    # rather than phantom free ones. Counts today, so 30 reaches D+29.
+    max_days: 30
     # The source names its courts, so a cell here can say how many of the five
     # are free.
     courts: 5
@@ -124,10 +130,13 @@
     location_id: 141
     booking_url: "https://app.padelbade.com/"
     price: "80 GEL"
-    # Offers a 01:00 start, so this one runs an hour later than Krtsanisi.
+    # Offers a 01:00 start, so this one is declared an hour later than
+    # Krtsanisi.
     opening_hours:
       from: "08:00"
       to: "02:00"
-    max_days: 14
+    # `app_bookable_days_in_future` is 14 for both courts here, and the count
+    # includes today.
+    max_days: 15
     courts: 2
     court_aliases: {}

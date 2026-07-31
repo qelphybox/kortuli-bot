@@ -254,12 +254,13 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **Three sources, four clubs.** Padel Club 2 (Reservio), Kus Tba Padel
-  (`turtle-booking`) and GymBreeze, whose two locations are configured as two
-  clubs because they sit at opposite ends of town. The concept also named
-  `tbilisipadel.com`, but it runs BookingPress, which needs its own adapter and
-  its own reconnaissance — neither is done. Everything above the adapter is
-  club-agnostic, so that is a new file in
+- **Four sources, six clubs.** Padel Club 2 (Reservio), Kus Tba Padel
+  (`turtle-booking`), GymBreeze and Padelbade (Book & Go) — the last two each
+  run two locations, configured as two clubs apiece because they sit at
+  opposite ends of town. `tbilisipadel.com` runs BookingPress, which needs its
+  own adapter; the reconnaissance is done and lives in `docs/research/`, and
+  the remaining Tbilisi clubs are planned in `docs/coverage-plan.md`.
+  Everything above the adapter is club-agnostic, so that is a new file in
   [lib/booking/adapters/](lib/booking/adapters/) and a line in `REGISTRY`.
 - **Kus Tba and GymBreeze are watched by the hour, not by the court.** Both
   report whether *some* court is free that hour, so a notification says "a

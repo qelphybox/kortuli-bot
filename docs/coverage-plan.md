@@ -9,8 +9,9 @@ directory listing.
 
 ## Where we are
 
-Four clubs, 24 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
-GymBreeze Ninoshvili, GymBreeze Radio City.
+Six clubs, 31 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
+GymBreeze Ninoshvili, GymBreeze Radio City, and — since #10 — Padelbade
+Krtsanisi and Padelbade Dighomi.
 
 The five adapters below take that to **twelve clubs and 47 courts** without
 touching a single club that has asked not to be read.
@@ -38,8 +39,8 @@ survey is complete — sapadelo omits Padel Club 2, which we already watch.
 | Kus Tba | 8 | kustba | watched |
 | Padel Club 2 | 4 | reservio | watched |
 | GymBreeze Radio City | 3 | gymbreeze | watched |
-| Padelbade Krtsanisi | 5 | Book & Go | **wave 1** |
-| Padelbade Dighomi | 2 | Book & Go | **wave 1** |
+| Padelbade Krtsanisi | 5 | Book & Go | watched |
+| Padelbade Dighomi | 2 | Book & Go | watched |
 | Tbilisi Padel Didi Dighomi | 5 | BookingPress | **wave 2** |
 | Tbilisi Padel Mtatsminda | 1 | BookingPress | **wave 2** |
 | Tbilisi Padel Ilia's Garden | 1 | BookingPress | **wave 2** |
@@ -97,13 +98,15 @@ Independent within a wave; ordered by courts-per-unit-of-work.
 
 ### Wave 1 — no foundations needed
 
-- **Book & Go** → Padelbade Krtsanisi + Dighomi, **7 courts**.
+- ~~**Book & Go** → Padelbade Krtsanisi + Dighomi, **7 courts**.~~ **Done, #10.**
   `GET https://api.bookandgo.app/api/v1/apps/58/court-bookings?date=`,
   unauthenticated, free slots only, per court, `Asia/Tbilisi` declared in the
   payload. One request returns all three Georgian locations at once, so two
   clubs cost one endpoint. The server does **not** filter past hours — the
   adapter must. Horizon 14 days for Dighomi, 22–30 for Krtsanisi.
-  *Best ratio in the whole plan.*
+  *Best ratio in the whole plan.* Half-hour starts turned out to be half the
+  inventory and are **not** watched — the Grid matches Cells on an exact hourly
+  `starts_at`, so watching them is a Grid change first. Folded into wave 4.
 - **Lemans Padel** → **4 courts**. `GET https://booking.lemanspadel.ge/api/availability?date=&duration=60`,
   no auth, explicit `available` boolean plus an `available_courts` count, and
   `/api/availability/courts` names which are free. No server-side horizon, so
