@@ -86,3 +86,48 @@
       to: "01:00"
     max_days: 8
     court_aliases: {}
+
+# Padelbade runs on Book & Go. One request returns every club of the tenant, so
+# these two share an adapter and are told apart by location_id — the same shape
+# as the two GymBreeze sites. The tenant also holds Padelbade Rustavi (location
+# 142), deliberately left out: another city, and the app has no notion of one.
+- slug: padelbade-krtsanisi
+  name: Padelbade Krtsanisi
+  adapter: bookandgo
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    location_id: 163
+    booking_url: "https://app.padelbade.com/"
+    price: "80 GEL"
+    # Observed rather than published: the platform reports no opening hours, so
+    # this is the span of starts the feed offers on a day far enough out that
+    # nothing is booked yet. Last start 00:00, so the club shuts at 01:00.
+    opening_hours:
+      from: "08:00"
+      to: "01:00"
+    # The shortest per-court `app_bookable_days_in_future` at this location;
+    # three of the five courts stop at 22 while two run to 29–30.
+    max_days: 22
+    # The source names its courts, so a cell here can say how many of the five
+    # are free.
+    courts: 5
+    # Court ids are stable integers, so there is nothing to alias.
+    court_aliases: {}
+
+- slug: padelbade-dighomi
+  name: Padelbade Dighomi
+  adapter: bookandgo
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    location_id: 141
+    booking_url: "https://app.padelbade.com/"
+    price: "80 GEL"
+    # Offers a 01:00 start, so this one runs an hour later than Krtsanisi.
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
+    max_days: 14
+    courts: 2
+    court_aliases: {}

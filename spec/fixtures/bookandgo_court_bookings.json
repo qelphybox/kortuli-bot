@@ -1,0 +1,186 @@
+{
+  "status": "success",
+  "message": "Court bookings fetched successfully",
+  "data": {
+    "bookings": [
+      {
+        "id": 559,
+        "duration": 60,
+        "price": 80,
+        "is_open_match": true,
+        "maximum_capacity": 4,
+        "bookabledays": [],
+        "sport": { "id": 347, "sport_name": "Padel", "is_open_match": false },
+        "location": {
+          "id": 163,
+          "currency": "GEL",
+          "location_name": "Tbilisi, krtsanisi ",
+          "google_maps_url": "https://maps.app.goo.gl/example",
+          "courts": [
+            {
+              "id": 703,
+              "court_name": "Blue 1",
+              "maximum_capacity": 4,
+              "timings": [
+                {
+                  "date": "2026-08-02",
+                  "start_time": "00:00:00",
+                  "end_time": "24:00:00",
+                  "available_time_slots": ["00:00:00", "08:00:00", "08:30:00", "09:00:00", "09:30:00", "10:00:00"],
+                  "mine_time_slots": []
+                }
+              ]
+            },
+            {
+              "id": 704,
+              "court_name": "Blue 2",
+              "maximum_capacity": 4,
+              "timings": [
+                {
+                  "date": "2026-08-02",
+                  "start_time": "00:00:00",
+                  "end_time": "24:00:00",
+                  "available_time_slots": ["08:00:00", "08:30:00", "11:00:00"],
+                  "mine_time_slots": []
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 560,
+        "duration": 90,
+        "price": 120,
+        "is_open_match": true,
+        "maximum_capacity": 4,
+        "bookabledays": [],
+        "sport": { "id": 347, "sport_name": "Padel", "is_open_match": false },
+        "location": {
+          "id": 163,
+          "currency": "GEL",
+          "location_name": "Tbilisi, krtsanisi ",
+          "google_maps_url": "https://maps.app.goo.gl/example",
+          "courts": [
+            {
+              "id": 703,
+              "court_name": "Blue 1",
+              "maximum_capacity": 4,
+              "timings": [
+                {
+                  "date": "2026-08-02",
+                  "start_time": "00:00:00",
+                  "end_time": "24:00:00",
+                  "available_time_slots": ["13:00:00", "13:30:00", "14:00:00"],
+                  "mine_time_slots": []
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 355,
+        "duration": 60,
+        "price": 80,
+        "is_open_match": true,
+        "maximum_capacity": 4,
+        "bookabledays": [],
+        "sport": { "id": 227, "sport_name": "Padel", "is_open_match": false },
+        "location": {
+          "id": 141,
+          "currency": "GEL",
+          "location_name": "Tbilisi, Dighomi",
+          "google_maps_url": "https://maps.app.goo.gl/example",
+          "courts": [
+            {
+              "id": 480,
+              "court_name": "Brick Red (Road Side)",
+              "maximum_capacity": 4,
+              "timings": [
+                {
+                  "date": "2026-08-02",
+                  "start_time": "00:00:00",
+                  "end_time": "24:00:00",
+                  "available_time_slots": ["00:00:00", "00:30:00", "01:00:00", "08:00:00"],
+                  "mine_time_slots": []
+                }
+              ]
+            },
+            {
+              "id": 481,
+              "court_name": "Green (Wall Side)",
+              "maximum_capacity": 4,
+              "timings": [
+                {
+                  "date": "2026-08-02",
+                  "start_time": "00:00:00",
+                  "end_time": "24:00:00",
+                  "available_time_slots": ["09:00:00"],
+                  "mine_time_slots": []
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 365,
+        "duration": 60,
+        "price": 60,
+        "is_open_match": true,
+        "maximum_capacity": 4,
+        "bookabledays": [],
+        "sport": { "id": 232, "sport_name": "Padel", "is_open_match": false },
+        "location": {
+          "id": 142,
+          "currency": "GEL",
+          "location_name": "Rustavi, Crocobet Courts",
+          "google_maps_url": "https://maps.app.goo.gl/example",
+          "courts": [
+            {
+              "id": 486,
+              "court_name": "Crocobet.com Court",
+              "maximum_capacity": 4,
+              "timings": [
+                {
+                  "date": "2026-08-02",
+                  "start_time": "00:00:00",
+                  "end_time": "24:00:00",
+                  "available_time_slots": ["08:00:00", "09:00:00", "10:00:00"],
+                  "mine_time_slots": []
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "locations_window": {
+      "141": {
+        "is_open": true,
+        "next_open_at_utc": null,
+        "club_timezone": "Asia/Tbilisi",
+        "open_time_local": null,
+        "locked_date": null,
+        "rolling_release": false
+      },
+      "142": {
+        "is_open": true,
+        "next_open_at_utc": null,
+        "club_timezone": "Asia/Tbilisi",
+        "open_time_local": null,
+        "locked_date": null,
+        "rolling_release": false
+      },
+      "163": {
+        "is_open": true,
+        "next_open_at_utc": null,
+        "club_timezone": "Asia/Tbilisi",
+        "open_time_local": null,
+        "locked_date": null,
+        "rolling_release": false
+      }
+    }
+  }
+}
