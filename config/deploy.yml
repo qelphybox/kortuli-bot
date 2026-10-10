@@ -16,17 +16,17 @@ primary_role: web
 servers:
   bot:
     hosts:
-      - 204.168.193.130
+      - 89.167.11.249
     cmd: bundle exec bin/bot
     proxy: false
   poller:
     hosts:
-      - 204.168.193.130
+      - 89.167.11.249
     cmd: bundle exec bin/poller
     proxy: false
   web:
     hosts:
-      - 204.168.193.130
+      - 89.167.11.249
     cmd: bundle exec bin/web
 
 # kamal-proxy terminates TLS and obtains the certificate over HTTP-01, which is

@@ -133,8 +133,9 @@ Docker on a VPS, driven by [Kamal](https://kamal-deploy.org). The config is
 
 Every push to `main` deploys itself:
 [.github/workflows/deploy.yml](.github/workflows/deploy.yml) runs the specs and
-then `kamal deploy` from a runner. It can also be started by hand from the
-Actions tab.
+then `kamal setup` from a runner — `deploy` plus a bootstrap that installs
+Docker only where it is missing, so a fresh server needs nothing but the SSH
+key. It can also be started by hand from the Actions tab.
 
 [.kamal/secrets](.kamal/secrets) is committed and holds no values — only the
 names Kamal reads, each taken from the environment. The workflow fills that
@@ -147,11 +148,11 @@ environment from these repository secrets:
 | `CONTACT_EMAIL` | goes into the poller's User-Agent |
 | `SESSION_SECRET` | signs the mini app's cookies; `openssl rand -hex 32` |
 | `SSH_PRIVATE_KEY` | a key the server accepts for `root` |
-| `SSH_KNOWN_HOSTS` | the server's host key, pinned: `ssh-keyscan 204.168.193.130` |
+| `SSH_KNOWN_HOSTS` | the server's host key, pinned: `ssh-keyscan 89.167.11.249` |
 
 From a laptop it is the same command, with those four exported in your shell
 instead (the SSH pair is just your own agent and `known_hosts`). First time on
-a fresh server:
+a fresh server, from a laptop:
 
 ```bash
 bundle exec kamal setup

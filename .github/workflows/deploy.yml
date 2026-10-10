@@ -85,4 +85,8 @@ jobs:
           printf '%s\n' "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
-      - run: bundle exec kamal deploy
+      # `setup` rather than `deploy`: it is `deploy` preceded by a bootstrap
+      # that installs Docker only where it is missing, so on a server that
+      # already has it the extra cost is one `docker -v`. In exchange a fresh
+      # server needs nothing done to it by hand beyond the SSH key.
+      - run: bundle exec kamal setup
