@@ -139,20 +139,21 @@ key. It can also be started by hand from the Actions tab.
 
 [.kamal/secrets](.kamal/secrets) is committed and holds no values — only the
 names Kamal reads, each taken from the environment. The workflow fills that
-environment from these repository secrets:
+environment from these repository secrets. The registry needs none: the image
+goes to GHCR under the run's own `GITHUB_TOKEN`.
 
 | Secret | What it is |
 | --- | --- |
-| `KAMAL_REGISTRY_PASSWORD` | GitHub PAT with **`write:packages`**; the one `gh auth` holds lacks that scope |
 | `TELEGRAM_TOKEN` | from @BotFather |
 | `CONTACT_EMAIL` | goes into the poller's User-Agent |
 | `SESSION_SECRET` | signs the mini app's cookies; `openssl rand -hex 32` |
 | `SSH_PRIVATE_KEY` | a key the server accepts for `root` |
 | `SSH_KNOWN_HOSTS` | the server's host key, pinned: `ssh-keyscan 89.167.11.249` |
 
-From a laptop it is the same command, with those four exported in your shell
-instead (the SSH pair is just your own agent and `known_hosts`). First time on
-a fresh server, from a laptop:
+From a laptop it is the same command, with those three exported in your shell
+instead, plus `KAMAL_REGISTRY_PASSWORD` — a GitHub PAT with **`write:packages`**,
+which the token `gh auth` holds lacks. The SSH pair is just your own agent and
+`known_hosts`. First time on a fresh server, from a laptop:
 
 ```bash
 bundle exec kamal setup

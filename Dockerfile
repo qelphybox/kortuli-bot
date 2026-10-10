@@ -42,6 +42,10 @@ RUN groupadd --system --gid 1000 booking && \
 
 USER booking:booking
 
+# Ties the GHCR package to this repository, which is what lets the workflow's
+# GITHUB_TOKEN push to it instead of a personal token.
+LABEL org.opencontainers.image.source="https://github.com/qelphybox/kortuli-bot"
+
 EXPOSE 8080
 
 # No HEALTHCHECK on purpose. The mini app answers /up and kamal-proxy asks it,

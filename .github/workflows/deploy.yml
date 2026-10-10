@@ -38,9 +38,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 20
+    # The run's own token pushes to GHCR, so there is no PAT to mint, store or
+    # rotate. Kamal also logs the server in with it to pull; the token dies
+    # with the job, which is fine because the pull happens inside the job.
+    permissions:
+      contents: read
+      packages: write
     # The names .kamal/secrets reads from the environment.
     env:
-      KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+      KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
       SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
@@ -54,7 +60,7 @@ jobs:
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           missing=0
-          for name in KAMAL_REGISTRY_PASSWORD TELEGRAM_TOKEN CONTACT_EMAIL SESSION_SECRET SSH_PRIVATE_KEY SSH_KNOWN_HOSTS; do
+          for name in TELEGRAM_TOKEN CONTACT_EMAIL SESSION_SECRET SSH_PRIVATE_KEY SSH_KNOWN_HOSTS; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret $name is not set"
               missing=1
