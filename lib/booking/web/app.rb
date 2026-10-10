@@ -61,6 +61,24 @@ module Booking
         # ADR-0002.
         def feedback_url = "https://t.me/#{settings.bot_username}?start=feedback"
 
+        def bot_url = "https://t.me/#{settings.bot_username}"
+
+        # Telegram's own share sheet: pick a chat, and the text lands in its
+        # input ready to send. No inline mode and no Bot API call — the client
+        # does all of it. `url` is required by the endpoint, so it carries the
+        # bot, which is also the honest answer to "where is this from?".
+        # Percent-encoded rather than form-encoded: a `+` for a space is not
+        # decoded back by every client.
+        def share_url(text)
+          "https://t.me/share/url?url=#{ERB::Util.url_encode(bot_url)}&text=#{ERB::Util.url_encode(text)}"
+        end
+
+        # The clipboard carries what the share sheet would, plus the bot link
+        # the sheet adds on its own — it is headed for WhatsApp as often as not.
+        def copy_text(text) = "#{text}\n\nvia #{bot_url}"
+
+        def h(text) = Rack::Utils.escape_html(text)
+
         def require_visitor!
           redirect(to("/start")) unless visitor_id
         end
@@ -357,6 +375,25 @@ module Booking
         @club_name = row.club_name
         @slots = slots_view(date, row)
         erb :slots, layout: :layout
+      end
+
+      # One date's free courts as one message, to send to whoever you play
+      # with. The whole day by default; `from` and `to` narrow it to the hours
+      # the group can actually make. Reached from the Clubs screen.
+      get "/date/:date/share" do
+        require_visitor!
+
+        date = parse_date(params[:date])
+        redirect(to("/")) if date.nil?
+
+        table = horizon_tables.fetch(date)
+        @date = date.to_s
+        @weekday = weekday_short(date)
+        @date_label = date_label(date)
+        @span = HourSpan.from(params, date:, columns: table.columns)
+        @sheet = Rundown.build(table:, clubs: settings.repos.clubs.enabled, window: @span.window)
+        @text = Messages.rundown(@sheet)
+        erb :share, layout: :layout
       end
 
       get "/watches" do

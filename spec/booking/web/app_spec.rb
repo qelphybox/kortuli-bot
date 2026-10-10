@@ -197,6 +197,111 @@ RSpec.describe Booking::Web::App do
     end
   end
 
+  describe "the share screen" do
+    let(:day) { today + 1 }
+    let(:free_slots) do
+      [slot(club: "padel-club-2", at: "#{day} 18:00"), slot(club: "padel-club-2", at: "#{day} 19:00"),
+       slot(club: "kus-tba-padel", court: "any", at: "#{day} 10:00"),
+       slot(club: "kus-tba-padel", court: "any", at: "#{day + 1} 01:00")]
+    end
+
+    def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="share__preview"[^>]*>(.*?)</pre>}m, 1].to_s)
+
+    def shared_text
+      href = last_response.body[/data-tg-share href="([^"]+)"/, 1]
+      CGI.unescape(CGI.unescapeHTML(href)[/[?&]text=([^&]*)/, 1].to_s)
+    end
+
+    it "is reached from the clubs screen of the same date" do
+      sign_in
+      get "/date/#{day}"
+
+      expect(last_response.body).to include(%(href="/date/#{day}/share"))
+    end
+
+    it "is not served to somebody without a session" do
+      get "/date/#{day}/share"
+
+      expect(last_response.location).to end_with("/start")
+    end
+
+    it "falls back to the dates screen when handed a date beyond the horizon" do
+      sign_in
+      get "/date/#{today + 90}/share"
+
+      expect(last_response.location).to end_with("/")
+    end
+
+    # The first case: the whole day, every club, in one message.
+    it "puts every club's free hours for the day into one message" do
+      sign_in
+      get "/date/#{day}/share"
+
+      expect(preview).to include("Padel Club 2\n18:00–20:00\nhttps://example.test/book")
+      expect(preview).to include("Kus Tba Padel\n10:00–11:00, 01:00–02:00")
+    end
+
+    # The share sheet sends what the preview shows; only the clipboard adds
+    # the bot's link, which the sheet adds by itself.
+    it "sends through Telegram's share sheet exactly the text it previews" do
+      sign_in
+      get "/date/#{day}/share"
+
+      expect(last_response.body).to include('data-tg-share href="https://t.me/share/url?url=https%3A%2F%2Ft.me%2Fkortuli_test_bot&amp;text=')
+      expect("#{shared_text}\n\nvia https://t.me/kortuli_test_bot").to eq(preview)
+    end
+
+    # The second case: a span of hours, picked after the day.
+    it "narrows the message to the hours picked" do
+      sign_in
+      get "/date/#{day}/share", from: 18, to: 22
+
+      expect(preview).to include(", 18:00–22:00")
+      expect(preview).to include("Padel Club 2\n18:00–20:00")
+      expect(preview).to include("Fully booked: Kus Tba Padel")
+    end
+
+    # Counted from the date's midnight, so a span into the small hours runs
+    # forwards rather than wrapping round to the morning.
+    it "lets a span run past midnight, into the hours a late club sells" do
+      sign_in
+      get "/date/#{day}/share", from: 23, to: 26
+
+      expect(preview).to include(", 23:00–02:00")
+      expect(preview).to include("Kus Tba Padel\n01:00–02:00")
+      expect(preview).not_to include("10:00")
+    end
+
+    it "offers the hours a club open past midnight sells, after 23:00" do
+      sign_in
+      get "/date/#{day}/share"
+
+      expect(last_response.body).to include('<option value="25">01:00</option>')
+      expect(last_response.body).to include('<option value="26" selected>02:00</option>')
+    end
+
+    # A filter, not a form: something off the list shows the whole day rather
+    # than a refusal.
+    it "shows the whole day when the span picked is backwards or not on offer" do
+      sign_in
+
+      get "/date/#{day}/share", from: 22, to: 18
+      expect(preview.lines.first).not_to include(",")
+      expect(preview).to include("10:00–11:00")
+
+      get "/date/#{day}/share", from: 4, to: "soon"
+      expect(preview).to include("10:00–11:00")
+    end
+
+    it "offers no send button when the span holds nothing free" do
+      sign_in
+      get "/date/#{day}/share", from: 8, to: 9
+
+      expect(last_response.body).to include(Booking::Messages.share_nothing)
+      expect(last_response.body).not_to include("data-tg-share")
+    end
+  end
+
   describe "the slots screen" do
     # Every hour the page invites a tap on. Reading them back is how "the
     # screen offers exactly what the route accepts" gets checked from the

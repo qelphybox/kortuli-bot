@@ -22,6 +22,12 @@ The Cells for every watched club over the booking horizon — what the viewer
 shows. One row per club, one column per hour.
 _Avoid_: schedule, table, calendar
 
+**Rundown**:
+One date's free Cells as a single message meant to be forwarded — per Club,
+its stretches of free hours, its price and a link to book. The whole day, or
+narrowed to a span of hours that may run past midnight.
+_Avoid_: digest, summary, export, share
+
 **Opening hours**:
 The hours a club offers at all, declared per club rather than observed. They
 decide how long a row is; no source tells us reliably.

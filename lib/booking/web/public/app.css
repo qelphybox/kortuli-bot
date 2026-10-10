@@ -582,3 +582,77 @@ button { color: inherit; }
   color: var(--fg);
   border-color: var(--fg);
 }
+
+/* --- Share. A header action on the Clubs screen leads here; the screen is
+       two pickers, the message as it will be sent, and the two ways out. -- */
+.head-action {
+  margin-left: auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 14px;
+  color: var(--fg);
+  font: 500 12.5px/1 "IBM Plex Sans", sans-serif;
+  text-decoration: none;
+}
+.head-action:hover, .head-action:focus-visible { border-color: var(--fg); }
+
+.share {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px calc(32px + env(safe-area-inset-bottom));
+}
+
+.share__span {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.share__span label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font: 500 10.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.share__span select {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  color: var(--fg);
+  font: 500 15px/1 "IBM Plex Mono", ui-monospace, monospace;
+}
+.share__span .dash {
+  color: var(--muted);
+  padding-bottom: 13px;
+  font: 400 14px/1 "IBM Plex Mono", ui-monospace, monospace;
+}
+.share__apply {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  padding: 12px 14px;
+  font: 500 13px/1 "IBM Plex Sans", sans-serif;
+  cursor: pointer;
+}
+/* With JS a change submits on its own, so the button is only for without. */
+.js [data-autosubmit] .share__apply { display: none; }
+
+.share__preview {
+  margin: 0;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  font: 400 13px/1.55 "IBM Plex Mono", ui-monospace, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.share .btn-secondary { width: 100%; cursor: pointer; }
