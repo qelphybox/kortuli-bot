@@ -56,10 +56,9 @@ jobs:
       - name: Check secrets are set
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           missing=0
-          for name in TELEGRAM_TOKEN CONTACT_EMAIL SSH_PRIVATE_KEY SSH_KNOWN_HOSTS; do
+          for name in TELEGRAM_TOKEN CONTACT_EMAIL SSH_PRIVATE_KEY; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret $name is not set"
               missing=1
@@ -74,21 +73,26 @@ jobs:
           ruby-version: "4.0.0"
           bundler-cache: true
 
-      - uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # Pinned rather than ssh-keyscan'd: a scan on every run would trust
-      # whatever answers at that address. Kamal's net-ssh honours this file,
-      # and .kamal/hooks/pre-deploy needs it outright — its plain `ssh` runs
-      # in BatchMode and refuses an unknown host.
-      - name: Trust the server's host key
+      # Deploy key into ssh-agent, and the server's host key into known_hosts.
+      # The key is scanned on every run rather than pinned in a secret — the
+      # same trade majorney makes. .kamal/hooks/pre-deploy needs it either
+      # way: its plain `ssh` runs in BatchMode and refuses an unknown host.
+      - name: Configure SSH
         env:
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
+          chmod 700 ~/.ssh
+          eval "$(ssh-agent -s)"
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | ssh-add -
+          ssh-keyscan -t rsa,ecdsa,ed25519 89.167.11.249 >> ~/.ssh/known_hosts
+          # Fail with a clear message instead of Kamal hanging on a password prompt.
+          if ! ssh -o BatchMode=yes -o ConnectTimeout=10 root@89.167.11.249 true; then
+            echo "::error::The server rejects SSH_PRIVATE_KEY: add its public key to /root/.ssh/authorized_keys on 89.167.11.249"
+            exit 1
+          fi
 
       # `setup` rather than `deploy`: it is `deploy` preceded by a bootstrap
       # that installs Docker only where it is missing, so on a server that

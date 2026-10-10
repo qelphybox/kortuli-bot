@@ -146,13 +146,17 @@ goes to GHCR under the run's own `GITHUB_TOKEN`.
 | --- | --- |
 | `TELEGRAM_TOKEN` | from @BotFather |
 | `CONTACT_EMAIL` | goes into the poller's User-Agent |
-| `SSH_PRIVATE_KEY` | a key the server accepts for `root` |
-| `SSH_KNOWN_HOSTS` | the server's host key, pinned: `ssh-keyscan 89.167.11.249` |
+| `SSH_PRIVATE_KEY` | a key the server accepts for `root`; the host key is scanned on each run |
 
 From a laptop it is the same command, with those two exported in your shell
-instead, plus `KAMAL_REGISTRY_PASSWORD` — a GitHub PAT with **`write:packages`**,
-which the token `gh auth` holds lacks. The SSH pair is just your own agent and
-`known_hosts`. First time on a fresh server, from a laptop:
+instead, plus `KAMAL_REGISTRY_PASSWORD`, which needs **`write:packages`**:
+
+```bash
+gh auth refresh -h github.com -s write:packages
+export KAMAL_REGISTRY_PASSWORD=$(gh auth token)
+```
+
+SSH is just your own agent and `known_hosts`. First time on a fresh server, from a laptop:
 
 ```bash
 bundle exec kamal setup
