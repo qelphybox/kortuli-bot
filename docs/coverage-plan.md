@@ -45,7 +45,7 @@ survey is complete — sapadelo omits Padel Club 2, which we already watch.
 | Tbilisi Padel Didi Dighomi | 5 | BookingPress | **wave 2** |
 | Tbilisi Padel Mtatsminda | 1 | BookingPress | **wave 2** |
 | Tbilisi Padel Ilia's Garden | 1 | BookingPress | **wave 2** |
-| Lemans Padel | 4 | own | **wave 1** |
+| Lemans Padel | 4 | lemans | watched |
 | Padel Gldani | 3 | own (tRPC) | **wave 3** |
 | PadelHub | 3 | own (Supabase) | watched |
 | Sportscape Samgori | 4 | unknown | not researched |
@@ -114,7 +114,9 @@ Independent within a wave; ordered by courts-per-unit-of-work.
   *Best ratio in the whole plan.* Half-hour starts turned out to be half the
   inventory and are **not** watched — the Grid matches Cells on an exact hourly
   `starts_at`, so watching them is a Grid change first. Folded into wave 4.
-- **Lemans Padel** → **4 courts**. `GET https://booking.lemanspadel.ge/api/availability?date=&duration=60`,
+- ~~**Lemans Padel** → **4 courts**.~~ **Done.** Court-level by count: one
+  request a day, a Slot per free court, refs numbered by count rather than
+  named. `GET https://booking.lemanspadel.ge/api/availability?date=&duration=60`,
   no auth, explicit `available` boolean plus an `available_courts` count, and
   `/api/availability/courts` names which are free. No server-side horizon, so
   cap `max_days` ourselves the way `Kustba` does.

@@ -291,10 +291,10 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **Six sources, nine clubs.** Padel Club 2 (Reservio), Kus Tba Padel
+- **Seven sources, ten clubs.** Padel Club 2 (Reservio), Kus Tba Padel
   (`turtle-booking`), GymBreeze (three locations), Padelbade (Book & Go, two),
-  PadelHub (Supabase) and Padel Academy (its own API, behind a member login)
-  — a venue with several locations is several clubs, because they sit in
+  PadelHub (Supabase), Padel Academy (its own API, behind a member login) and
+  Lemans Padel (its own API) — a venue with several locations is several clubs, because they sit in
   different parts of town. `tbilisipadel.com` runs BookingPress, which needs its
   own adapter; the reconnaissance is done and lives in `docs/research/`, and
   the remaining Tbilisi clubs are planned in `docs/coverage-plan.md`.
@@ -309,6 +309,11 @@ This is an MVP, deliberately:
   [lib/booking/adapters/kustba.rb](lib/booking/adapters/kustba.rb). For
   GymBreeze it is not: passing `court_id` is answered with "no longer supported,
   use location_id".
+- **Lemans Padel counts its courts but does not name them.** One request a day
+  says how many of the four are free each hour; *which* ones is a request per
+  hour. So its cells say `2/4` and a cancellation from one free court to two
+  is still caught, but the notification says "a court". See
+  [lib/booking/adapters/lemans.rb](lib/booking/adapters/lemans.rb).
 - **GymBreeze prices are printed as a range.** They move with the hour and the
   weekday (40 GEL midday, 60 either side at Ninoshvili). The real rates are
   published at `/facilities/locations/<id>/`, so computing one per slot is a

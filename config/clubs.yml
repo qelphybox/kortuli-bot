@@ -206,3 +206,26 @@
     # number, so this is also how many it asks about.
     courts: 3
     court_aliases: {}
+
+# Lemans Padel books through its own PHP API, open to reads. It reports how
+# many of its courts are free each hour but not which, so a cell can say "2/4"
+# while a notification can only say "a court"; see the adapter.
+- slug: lemans-padel
+  name: Lemans Padel
+  adapter: lemans
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    booking_url: "https://lemanspadel.ge/book-padel/"
+    # The same on all four courts, from the source's own `duration_prices`.
+    price: "70 GEL"
+    # Last start 01:00, which the source files under the date it falls on.
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
+    # No upper bound on the club's own picker or its API; see the adapter.
+    max_days: 14
+    courts: 4
+    # The refs are counts of free courts rather than court names — nothing to
+    # alias.
+    court_aliases: {}
