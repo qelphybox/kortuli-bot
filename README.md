@@ -93,13 +93,21 @@ outside a club's opening hours is left blank rather than drawn as taken. Clubs
 whose source names the court say how many of them are free (`2/4`); the rest
 can only say that something is (`✓`).
 
+The star beside each club on a date's list makes it a **Favourite**: one
+tap, kept per person. Favourites lead their half of that list, and come
+already ticked on the form that creates a standing watch.
+
 A date's **Share** button turns it into one message for whoever you play
 with: every club with something free, its free hours folded into stretches
 (`18:00–20:00, 22:00–23:00`), its price and its booking link, and the clubs
-that are fully booked named at the end. Two pickers narrow it to the hours the
+that are fully booked named at the end. A switch narrows it to your
+Favourites or to clubs you tick by hand, and two pickers to the hours the
 group can make — counted from that date's midnight, so a span can run to
-02:00. It leaves through Telegram's own share sheet (`t.me/share/url`, no
-inline mode, no Bot API call) or the clipboard, for every other messenger.
+02:00. Both live in the URL, so changing one keeps the other. Asking for
+Favourites with none starred, or ticking nothing, shows every club rather than
+an empty message. It leaves through Telegram's own share sheet
+(`t.me/share/url`, no inline mode, no Bot API call) or the clipboard, for
+every other messenger.
 
 Tapping an hour that is **gone** asks to be told when it comes back: one tap,
 no form, a watch on exactly that club and that hour. Hours that have already

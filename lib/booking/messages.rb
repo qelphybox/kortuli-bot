@@ -151,6 +151,21 @@ module Booking
 
     def share_copied = "Copied"
 
-    def share_nothing = "Nothing free in these hours — pick a wider span."
+    def share_nothing = "Nothing free here — pick a wider span or more clubs."
+
+    def share_all_clubs = "All"
+
+    def share_favourites = "Favourites"
+
+    def share_pick_clubs = "Pick"
+
+    # Asked for Favourites before starring any. Points at where the stars are
+    # rather than apologising: every club is shown in the meantime.
+    def share_no_favourites = "No favourites yet — star clubs on the day's list. Showing every club for now."
+
+    # A screen reader hears the star as the action it takes, not as a glyph.
+    def favourite_add = "Add to favourites"
+
+    def favourite_remove = "Remove from favourites"
   end
 end

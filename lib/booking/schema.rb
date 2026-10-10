@@ -74,6 +74,18 @@ module Booking
         unique %i[watch_id slot_key]
       end
 
+      # The clubs a person has starred. A row per star rather than a JSON column
+      # on some user record, because there is no user record — a person is a
+      # Telegram id and nothing else — and a unique pair makes starring twice
+      # the same as starring once.
+      db.create_table?(:favourites) do
+        primary_key :id
+        Bignum :user_id, null: false
+        String :club_slug, null: false
+        DateTime :created_at, null: false
+        unique %i[user_id club_slug]
+      end
+
       # `create_table?` does nothing to a table that already exists, and by the
       # time the Dated watch arrived there were watches in the file. Guarded so
       # it is as re-runnable as everything above it.

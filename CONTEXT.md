@@ -24,8 +24,9 @@ _Avoid_: schedule, table, calendar
 
 **Rundown**:
 One date's free Cells as a single message meant to be forwarded — per Club,
-its stretches of free hours, its price and a link to book. The whole day, or
-narrowed to a span of hours that may run past midnight.
+its stretches of free hours, its price and a link to book. The whole day and
+every Club, or narrowed to a span of hours that may run past midnight, and to
+the Favourites or a handful of Clubs ticked by hand.
 _Avoid_: digest, summary, export, share
 
 **Opening hours**:
@@ -51,6 +52,11 @@ A Club whose source reports only whether *some* court is free that hour. Its
 Cells say whether, not how many. Kus Tba and all three GymBreeze locations —
 for Kus Tba by our choice, for GymBreeze because its API refuses.
 _Avoid_: per-hour, coarse, aggregate
+
+**Favourite**:
+A Club one person has starred. Theirs alone; it narrows a Rundown, leads the
+list of Clubs, and comes pre-ticked when making a Standing watch.
+_Avoid_: bookmark, pinned, saved club
 
 ## Watching
 
