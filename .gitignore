@@ -6,6 +6,3 @@
 /tmp/
 /.bundle/
 /vendor/bundle/
-
-# Kamal reads real secrets from here at deploy time.
-.kamal/secrets
