@@ -1,6 +1,7 @@
 require "faraday"
 require "faraday/retry"
 require "json"
+require "zlib"
 
 module Booking
   # The one place that touches the network. Clubs run on shared hosting, so the
@@ -11,12 +12,15 @@ module Booking
 
     def initialize(user_agent: Config.user_agent, timeout: Config.http_timeout)
       @connection = Faraday.new do |f|
+        # POST is on the list on purpose: every POST we send is a read that a
+        # source happens to want as a JSON body (an RPC, a schedule check, a
+        # login), so repeating one changes nothing on the other side.
         f.request :retry,
                   max: 3,
                   interval: 1,
                   backoff_factor: 2,
                   retry_statuses: RETRY_STATUSES,
-                  methods: [:get]
+                  methods: %i[get post]
         f.headers["User-Agent"] = user_agent
         f.headers["Accept"] = "application/json"
         f.options.timeout = timeout
@@ -24,12 +28,14 @@ module Booking
       end
     end
 
-    def get_json(url, params = {})
-      JSON.parse(get_body(url, params))
-    rescue JSON::ParserError => e
-      # A club that answers HTML where JSON was promised has redesigned or put
-      # up an error page. Same failure mode as a timeout, so: same exception.
-      raise Adapters::SourceUnavailable, "#{url}: #{e.class} #{e.message}"
+    def get_json(url, params = {}, headers: {})
+      parse(url, request(url) { @connection.get(url, params, headers) })
+    end
+
+    # For sources that read through an RPC rather than a query string. Headers
+    # are per request because they are per club: a Supabase key, a bearer.
+    def post_json(url, body = {}, headers: {})
+      parse(url, request(url) { @connection.post(url, JSON.generate(body), headers.merge("Content-Type" => "application/json")) })
     end
 
     # For the one request that is not JSON: the discover task scraping a club's
@@ -37,13 +43,42 @@ module Booking
     # Faraday directly so that the very first request we ever make to a club
     # still carries the User-Agent that lets them find a human.
     def get_body(url, params = {})
-      response = @connection.get(url, params)
+      request(url) { @connection.get(url, params) }
+    end
+
+    private
+
+    def request(url)
+      response = yield
+      # Its own type so an adapter holding a login can tell "log in again" from
+      # "the club is down" — but still a SourceUnavailable to everyone else.
+      raise Adapters::Unauthorized, "#{url} returned #{response.status}" if response.status == 401
       raise Adapters::SourceUnavailable, "#{url} returned #{response.status}" unless response.success?
 
-      response.body
-    rescue Faraday::Error => e
+      decoded(response)
+    rescue Faraday::Error, Zlib::Error => e
       # Everything the outside world can do wrong arrives as one exception type,
       # so the poller has exactly one failure mode to reason about.
+      raise Adapters::SourceUnavailable, "#{url}: #{e.class} #{e.message}"
+    end
+
+    GZIP_MAGIC = "\x1F\x8B".b.freeze
+
+    # Net::HTTP asks for gzip and is meant to inflate it, but the header is no
+    # guide to whether it did: Supabase arrived still gzipped, Padel Academy
+    # arrived inflated with `content-encoding: gzip` still on it. The body's
+    # own first two bytes are the only honest answer, and no JSON, HTML or
+    # text body starts with them.
+    def decoded(response)
+      body = response.body.to_s
+      body.b.start_with?(GZIP_MAGIC) ? Zlib.gunzip(body) : body
+    end
+
+    def parse(url, body)
+      JSON.parse(body)
+    rescue JSON::ParserError => e
+      # A club that answers HTML where JSON was promised has redesigned or put
+      # up an error page. Same failure mode as a timeout, so: same exception.
       raise Adapters::SourceUnavailable, "#{url}: #{e.class} #{e.message}"
     end
   end

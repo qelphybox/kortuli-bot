@@ -24,6 +24,12 @@ servers:
       - 89.167.11.249
     cmd: bundle exec bin/poller
     proxy: false
+    # The one club that shows its schedule only to a member. Only the poller
+    # reads it, so only the poller is handed the login.
+    env:
+      secret:
+        - PADEL_ACADEMY_EMAIL
+        - PADEL_ACADEMY_PASSWORD
   web:
     hosts:
       - 89.167.11.249

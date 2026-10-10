@@ -155,6 +155,7 @@ goes to GHCR under the run's own `GITHUB_TOKEN`.
 | `TELEGRAM_TOKEN` | from @BotFather |
 | `CONTACT_EMAIL` | goes into the poller's User-Agent |
 | `SSH_PRIVATE_KEY` | a key the server accepts for `root`; the host key is scanned on each run |
+| `PADEL_ACADEMY_EMAIL`, `PADEL_ACADEMY_PASSWORD` | optional — the member login Padel Academy's schedule sits behind; handed to the poller alone |
 
 From a laptop it is the same command, with those two exported in your shell
 instead, plus `KAMAL_REGISTRY_PASSWORD`, which needs **`write:packages`**:
@@ -282,10 +283,11 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **Four sources, six clubs.** Padel Club 2 (Reservio), Kus Tba Padel
-  (`turtle-booking`), GymBreeze and Padelbade (Book & Go) — the last two each
-  run two locations, configured as two clubs apiece because they sit at
-  opposite ends of town. `tbilisipadel.com` runs BookingPress, which needs its
+- **Six sources, nine clubs.** Padel Club 2 (Reservio), Kus Tba Padel
+  (`turtle-booking`), GymBreeze (three locations), Padelbade (Book & Go, two),
+  PadelHub (Supabase) and Padel Academy (its own API, behind a member login)
+  — a venue with several locations is several clubs, because they sit in
+  different parts of town. `tbilisipadel.com` runs BookingPress, which needs its
   own adapter; the reconnaissance is done and lives in `docs/research/`, and
   the remaining Tbilisi clubs are planned in `docs/coverage-plan.md`.
   Everything above the adapter is club-agnostic, so that is a new file in

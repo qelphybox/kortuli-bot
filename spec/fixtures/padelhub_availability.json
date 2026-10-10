@@ -1,0 +1,125 @@
+{
+  "courts": [
+    {
+      "id": "0a0a2ddd-4f0d-4a66-a5c3-2d08bcf5eebd",
+      "name": "court_padel_open",
+      "description": "court_padel_open_desc",
+      "sport_type": "padel",
+      "image_url": "/courts/padel-open.jpg",
+      "is_active": true,
+      "created_at": "2026-05-14T04:15:12.07446+00:00",
+      "evening_price": null
+    },
+    {
+      "id": "154545c2-e962-4d85-8e1a-9bf5bcfa4721",
+      "name": "court_pickleball",
+      "description": "court_pickleball_desc",
+      "sport_type": "pickleball",
+      "image_url": "/courts/pickleball.jpg",
+      "is_active": true,
+      "created_at": "2026-05-18T15:03:09.262452+00:00",
+      "evening_price": null
+    },
+    {
+      "id": "7c36c5d8-8a2f-4021-ab76-6305ed6f85a1",
+      "name": "court_padel_closed",
+      "description": "court_padel_closed_desc",
+      "sport_type": "padel",
+      "image_url": "/courts/padel-closed.jpg",
+      "is_active": true,
+      "created_at": "2026-05-14T04:15:12.07446+00:00",
+      "evening_price": 70.0
+    },
+    {
+      "id": "bce555f2-8568-498b-b6cc-55ca1ef71d16",
+      "name": "court_padel_closed_2",
+      "description": "court_padel_closed_2_desc",
+      "sport_type": "padel",
+      "image_url": "",
+      "is_active": true,
+      "created_at": "2026-10-05T15:40:20.351928+00:00",
+      "evening_price": 70.0
+    }
+  ],
+  "availability": {
+    "0a0a2ddd-4f0d-4a66-a5c3-2d08bcf5eebd": [
+      {
+        "time_slot": "20:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "21:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      }
+    ],
+    "154545c2-e962-4d85-8e1a-9bf5bcfa4721": [],
+    "7c36c5d8-8a2f-4021-ab76-6305ed6f85a1": [
+      {
+        "time_slot": "11:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "12:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "18:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "19:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "20:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "21:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      }
+    ],
+    "bce555f2-8568-498b-b6cc-55ca1ef71d16": [
+      {
+        "time_slot": "18:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "19:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "20:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      },
+      {
+        "time_slot": "21:00",
+        "booking_date": "2026-10-12",
+        "status": "confirmed",
+        "is_payment_hold": false
+      }
+    ]
+  }
+}

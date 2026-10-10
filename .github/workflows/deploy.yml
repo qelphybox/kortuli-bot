@@ -49,6 +49,10 @@ jobs:
       KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+      # Not in the check below on purpose: without them one club fails its
+      # tick, which is no reason to stop the other eight from shipping.
+      PADEL_ACADEMY_EMAIL: ${{ secrets.PADEL_ACADEMY_EMAIL }}
+      PADEL_ACADEMY_PASSWORD: ${{ secrets.PADEL_ACADEMY_PASSWORD }}
     steps:
       # An unset secret reaches Kamal as an empty string, not an error, and
       # the deploy then fails much later and much less legibly — or worse,

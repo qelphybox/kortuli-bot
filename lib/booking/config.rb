@@ -57,6 +57,15 @@ module Booking
 
     def http_timeout = Integer(ENV.fetch("HTTP_TIMEOUT", "15"))
 
+    # Padel Academy shows its schedule only to a signed-in member, so polling
+    # it needs an account. Optional: without one that club fails its tick and
+    # says why, and every other club carries on.
+    def padel_academy_credentials
+      email = ENV["PADEL_ACADEMY_EMAIL"].to_s
+      password = ENV["PADEL_ACADEMY_PASSWORD"].to_s
+      { email:, password: } unless email.empty? || password.empty?
+    end
+
     # Clubs run on shared hosting, not Amazon. Announcing who we are and how to
     # complain is cheaper than being banned by IP in week two.
     def user_agent
