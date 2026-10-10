@@ -1,0 +1,53 @@
+<%#
+  One date's free courts as one message. The two pickers narrow it to a span
+  of hours — a GET form, so the span lives in the URL and a refresh keeps it.
+  The preview is exactly what leaves: the share sheet sends the same text, the
+  clipboard the same plus the bot's link.
+%>
+<header class="app-head app-head--sub">
+  <a class="back" href="/date/<%= @date %>" aria-label="Back to clubs">←</a>
+  <span class="app-head__title">
+    <span class="app-head__weekday">Share · <%= @weekday %></span>
+    <span class="app-head__date"><%= @date_label %></span>
+  </span>
+</header>
+
+<section class="share">
+  <% if @span.hours.any? %>
+    <form class="share__span" method="get" action="/date/<%= @date %>/share" data-autosubmit>
+      <label>
+        From
+        <select name="from">
+          <% @span.from_choices.each do |hour| %>
+            <option value="<%= hour %>"<%= " selected" if hour == @span.from %>><%= @span.label(hour) %></option>
+          <% end %>
+        </select>
+      </label>
+      <span class="dash" aria-hidden="true">–</span>
+      <label>
+        To
+        <select name="to">
+          <% @span.to_choices.each do |hour| %>
+            <option value="<%= hour %>"<%= " selected" if hour == @span.to %>><%= @span.label(hour) %></option>
+          <% end %>
+        </select>
+      </label>
+      <button class="share__apply" type="submit">Show</button>
+    </form>
+    <% unless @span.whole_day? %>
+      <a class="btn-tertiary" href="/date/<%= @date %>/share">Whole day</a>
+    <% end %>
+  <% end %>
+
+  <pre class="share__preview" id="rundown"><%= h(copy_text(@text)) %></pre>
+
+  <% if @sheet.empty? %>
+    <p class="disclaimer"><%= Booking::Messages.share_nothing %></p>
+  <% else %>
+    <a class="cta" data-tg-share href="<%= h(share_url(@text)) %>" target="_blank" rel="noopener">
+      <%= Booking::Messages.share_send %>
+    </a>
+    <button class="btn-secondary" type="button" data-copy="#rundown"
+            data-copied="<%= Booking::Messages.share_copied %>"><%= Booking::Messages.share_copy %></button>
+  <% end %>
+</section>
