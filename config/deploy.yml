@@ -16,17 +16,17 @@ primary_role: web
 servers:
   bot:
     hosts:
-      - 204.168.193.130
+      - 89.167.11.249
     cmd: bundle exec bin/bot
     proxy: false
   poller:
     hosts:
-      - 204.168.193.130
+      - 89.167.11.249
     cmd: bundle exec bin/poller
     proxy: false
   web:
     hosts:
-      - 204.168.193.130
+      - 89.167.11.249
     cmd: bundle exec bin/web
 
 # kamal-proxy terminates TLS and obtains the certificate over HTTP-01, which is
@@ -81,9 +81,6 @@ env:
   secret:
     - TELEGRAM_TOKEN
     - CONTACT_EMAIL
-    # Signs the mini app's own session cookies. Rotating it logs everyone out
-    # and touches nothing else.
-    - SESSION_SECRET
 
 # The log is the health check, so keep enough of it to see a night's polling.
 logging:

@@ -17,15 +17,15 @@ module Booking
     # ADR-0002). BOT_USERNAME is checked at boot too so both the web deeplink
     # and the bot boot fail together on a misconfigured handle.
     REQUIRED_FOR_BOT = (REQUIRED + %w[APP_URL OWNER_TELEGRAM_ID BOT_USERNAME]).freeze
-    # The web additionally signs its own session cookies. Deliberately its own
-    # secret rather than something derived from the token, so it can be rotated
-    # — logging everyone out — without touching the bot. It also builds the
-    # feedback pill's deeplink and so needs the bot's public @handle.
-    REQUIRED_FOR_WEB = (REQUIRED + %w[SESSION_SECRET BOT_USERNAME]).freeze
+    # The web signs its session cookies with a key derived from the token (see
+    # Web::Session.for_token), so it needs nothing more for that. It does build
+    # the feedback pill's deeplink and so needs the bot's public @handle.
+    REQUIRED_FOR_WEB = (REQUIRED + %w[BOT_USERNAME]).freeze
 
-    def missing_environment(required = REQUIRED) = required.reject { ENV[_1] }
-
-    def session_secret = ENV.fetch("SESSION_SECRET")
+    # Empty counts as missing: `KEY=` in a .env or an unset variable expanded by
+    # Kamal both arrive as "", and a blank token boots a process that can only
+    # fail later and further from the cause.
+    def missing_environment(required = REQUIRED) = required.select { ENV[_1].to_s.empty? }
 
     def web_port = Integer(ENV.fetch("PORT", "8080"))
 

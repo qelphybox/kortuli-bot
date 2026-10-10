@@ -13,6 +13,19 @@ module Booking
       # working.
       LIFETIME_SECONDS = 30 * 86_400
       DIGEST = "SHA256".freeze
+      # Keeps this key apart from anything else derived from the same token,
+      # Telegram's own "WebAppData" key for initData included.
+      DERIVATION_KEY = "kortuli-session".freeze
+
+      # The signing key comes from the bot token rather than a secret of its
+      # own. A separate secret bought nothing: whoever holds the token can mint
+      # initData for any user and be issued a cookie honestly through /auth.
+      # Rotating the token therefore logs everyone out, which is what a leaked
+      # token calls for anyway — and nobody notices, because an unreadable
+      # cookie just sends them back through /start for a fresh one.
+      def self.for_token(token)
+        new(secret: OpenSSL::HMAC.digest(DIGEST, DERIVATION_KEY, token.to_s))
+      end
 
       def initialize(secret:)
         @secret = secret.to_s

@@ -62,8 +62,8 @@ bundle exec bin/poller
 bundle exec bin/web
 ```
 
-Each entrypoint asks only for what it uses: `bin/web` needs `SESSION_SECRET`
-and `BOT_USERNAME`, `bin/bot` needs `APP_URL`, `BOT_USERNAME` and
+Each entrypoint asks only for what it uses: `bin/web` needs `BOT_USERNAME`,
+`bin/bot` needs `APP_URL`, `BOT_USERNAME` and
 `OWNER_TELEGRAM_ID`. Only the token is shared. Locally the mini app comes up
 on `http://localhost:8080`, where it will redirect you to `/start` and then
 tell you to open it from Telegram — the signed payload it needs only exists
@@ -139,18 +139,38 @@ itself every time it boots.
 Docker on a VPS, driven by [Kamal](https://kamal-deploy.org). The config is
 [config/deploy.yml](config/deploy.yml); the image goes to GHCR.
 
-Put the real values in `.kamal/secrets` (gitignored — see
-[.kamal/secrets.example](.kamal/secrets.example)). `KAMAL_REGISTRY_PASSWORD` is
-a GitHub token with **`write:packages`**; the one `gh auth` holds does not have
-that scope.
+Every push to `main` deploys itself:
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) runs the specs and
+then `kamal setup` from a runner — `deploy` plus a bootstrap that installs
+Docker only where it is missing, so a fresh server needs nothing but the SSH
+key. It can also be started by hand from the Actions tab.
 
-First time on a fresh server:
+[.kamal/secrets](.kamal/secrets) is committed and holds no values — only the
+names Kamal reads, each taken from the environment. The workflow fills that
+environment from these repository secrets. The registry needs none: the image
+goes to GHCR under the run's own `GITHUB_TOKEN`.
+
+| Secret | What it is |
+| --- | --- |
+| `TELEGRAM_TOKEN` | from @BotFather |
+| `CONTACT_EMAIL` | goes into the poller's User-Agent |
+| `SSH_PRIVATE_KEY` | a key the server accepts for `root`; the host key is scanned on each run |
+
+From a laptop it is the same command, with those two exported in your shell
+instead, plus `KAMAL_REGISTRY_PASSWORD`, which needs **`write:packages`**:
+
+```bash
+gh auth refresh -h github.com -s write:packages
+export KAMAL_REGISTRY_PASSWORD=$(gh auth token)
+```
+
+SSH is just your own agent and `known_hosts`. First time on a fresh server, from a laptop:
 
 ```bash
 bundle exec kamal setup
 ```
 
-After that, every deploy is:
+After that, by hand:
 
 ```bash
 bundle exec kamal deploy

@@ -1,0 +1,101 @@
+name: Deploy
+
+# Every push to main ships, provided the specs pass. The run is the same
+# `kamal deploy` the README describes, from a runner instead of a laptop —
+# which also retires the cross-build: the runner is amd64, like the VPS.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Kamal takes a lock on the server, and a second deploy racing for it fails
+# rather than waits. Queue runs here instead, and never cancel one half-way:
+# a deploy killed mid-flight leaves that lock behind (`kamal lock release`).
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Matches RUBY_VERSION in the Dockerfile: the specs should run on the
+      # Ruby that production runs.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0.0"
+          bundler-cache: true
+
+      - run: bundle exec rspec
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 20
+    # The run's own token pushes to GHCR, so there is no PAT to mint, store or
+    # rotate. Kamal also logs the server in with it to pull; the token dies
+    # with the job, which is fine because the pull happens inside the job.
+    permissions:
+      contents: read
+      packages: write
+    # The names .kamal/secrets reads from the environment.
+    env:
+      KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
+    steps:
+      # An unset secret reaches Kamal as an empty string, not an error, and
+      # the deploy then fails much later and much less legibly — or worse,
+      # succeeds with a bot that cannot log in. Refuse up front instead.
+      - name: Check secrets are set
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          missing=0
+          for name in TELEGRAM_TOKEN CONTACT_EMAIL SSH_PRIVATE_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is not set"
+              missing=1
+            fi
+          done
+          exit $missing
+
+      - uses: actions/checkout@v5
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0.0"
+          bundler-cache: true
+
+      # Deploy key into ssh-agent, and the server's host key into known_hosts.
+      # The key is scanned on every run rather than pinned in a secret — the
+      # same trade majorney makes. .kamal/hooks/pre-deploy needs it either
+      # way: its plain `ssh` runs in BatchMode and refuses an unknown host.
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          eval "$(ssh-agent -s)"
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+          printf '%s\n' "$SSH_PRIVATE_KEY" | ssh-add -
+          ssh-keyscan -t rsa,ecdsa,ed25519 89.167.11.249 >> ~/.ssh/known_hosts
+          # Fail with a clear message instead of Kamal hanging on a password prompt.
+          if ! ssh -o BatchMode=yes -o ConnectTimeout=10 root@89.167.11.249 true; then
+            echo "::error::The server rejects SSH_PRIVATE_KEY: add its public key to /root/.ssh/authorized_keys on 89.167.11.249"
+            exit 1
+          fi
+
+      # `setup` rather than `deploy`: it is `deploy` preceded by a bootstrap
+      # that installs Docker only where it is missing, so on a server that
+      # already has it the extra cost is one `docker -v`. In exchange a fresh
+      # server needs nothing done to it by hand beyond the SSH key.
+      - run: bundle exec kamal setup

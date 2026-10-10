@@ -1,0 +1,21 @@
+# The check a pull request has to pass. deploy.yml runs the same specs before a
+# rollout, in its own job; keep the two in step. Locally: `bundle exec rspec`.
+
+name: ci
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # Matches RUBY_VERSION in the Dockerfile.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "4.0.0"
+          bundler-cache: true
+
+      - run: bundle exec rspec
