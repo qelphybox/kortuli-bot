@@ -9,7 +9,7 @@ directory listing.
 
 ## Where we are
 
-Six clubs, 31 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
+Six clubs, 30 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
 GymBreeze Ninoshvili, GymBreeze Radio City, and — since #10 — Padelbade
 Krtsanisi and Padelbade Dighomi.
 
@@ -35,7 +35,7 @@ survey is complete — sapadelo omits Padel Club 2, which we already watch.
 
 | Club | Courts | System | State |
 |---|---|---|---|
-| GymBreeze Ninoshvili | 9 | gymbreeze | watched |
+| GymBreeze Ninoshvili | 8 | gymbreeze | watched |
 | Kus Tba | 8 | kustba | watched |
 | Padel Club 2 | 4 | reservio | watched |
 | GymBreeze Radio City | 3 | gymbreeze | watched |
@@ -46,14 +46,14 @@ survey is complete — sapadelo omits Padel Club 2, which we already watch.
 | Tbilisi Padel Ilia's Garden | 1 | BookingPress | **wave 2** |
 | Lemans Padel | 4 | own | **wave 1** |
 | Padel Gldani | 3 | own (tRPC) | **wave 3** |
-| PadelHub | 2 | own (Supabase) | **wave 3** |
+| PadelHub | 3 | own (Supabase) | **wave 3** |
 | Sportscape Samgori | 4 | unknown | not researched |
-| Padel Academy | 3 | own, login-gated | deferred |
+| Padel Academy | 3 | own (Laravel), account login | **blocked on a decision** |
 | Padel Island Lisi / Expo | 4 | TPC MatchPoint | **excluded, see below** |
 | Padelio | ? | own | broken upstream |
 | GPadel Tskneti | 2 | — | dead domain |
 | Vera Park | 1 | — | not open |
-| GymBreeze Sports Palace | 4 | gymbreeze | not open — free when it is |
+| GymBreeze Sport Palace | 4 | gymbreeze | **open — one config entry** |
 
 ## Excluded on purpose
 
@@ -128,10 +128,12 @@ Independent within a wave; ordered by courts-per-unit-of-work.
 - **Padel Gldani** → **3 courts**. Open tRPC, `bookings.getBookedSlots`,
   batched so three courts arrive in one request. Returns booked intervals →
   invert. Has a real `?court=<id>` deeplink, the only club here that does.
-- **PadelHub** → **2 courts**. Supabase RPC
+- **PadelHub** → **3 courts** (a third opened 2026-10-05). Supabase RPC
   `POST /rest/v1/rpc/get_booking_availability` with the publishable anon key
   from the bundle. Returns booked hours per court → invert. The `bookings`
-  table itself is RLS-blocked; the RPC is the intended door.
+  table itself is RLS-blocked; the RPC is the intended door. Read the court
+  list per tick rather than pinning UUIDs, and count only `confirmed` rows as
+  taken — see `docs/research/sport-palace-padelhub-padel-academy.md`.
 
 ### Wave 4 — the Grid at twelve clubs
 
@@ -153,7 +155,9 @@ grilling session before anyone writes markup.
 5. Set `courts:` only if the source names individual courts. Its absence is
    what makes a club hour-level.
 
-GymBreeze Sports Palace, when it opens, is case 2: one config entry.
+GymBreeze Sport Palace is case 2: one config entry, and it opened by
+2026-10-10. The entry is written out in
+`docs/research/sport-palace-padelhub-padel-academy.md`.
 
 ## What a new city costs
 
@@ -191,7 +195,11 @@ and it buys Batumi and Rustavi together.
 - **Sportscape Samgori (4 courts)** was never researched — the survey had no
   booking URL for it and it was left out of the recon brief. It is the largest
   unexamined club in Tbilisi.
-- **Padel Academy (3 courts)** is login-gated and was deliberately skipped.
+- **Padel Academy (3 courts)** was researched 2026-10-10. Availability is one
+  clean free-only call, but it sits behind an ordinary account login. There is
+  no robots refusal and no captcha. Reading it means registering a bot account
+  on the club's system, or asking the club for access. That is a decision to
+  take, not a technical gap.
 - **Nonce lifetime** for BookingPress is inferred from WordPress defaults, not
   measured. Re-scraping per tick makes it moot.
 - No per-club deeplink exists for Book & Go or BookingPress. Both fall back to
