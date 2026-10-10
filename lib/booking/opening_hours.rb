@@ -47,5 +47,14 @@ module Booking
         Clock.local_to_utc(format("%s %02d:00", date + day, hour))
       end
     end
+
+    # The same instants keyed by the wall-clock label a source files them
+    # under — "00:00" meaning tonight's midnight, not this morning's. Sources
+    # that speak in bare "HH:MM" for a business day are read through this, so
+    # the rollover lives here once rather than in each of them. A label is
+    # unique within a business day, which is what makes it a usable key.
+    def starts_by_label(date)
+      hours.zip(starts_on(date)).to_h { |hour, starts_at| [format("%02d:00", hour), starts_at] }
+    end
   end
 end

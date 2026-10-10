@@ -42,13 +42,14 @@ _Avoid_: venue, location, site
 
 **Court-level club**:
 A Club whose source names the individual court, so its Cells can say how many
-of them are free. Padel Club 2 and both Padelbade locations.
+of them are free. Padel Club 2, both Padelbade locations, PadelHub and Padel
+Academy.
 _Avoid_: per-court, granular
 
 **Hour-level club**:
 A Club whose source reports only whether *some* court is free that hour. Its
-Cells say whether, not how many. Kus Tba and both GymBreeze locations — for Kus
-Tba by our choice, for GymBreeze because its API refuses.
+Cells say whether, not how many. Kus Tba and all three GymBreeze locations —
+for Kus Tba by our choice, for GymBreeze because its API refuses.
 _Avoid_: per-hour, coarse, aggregate
 
 ## Watching

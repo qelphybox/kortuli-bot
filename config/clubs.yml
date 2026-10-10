@@ -87,6 +87,24 @@
     max_days: 8
     court_aliases: {}
 
+# The third site, at the Sports Palace on 26 May Square. It sat in the backend
+# from July and started selling by October; same API, same window, Ninoshvili's
+# prices.
+- slug: gymbreeze-sport-palace
+  name: GymBreeze Sport Palace
+  adapter: gymbreeze
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    location_id: "7a896411-0c3a-5336-a522-a6da08b6132c"
+    booking_url: "https://gymbreeze.ge/eng"
+    price: "40–60 GEL"
+    opening_hours:
+      from: "08:00"
+      to: "01:00"
+    max_days: 8
+    court_aliases: {}
+
 # Padelbade runs on Book & Go. One request returns every club of the tenant, so
 # these two share an adapter and are told apart by location_id — the same shape
 # as the two GymBreeze sites. The tenant also holds Padelbade Rustavi (location
@@ -139,4 +157,52 @@
     # includes today.
     max_days: 15
     courts: 2
+    court_aliases: {}
+
+# PadelHub reads through Supabase with the anon key its own site ships; the
+# adapter carries it. Courts come from the source every tick — a third one
+# opened in October 2026 — so nothing here pins them.
+- slug: padelhub
+  name: PadelHub
+  adapter: padelhub
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    booking_url: "https://www.padelhub.ge/booking"
+    # 40 for starts up to 14:00, then the court's own evening price: 60
+    # outdoors, 70 under the roof.
+    price: "40–70 GEL"
+    # The site's grid, hard-coded client-side: 08:00 to a last start at 00:00.
+    opening_hours:
+      from: "08:00"
+      to: "01:00"
+    # No upper bound on the club's own picker; see the adapter.
+    max_days: 14
+    courts: 3
+    # Court names arrive as i18n keys. "open" is the outdoor court.
+    court_labels:
+      court_padel_open: "Outdoor"
+      court_padel_closed: "Indoor 1"
+      court_padel_closed_2: "Indoor 2"
+    court_aliases: {}
+
+# Padel Academy shows its schedule only after a login, so this club polls as a
+# member: PADEL_ACADEMY_EMAIL and PADEL_ACADEMY_PASSWORD in the environment.
+# Without them it fails its tick and says so; nothing else is affected.
+- slug: padel-academy
+  name: Padel Academy
+  adapter: padelacademy
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    booking_url: "https://booking.padelacademy.ge/"
+    price: "80 GEL"
+    # Last start 01:00, filed by the source under the date before.
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
+    max_days: 14
+    # Courts 1–3, hard-coded in the club's client. The adapter asks each by
+    # number, so this is also how many it asks about.
+    courts: 3
     court_aliases: {}
