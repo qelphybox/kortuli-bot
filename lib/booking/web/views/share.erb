@@ -1,6 +1,7 @@
 <%#
-  One date's free courts as one message. The two pickers narrow it to a span
-  of hours — a GET form, so the span lives in the URL and a refresh keeps it.
+  One date's free courts as one message. The switch narrows it to some of the
+  clubs, the two pickers to a span of hours — one GET form, so both live in
+  the URL, a refresh keeps them, and changing one never drops the other.
   The preview is exactly what leaves: the share sheet sends the same text, the
   clipboard the same plus the bot's link.
 %>
@@ -13,30 +14,59 @@
 </header>
 
 <section class="share">
-  <% if @span.hours.any? %>
-    <form class="share__span" method="get" action="/date/<%= @date %>/share" data-autosubmit>
-      <label>
-        From
-        <select name="from">
-          <% @span.from_choices.each do |hour| %>
-            <option value="<%= hour %>"<%= " selected" if hour == @span.from %>><%= @span.label(hour) %></option>
-          <% end %>
-        </select>
-      </label>
-      <span class="dash" aria-hidden="true">–</span>
-      <label>
-        To
-        <select name="to">
-          <% @span.to_choices.each do |hour| %>
-            <option value="<%= hour %>"<%= " selected" if hour == @span.to %>><%= @span.label(hour) %></option>
-          <% end %>
-        </select>
-      </label>
-      <button class="share__apply" type="submit">Show</button>
-    </form>
-    <% unless @span.whole_day? %>
-      <a class="btn-tertiary" href="/date/<%= @date %>/share">Whole day</a>
+  <form class="share__form" method="get" action="/date/<%= @date %>/share" data-autosubmit>
+    <fieldset class="share__clubs">
+      <legend>Clubs</legend>
+      <% [["all", Booking::Messages.share_all_clubs], ["favourites", Booking::Messages.share_favourites],
+          ["picked", Booking::Messages.share_pick_clubs]].each do |mode, label| %>
+        <label class="choice">
+          <input type="radio" name="only" value="<%= mode %>"<%= " checked" if @filter.mode == mode %>>
+          <%= label %>
+        </label>
+      <% end %>
+    </fieldset>
+
+    <% if @filter.picked? %>
+      <fieldset class="share__clubs">
+        <legend>Which</legend>
+        <% @clubs.each do |club| %>
+          <label class="choice">
+            <input type="checkbox" name="clubs[]" value="<%= club.slug %>"<%= " checked" if @filter.includes?(club.slug) %>>
+            <%= "★ " if favourite?(club.slug) %><%= club.name %>
+          </label>
+        <% end %>
+      </fieldset>
     <% end %>
+
+    <% if @filter.no_favourites? %>
+      <p class="disclaimer"><%= Booking::Messages.share_no_favourites %></p>
+    <% end %>
+
+    <% if @span.hours.any? %>
+      <div class="share__span">
+        <label>
+          From
+          <select name="from">
+            <% @span.from_choices.each do |hour| %>
+              <option value="<%= hour %>"<%= " selected" if hour == @span.from %>><%= @span.label(hour) %></option>
+            <% end %>
+          </select>
+        </label>
+        <span class="dash" aria-hidden="true">–</span>
+        <label>
+          To
+          <select name="to">
+            <% @span.to_choices.each do |hour| %>
+              <option value="<%= hour %>"<%= " selected" if hour == @span.to %>><%= @span.label(hour) %></option>
+            <% end %>
+          </select>
+        </label>
+        <button class="share__apply" type="submit">Show</button>
+      </div>
+    <% end %>
+  </form>
+  <% unless @span.whole_day? %>
+    <a class="btn-tertiary" href="/date/<%= @date %>/share<%= h(share_query(@filter)) %>">Whole day</a>
   <% end %>
 
   <pre class="share__preview" id="rundown"><%= h(copy_text(@text)) %></pre>

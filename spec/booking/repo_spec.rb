@@ -93,6 +93,33 @@ RSpec.describe "repositories" do
     end
   end
 
+  describe Booking::Repo::Favourites do
+    subject(:repo) { described_class.new(db) }
+
+    it "remembers the clubs each person starred, and only theirs" do
+      repo.add(42, "padel-club-2")
+      repo.add(42, "kus-tba-padel")
+      repo.add(7, "gymbreeze-vake")
+
+      expect(repo.for_user(42)).to eq(Set["padel-club-2", "kus-tba-padel"])
+    end
+
+    # A double tap on a slow connection arrives as two posts.
+    it "treats starring twice as starring once" do
+      repo.add(42, "padel-club-2")
+      repo.add(42, "padel-club-2")
+
+      expect(repo.for_user(42)).to eq(Set["padel-club-2"])
+    end
+
+    it "forgets an unstarred club" do
+      repo.add(42, "padel-club-2")
+      repo.remove(42, "padel-club-2")
+
+      expect(repo.for_user(42)).to be_empty
+    end
+  end
+
   describe Booking::Repo::Clubs do
     subject(:repo) { described_class.new(db) }
 

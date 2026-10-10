@@ -7,15 +7,17 @@ RSpec.describe Booking::Web::App do
   let(:sessions) { Booking::Web::Session.new(secret: "a-secret-that-only-the-server-knows") }
 
   # Clubs and Slots are stood in for: the web only reads them, and the routes
-  # are what is under test, not Sequel. Watches are the real repository over an
-  # in-memory database, because here the web *writes* — and a faked repository
-  # would prove only that the route called the method it was written to call.
-  FakeRepos = Struct.new(:clubs, :slots, :watches)
+  # are what is under test, not Sequel. Watches and Favourites are the real
+  # repositories over an in-memory database, because here the web *writes* —
+  # and a faked repository would prove only that the route called the method
+  # it was written to call.
+  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites)
   FakeClubs = Struct.new(:enabled)
   FakeSlots = Struct.new(:all)
 
   let(:db) { Booking::DB.connect("sqlite:/") }
   let(:watches) { Booking::Repo::Watches.new(db) }
+  let(:favourites) { Booking::Repo::Favourites.new(db) }
   let(:today) { Booking::Clock.local_date(Booking::Clock.now) }
   let(:clubs) do
     [
@@ -32,7 +34,7 @@ RSpec.describe Booking::Web::App do
     ]
   end
   let(:free_slots) { [] }
-  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches) }
+  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites) }
 
   def app
     described_class.tap do |a|
@@ -195,6 +197,79 @@ RSpec.describe Booking::Web::App do
       expect(last_response.status).to eq(302)
       expect(last_response.location).to end_with("/")
     end
+
+    describe "starring a club" do
+      def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+
+      it "offers a star on every club, none of them lit at first" do
+        sign_in
+        get "/date/#{today}"
+
+        expect(last_response.body).to include(%(action="/favourites/padel-club-2"))
+        expect(last_response.body).to include(%(action="/favourites/kus-tba-padel"))
+        expect(last_response.body).not_to include("is-on")
+      end
+
+      it "remembers the star and turns it over on the same screen" do
+        sign_in(user_id: 42)
+        post "/favourites/kus-tba-padel", date: today.to_s
+
+        expect(last_response.location).to end_with("/date/#{today}")
+        expect(favourites.for_user(42)).to eq(Set["kus-tba-padel"])
+
+        follow_redirect!
+        expect(last_response.body).to include(%(action="/favourites/kus-tba-padel/delete"))
+      end
+
+      it "takes the star back off" do
+        sign_in(user_id: 42)
+        favourites.add(42, "kus-tba-padel")
+
+        post "/favourites/kus-tba-padel/delete", date: today.to_s
+
+        expect(favourites.for_user(42)).to be_empty
+      end
+
+      # Kus Tba sorts after Padel Club 2 by slug, so leading is the star's doing.
+      it "lists favourites first" do
+        sign_in(user_id: 42)
+        favourites.add(42, "kus-tba-padel")
+
+        get "/date/#{today}"
+
+        expect(club_names_in_order).to eq(["Kus Tba Padel", "Padel Club 2"])
+      end
+
+      it "is somebody's own: another person's stars do not show" do
+        favourites.add(7, "kus-tba-padel")
+        sign_in(user_id: 42)
+
+        get "/date/#{today}"
+
+        expect(last_response.body).not_to include("is-on")
+      end
+
+      it "refuses a club nobody watches" do
+        sign_in(user_id: 42)
+        post "/favourites/not-a-club", date: today.to_s
+
+        expect(last_response.status).to eq(404)
+        expect(favourites.for_user(42)).to be_empty
+      end
+
+      it "cannot be done without a session" do
+        post "/favourites/kus-tba-padel", date: today.to_s
+
+        expect(last_response.location).to end_with("/start")
+      end
+
+      it "lands on the dates screen when the page's date has gone by" do
+        sign_in(user_id: 42)
+        post "/favourites/kus-tba-padel", date: (today - 1).to_s
+
+        expect(last_response.location).to end_with("/")
+      end
+    end
   end
 
   describe "the share screen" do
@@ -299,6 +374,90 @@ RSpec.describe Booking::Web::App do
 
       expect(last_response.body).to include(Booking::Messages.share_nothing)
       expect(last_response.body).not_to include("data-tg-share")
+    end
+
+    describe "narrowed to some clubs" do
+      it "speaks for every club until told otherwise" do
+        sign_in
+        get "/date/#{day}/share"
+
+        expect(last_response.body).to include('name="only" value="all" checked')
+        expect(last_response.body).not_to include('name="clubs[]"')
+      end
+
+      it "narrows the message to the clubs starred" do
+        sign_in(user_id: 42)
+        favourites.add(42, "kus-tba-padel")
+
+        get "/date/#{day}/share", only: "favourites"
+
+        expect(preview).to include("Kus Tba Padel\n10:00–11:00")
+        expect(preview).not_to include("Padel Club 2")
+      end
+
+      # Not an empty message: every club, and a line saying where stars are made.
+      it "shows every club, and says why, when nothing is starred yet" do
+        sign_in(user_id: 42)
+        get "/date/#{day}/share", only: "favourites"
+
+        expect(preview).to include("Padel Club 2").and include("Kus Tba Padel")
+        expect(last_response.body).to include(Booking::Messages.share_no_favourites)
+      end
+
+      it "narrows the message to the clubs ticked by hand" do
+        sign_in
+        get "/date/#{day}/share", only: "picked", clubs: ["padel-club-2"]
+
+        expect(preview).to include("Padel Club 2\n18:00–20:00")
+        expect(preview).not_to include("Kus Tba Padel")
+        expect(last_response.body).to include('name="clubs[]" value="padel-club-2" checked')
+        expect(last_response.body).to include('name="clubs[]" value="kus-tba-padel">')
+      end
+
+      # Switching to "Pick" starts from the whole list and unticks down.
+      it "starts picking from every club ticked" do
+        sign_in
+        get "/date/#{day}/share", only: "picked"
+
+        expect(last_response.body).to include('name="clubs[]" value="padel-club-2" checked')
+        expect(last_response.body).to include('name="clubs[]" value="kus-tba-padel" checked')
+        expect(preview).to include("Padel Club 2").and include("Kus Tba Padel")
+      end
+
+      it "ignores a club nobody watches" do
+        sign_in
+        get "/date/#{day}/share", only: "picked", clubs: %w[padel-club-2 not-a-club]
+
+        expect(preview).to include("Padel Club 2")
+        expect(preview).not_to include("not-a-club")
+      end
+
+      # Kus Tba has nothing between 18:00 and 22:00, and unpicked it is not
+      # a club the reader was asked about — so it is not named as booked.
+      it "names as fully booked only the clubs it was narrowed to" do
+        sign_in
+        get "/date/#{day}/share", only: "picked", clubs: ["padel-club-2"], from: 18, to: 22
+
+        expect(preview).to include("Padel Club 2\n18:00–20:00")
+        expect(preview).not_to include("Fully booked")
+      end
+
+      it "narrows by clubs and hours at once" do
+        sign_in
+        get "/date/#{day}/share", only: "picked", clubs: ["kus-tba-padel"], from: 23, to: 26
+
+        expect(preview).to include(", 23:00–02:00")
+        expect(preview).to include("Kus Tba Padel\n01:00–02:00")
+        expect(preview).not_to include("Padel Club 2")
+      end
+
+      # The span resets; the clubs picked do not.
+      it "keeps the clubs on the way back to the whole day" do
+        sign_in
+        get "/date/#{day}/share", only: "picked", clubs: ["kus-tba-padel"], from: 18, to: 22
+
+        expect(last_response.body).to include(%(href="/date/#{day}/share?only=picked&amp;clubs%5B%5D=kus-tba-padel">Whole day))
+      end
     end
   end
 
@@ -758,6 +917,17 @@ RSpec.describe Booking::Web::App do
 
         expect(last_response.body).to include('value="padel-club-2"').and include('value="kus-tba-padel"')
         expect(last_response.body).to include("Padel Club 2").and include("Kus Tba Padel")
+      end
+
+      # The clubs a person starred are the ones they would tick anyway.
+      it "starts with the starred clubs ticked" do
+        sign_in(user_id: 42)
+        favourites.add(42, "kus-tba-padel")
+
+        get "/watches/new"
+
+        expect(last_response.body).to include('value="kus-tba-padel" checked')
+        expect(last_response.body).not_to include('value="padel-club-2" checked')
       end
 
       it "offers the weekdays and both ends of the range on the same form" do

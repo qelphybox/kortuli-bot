@@ -243,6 +243,24 @@ button { color: inherit; }
 .club-row.is-empty .club-row__sub { color: var(--muted); }
 .chev { font-size: 19px; color: var(--muted); }
 
+/* The star sits beside the row's link rather than inside it, so the divider
+   moves up to the item and the link stretches to fill what is left. */
+.club-item { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
+.club-item .club-row { flex: 1; min-width: 0; border-bottom: 0; padding-left: 4px; }
+.fav { display: flex; }
+.fav__star {
+  border: 0;
+  background: transparent;
+  padding: 0 6px 0 18px;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.fav__star.is-on { color: var(--accent); }
+.fav__star:hover, .fav__star:focus-visible { color: var(--fg); }
+.fav__star.is-on:hover, .fav__star.is-on:focus-visible { color: var(--accent); }
+
 /* --- Slots screen ---------------------------------------------------- */
 .slots { padding-top: 4px; }
 
@@ -601,6 +619,30 @@ button { color: inherit; }
   flex-direction: column;
   gap: 14px;
   padding: 18px 20px calc(32px + env(safe-area-inset-bottom));
+}
+
+.share__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.share__clubs {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.share__clubs legend {
+  flex-basis: 100%;
+  padding: 0;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font: 500 10.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .share__span {

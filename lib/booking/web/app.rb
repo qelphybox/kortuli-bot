@@ -136,9 +136,17 @@ module Booking
 
         def clock(hour) = Messages.clock(hour * 60)
 
-        # Nothing is picked until something has been refused; a first visit has
-        # no submission to remember.
-        def picked_club?(slug) = !!@submitted&.picked_club?(slug)
+        # Memoised per request: every club row on the screen asks for it.
+        def favourites = @favourites ||= settings.repos.favourites.for_user(visitor_id)
+
+        def favourite?(slug) = favourites.include?(slug)
+
+        def enabled_slugs = settings.repos.clubs.enabled.map(&:slug)
+
+        # A first visit has no submission to remember, so it starts from the
+        # clubs this person has starred — the ones they would tick anyway.
+        # Days and hours start blank: nothing to guess them from.
+        def picked_club?(slug) = @submitted ? @submitted.picked_club?(slug) : favourite?(slug)
         def picked_day?(day) = !!@submitted&.picked_day?(day)
         def picked_hour?(hour, which) = @submitted&.public_send(which) == hour
 
@@ -211,6 +219,8 @@ module Booking
         # One dict per Club on the selected date. Clubs with anything free
         # come first, then the fully-booked ones — dimmed rather than hidden,
         # so the eye reads "we did look" rather than "the club is gone".
+        # Within each half, Favourites lead: they are the rows the eye is
+        # hunting for.
         def clubs_view(date)
           table = horizon_tables.fetch(date)
           rows = table.rows.map do |row|
@@ -227,11 +237,14 @@ module Booking
               slug: row.club_slug,
               name: row.club_name,
               any_free:,
+              favourite: favourite?(row.club_slug),
               sub:
             }
           end
 
-          rows.sort_by { |c| c[:any_free] ? 0 : 1 }
+          # The index breaks ties, because Ruby's sort_by is not stable and
+          # the rows already arrive in an order worth keeping.
+          rows.each_with_index.sort_by { |c, i| [c[:any_free] ? 0 : 1, c[:favourite] ? 0 : 1, i] }.map(&:first)
         end
 
         # One dict per hour on the selected club-and-date. "Watching" is
@@ -269,6 +282,31 @@ module Booking
 
             out << w.from_minute
           end
+        end
+
+        # The id arrives from the page, so it is checked against what is on
+        # offer rather than stored as typed — a star on a club nobody watches
+        # would be a row that never shows anywhere.
+        def own_club!(slug)
+          require_visitor!
+          halt(404) unless enabled_slugs.include?(slug.to_s)
+
+          slug.to_s
+        end
+
+        # Back to the Clubs screen it was tapped on, so the star turns over
+        # in place. A date that is not on offer any more lands on the Dates
+        # screen instead, where every star is one tap away again.
+        def back_to_clubs
+          date = parse_date(params[:date])
+          redirect(to(date ? "/date/#{date}" : "/"))
+        end
+
+        # The query a link back to Share needs to keep its clubs narrowed.
+        def share_query(filter)
+          query = filter.to_params
+
+          query.empty? ? "" : "?#{Rack::Utils.build_nested_query(query)}"
         end
 
         def visible_watches
@@ -378,8 +416,10 @@ module Booking
       end
 
       # One date's free courts as one message, to send to whoever you play
-      # with. The whole day by default; `from` and `to` narrow it to the hours
-      # the group can actually make. Reached from the Clubs screen.
+      # with. The whole day and every club by default; `from` and `to` narrow
+      # it to the hours the group can actually make, and `only` to the
+      # Favourites or to the clubs ticked by hand. Reached from the Clubs
+      # screen.
       get "/date/:date/share" do
         require_visitor!
 
@@ -387,13 +427,30 @@ module Booking
         redirect(to("/")) if date.nil?
 
         table = horizon_tables.fetch(date)
+        clubs = settings.repos.clubs.enabled
         @date = date.to_s
         @weekday = weekday_short(date)
         @date_label = date_label(date)
+        @clubs = clubs
+        @filter = ClubFilter.from(params, watched_slugs: clubs.map(&:slug), favourites:)
+        # The hours stay the whole table's, not the narrowed one's: switching
+        # clubs should not throw away a span the group already agreed on.
         @span = HourSpan.from(params, date:, columns: table.columns)
-        @sheet = Rundown.build(table:, clubs: settings.repos.clubs.enabled, window: @span.window)
+        @sheet = Rundown.build(table: @filter.narrow(table), clubs:, window: @span.window)
         @text = Messages.rundown(@sheet)
         erb :share, layout: :layout
+      end
+
+      # A star on a Clubs row. Post-redirect-get like the watch actions, so a
+      # refresh does not tap it a second time.
+      post "/favourites/:slug" do
+        settings.repos.favourites.add(visitor_id, own_club!(params[:slug]))
+        back_to_clubs
+      end
+
+      post "/favourites/:slug/delete" do
+        settings.repos.favourites.remove(visitor_id, own_club!(params[:slug]))
+        back_to_clubs
       end
 
       get "/watches" do
@@ -413,7 +470,7 @@ module Booking
       post "/watches" do
         require_visitor!
 
-        @submitted = Submission.from(params, watched_slugs: settings.repos.clubs.enabled.map(&:slug))
+        @submitted = Submission.from(params, watched_slugs: enabled_slugs)
         refusals = @submitted.refusals
 
         # Re-rendered rather than redirected, so the reason arrives attached to
@@ -447,7 +504,7 @@ module Booking
       post "/watches/dated" do
         require_visitor!
 
-        tapped = TappedHour.from(params, watched_slugs: settings.repos.clubs.enabled.map(&:slug), horizon:)
+        tapped = TappedHour.from(params, watched_slugs: enabled_slugs, horizon:)
         halt(422) unless tapped
 
         ask_about(tapped)
