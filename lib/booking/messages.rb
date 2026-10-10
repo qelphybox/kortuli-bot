@@ -22,6 +22,34 @@ module Booking
       "#{DAY_NAMES[starts.wday]} #{starts.day} #{starts.strftime("%b")}, #{starts.strftime("%H:%M")}–#{ends.strftime("%H:%M")}"
     end
 
+    # Plain text rather than HTML: it leaves through Telegram's share sheet or
+    # the clipboard, and neither carries markup. Links survive anyway — every
+    # client turns a bare URL into one.
+    def rundown(sheet)
+      return "#{rundown_heading(sheet)}\n\nNothing free." if sheet.empty?
+
+      blocks = sheet.entries.map do |entry|
+        [
+          [entry.club_name, entry.price].compact.join(" · "),
+          entry.runs.map { "#{local_clock(_1.starts_at)}–#{local_clock(_1.ends_at)}" }.join(", "),
+          entry.link
+        ].compact.join("\n")
+      end
+      blocks << "Fully booked: #{sheet.booked.join(", ")}" if sheet.booked.any?
+
+      [rundown_heading(sheet), *blocks].join("\n\n")
+    end
+
+    def rundown_heading(sheet)
+      date = sheet.date
+      day = "#{DAY_NAMES[date.wday]} #{date.day} #{date.strftime("%b")}"
+      day = "#{day}, #{local_clock(sheet.window.begin)}–#{local_clock(sheet.window.end)}" if sheet.window
+
+      "🎾 Free padel courts · #{day}"
+    end
+
+    def local_clock(utc_time) = Clock.to_local(utc_time).strftime("%H:%M")
+
     def time_range(watch) = "#{clock(watch.from_minute)}–#{clock(watch.to_minute)}"
 
     def clock(minute_of_day) = format("%02d:%02d", minute_of_day / 60, minute_of_day % 60)
@@ -114,5 +142,15 @@ module Booking
     def feedback_pill_clubs = "Missing a club? Tell us"
 
     def feedback_pill_slots = "Times look wrong? Tell us"
+
+    # The Share screen's own copy. Kept here for the same reason as the rest:
+    # the screen and its specs read one string.
+    def share_send = "Send to a chat"
+
+    def share_copy = "Copy text"
+
+    def share_copied = "Copied"
+
+    def share_nothing = "Nothing free in these hours — pick a wider span."
   end
 end
