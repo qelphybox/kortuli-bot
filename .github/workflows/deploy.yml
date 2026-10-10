@@ -49,7 +49,6 @@ jobs:
       KAMAL_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       CONTACT_EMAIL: ${{ secrets.CONTACT_EMAIL }}
-      SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
     steps:
       # An unset secret reaches Kamal as an empty string, not an error, and
       # the deploy then fails much later and much less legibly — or worse,
@@ -60,7 +59,7 @@ jobs:
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
         run: |
           missing=0
-          for name in TELEGRAM_TOKEN CONTACT_EMAIL SESSION_SECRET SSH_PRIVATE_KEY SSH_KNOWN_HOSTS; do
+          for name in TELEGRAM_TOKEN CONTACT_EMAIL SSH_PRIVATE_KEY SSH_KNOWN_HOSTS; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret $name is not set"
               missing=1

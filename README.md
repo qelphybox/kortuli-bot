@@ -62,8 +62,8 @@ bundle exec bin/poller
 bundle exec bin/web
 ```
 
-Each entrypoint asks only for what it uses: `bin/web` needs `SESSION_SECRET`
-and `BOT_USERNAME`, `bin/bot` needs `APP_URL`, `BOT_USERNAME` and
+Each entrypoint asks only for what it uses: `bin/web` needs `BOT_USERNAME`,
+`bin/bot` needs `APP_URL`, `BOT_USERNAME` and
 `OWNER_TELEGRAM_ID`. Only the token is shared. Locally the mini app comes up
 on `http://localhost:8080`, where it will redirect you to `/start` and then
 tell you to open it from Telegram — the signed payload it needs only exists
@@ -146,11 +146,10 @@ goes to GHCR under the run's own `GITHUB_TOKEN`.
 | --- | --- |
 | `TELEGRAM_TOKEN` | from @BotFather |
 | `CONTACT_EMAIL` | goes into the poller's User-Agent |
-| `SESSION_SECRET` | signs the mini app's cookies; `openssl rand -hex 32` |
 | `SSH_PRIVATE_KEY` | a key the server accepts for `root` |
 | `SSH_KNOWN_HOSTS` | the server's host key, pinned: `ssh-keyscan 89.167.11.249` |
 
-From a laptop it is the same command, with those three exported in your shell
+From a laptop it is the same command, with those two exported in your shell
 instead, plus `KAMAL_REGISTRY_PASSWORD` — a GitHub PAT with **`write:packages`**,
 which the token `gh auth` holds lacks. The SSH pair is just your own agent and
 `known_hosts`. First time on a fresh server, from a laptop:

@@ -38,6 +38,33 @@ RSpec.describe Booking::Web::Session do
     expect(sessions.user_id(token, now: later)).to eq(42)
   end
 
+  describe ".for_token" do
+    let(:token) { "123456:bot-token" }
+
+    # A deploy restarts the web process; cookies issued before it must still
+    # read after it, or every deploy would bounce everyone through /start.
+    it "derives the same key from the same token" do
+      cookie = described_class.for_token(token).issue(42, now: issued_at)
+
+      expect(described_class.for_token(token).user_id(cookie, now: issued_at)).to eq(42)
+    end
+
+    # Rotating the bot token is the one way to log everyone out.
+    it "refuses a cookie issued under a different token" do
+      cookie = described_class.for_token("654321:old-token").issue(42, now: issued_at)
+
+      expect(described_class.for_token(token).user_id(cookie, now: issued_at)).to be_nil
+    end
+
+    # The token itself must not be the key: then a cookie signature would be
+    # one HMAC away from anything else keyed on the raw token.
+    it "does not sign with the raw token" do
+      cookie = described_class.new(secret: token).issue(42, now: issued_at)
+
+      expect(described_class.for_token(token).user_id(cookie, now: issued_at)).to be_nil
+    end
+  end
+
   it "refuses junk" do
     expect(sessions.user_id(nil, now: issued_at)).to be_nil
     expect(sessions.user_id("", now: issued_at)).to be_nil
