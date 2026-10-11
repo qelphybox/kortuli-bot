@@ -39,8 +39,9 @@ module Booking
         ].compact.join("\n")
       end
       blocks << "Fully booked: #{sheet.booked.join(", ")}" if sheet.booked.any?
+      heading = [rundown_heading(sheet), (weather_brief(sheet.outlook) if sheet.outlook)].compact.join("\n")
 
-      [rundown_heading(sheet), *blocks].join("\n\n")
+      [heading, *blocks].join("\n\n")
     end
 
     def rundown_heading(sheet)
@@ -177,10 +178,22 @@ module Booking
     def weather_outlook(outlook)
       if outlook.wet? then "#{outlook.icon} Rain likely #{weather_runs(outlook.wet_runs)}"
       elsif outlook.damp? then "#{outlook.icon} Showers possible #{weather_runs(outlook.damp_runs)}"
-      else
-        low, high = outlook.temperatures
-        ["🌤 No rain expected", ("#{low.round}–#{high.round}°" if low)].compact.join(" · ")
+      else ["🌤 No rain expected", temperature_range(outlook)].compact.join(" · ")
       end
+    end
+
+    # The outlook with how warm it gets even when it rains: a message headed
+    # for a chat has no hour-by-hour marks below it to read that off.
+    def weather_brief(outlook)
+      return weather_outlook(outlook) unless outlook.wet? || outlook.damp?
+
+      [weather_outlook(outlook), temperature_range(outlook)].compact.join(" · ")
+    end
+
+    def temperature_range(outlook)
+      low, high = outlook.temperatures
+
+      "#{low.round}–#{high.round}°" if low
     end
 
     # Said whenever the list has been reordered for it, so the order does not

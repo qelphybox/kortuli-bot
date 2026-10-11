@@ -110,10 +110,13 @@ already ticked on the form that creates a standing watch.
 A date's **Share** button turns it into one message for whoever you play
 with: every club with something free, its free hours folded into stretches
 (`18:00–20:00, 22:00–23:00`), its price and its booking link, and the clubs
-that are fully booked named at the end. A switch narrows it to your
-Favourites or to clubs you tick by hand, and two pickers to the hours the
-group can make — counted from that date's midnight, so a span can run to
-02:00. Both live in the URL, so changing one keeps the other. Asking for
+that are fully booked named at the end. Under its heading goes the
+Forecast's line for the same hours, with how warm it gets even when it rains
+(`🌧 Rain likely 19:00–21:00 · 14–19°`, `🌤 No rain expected · 16–23°`),
+because the chat it lands in has no hour-by-hour marks to read that off. A
+switch narrows it to your Favourites or to clubs you tick by hand, and two
+pickers to the hours the group can make — counted from that date's midnight,
+so a span can run to 02:00. Both live in the URL, so changing one keeps the other. Asking for
 Favourites with none starred, or ticking nothing, shows every club rather than
 an empty message. It leaves through Telegram's own share sheet
 (`t.me/share/url`, no inline mode, no Bot API call) or the clipboard, for
@@ -142,9 +145,10 @@ expected · 14–21°` — counted over the hours still to come. When rain is
 likely, the clubs whose every court is in the open sink below the rest of
 their half, favourite or not, and the line says so. Every hour on a club's
 screen carries its own mark (`🌧 Rain 75% · 19°`, `☁️ 17°`), and the home
-screen puts a 🌧 beside a date with rain in it. A message about a freed
-slot carries the same mark for its hour — the wettest one it touches, so a
-ninety-minute game is not promised a dry finish. It comes from
+screen puts a 🌧 beside a date with rain in it, and a date's Share message
+opens with its line. A message about a freed slot carries the same mark for
+its hour — the wettest one it touches, so a ninety-minute game is not
+promised a dry finish. It comes from
 [Open-Meteo](https://open-meteo.com): free, no key, hourly and sixteen days
 out. The poller fetches it every hour (`WEATHER_INTERVAL`) as a job of its
 own, so a club timing out never holds it up, and a failed fetch keeps the

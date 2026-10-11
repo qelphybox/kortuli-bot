@@ -26,9 +26,20 @@ RSpec.describe Booking::Rundown do
 
   def free(club, local, court: "any") = slot(club: club.slug, court:, at: local)
 
-  def sheet(slots, window: nil, now: self.now)
+  def sheet(slots, window: nil, forecast: [], now: self.now)
     table = Booking::Grid.build(clubs:, slots:, date:)
-    described_class.build(table:, clubs:, window:, now:)
+    described_class.build(table:, clubs:, window:, forecast: Booking::Weather.by_hour(forecast), now:)
+  end
+
+  def weather(local, chance:, temperature: 15.0)
+    Booking::Weather::Hour.new(starts_at: at(local), rain_chance: chance, rain_mm: 0.0, code: 3, temperature:, day: false)
+  end
+
+  # The whole of the 3rd, wet from 19:00 to 21:00 and warmest at noon.
+  let(:forecast) do
+    (8..23).map do
+      weather(format("2026-08-03 %02d:00", _1), chance: [19, 20].include?(_1) ? 80 : 0, temperature: _1 == 12 ? 24.0 : 15.0)
+    end
   end
 
   def runs(entry) = entry.runs.map { [Booking::Clock.to_local(_1.starts_at).hour, Booking::Clock.to_local(_1.ends_at).hour] }
@@ -88,8 +99,37 @@ RSpec.describe Booking::Rundown do
     expect(sheet([])).to be_empty
   end
 
+  describe "its weather" do
+    let(:slots) { [free(court_level, "2026-08-03 18:00")] }
+
+    it "reads the Forecast over the whole day" do
+      outlook = sheet(slots, forecast:).outlook
+
+      expect(outlook).to be_wet
+      expect(outlook.temperatures).to eq([15.0, 24.0])
+    end
+
+    # A group playing at six does not care that it pours at seven.
+    it "reads only the hours inside the window" do
+      outlook = sheet(slots, forecast:, window: at("2026-08-03 16:00")...at("2026-08-03 19:00")).outlook
+
+      expect(outlook).not_to be_wet
+      expect(outlook.hours.size).to eq(3)
+    end
+
+    it "leaves out the hours that have already begun" do
+      outlook = sheet(slots, forecast:, now: at("2026-08-03 12:30")).outlook
+
+      expect(outlook.temperatures).to eq([15.0, 15.0])
+    end
+
+    it "is nil where there is no Forecast" do
+      expect(sheet(slots).outlook).to be_nil
+    end
+  end
+
   describe "as a message" do
-    def text(slots, window: nil) = Booking::Messages.rundown(sheet(slots, window:))
+    def text(slots, window: nil, forecast: []) = Booking::Messages.rundown(sheet(slots, window:, forecast:))
 
     it "heads with the date, and names the span only when there is one" do
       expect(text([])).to start_with("🎾 Free padel courts · Mon 3 Aug\n")
@@ -107,6 +147,25 @@ RSpec.describe Booking::Rundown do
 
     it "closes with the clubs that are fully booked" do
       expect(text([free(court_level, "2026-08-03 18:00")])).to end_with("Fully booked: Kus Tba Padel")
+    end
+
+    # Under the heading, before any club: whether to bother with an open court
+    # is decided before which one.
+    it "says when it will rain, and how warm it gets" do
+      message = text([free(court_level, "2026-08-03 18:00")], forecast:)
+
+      expect(message).to start_with("🎾 Free padel courts · Mon 3 Aug\n🌧 Rain likely 19:00–21:00 · 15–24°\n\nPadel Club 2")
+    end
+
+    it "says a dry day is dry, with how warm it gets" do
+      dry = (8..23).map { weather(format("2026-08-03 %02d:00", _1), chance: 0, temperature: 10.0 + _1) }
+
+      expect(text([free(court_level, "2026-08-03 18:00")], forecast: dry))
+        .to start_with("🎾 Free padel courts · Mon 3 Aug\n🌤 No rain expected · 18–33°\n\n")
+    end
+
+    it "says nothing about the weather where there is no Forecast" do
+      expect(text([free(court_level, "2026-08-03 18:00")])).to start_with("🎾 Free padel courts · Mon 3 Aug\n\nPadel Club 2")
     end
 
     it "says plainly when there is nothing" do
