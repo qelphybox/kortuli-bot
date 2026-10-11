@@ -351,6 +351,11 @@ module Booking
             {
               time:,
               starts_at: starts_at.iso8601,
+              # Ticked to share as a Game. Counted from the page's midnight,
+              # so an hour after it comes out as 24 rather than 0. An hour
+              # already over has nothing left to tell anybody about.
+              hour: HourSpan.offset(date, starts_at),
+              pickable: starts_at + 3600 > Clock.now,
               free: cell.free?,
               askable: !cell.free? && askable?(starts_at),
               watching: watching_this,
@@ -408,6 +413,28 @@ module Booking
             }
           end
         end
+
+        def enabled_club(slug) = settings.repos.clubs.enabled.find { _1.slug == slug }
+
+        # The Game a span at a club makes, carrying the public link that
+        # describes it — the one the group gets, and the one a calendar
+        # points back to.
+        def game_at(club, span)
+          found = profile(club.slug)
+
+          Game.new(
+            club_slug: club.slug, club_name: club.name, starts_at: span.starts_at, ends_at: span.ends_at,
+            price: club.settings["price"], place: found&.address || found&.area, maps_url: found&.maps_url,
+            booking_url: club.settings["booking_url"], card_url: url(game_path(club.slug, span))
+          )
+        end
+
+        # Hours counted from the date's midnight, as HourSpan counts them, so a
+        # game from 23:00 to 01:00 is `23-25` under the evening it belongs to.
+        def game_path(slug, span) = "/game/#{slug}/#{span.date}/#{span.from}-#{span.to}"
+
+        # The wettest hour the game touches, as a freed slot's message says.
+        def game_weather(game) = Weather.worst(forecast, game.starts_at, game.ends_at)
 
         # The query a link back to Share needs to keep its clubs narrowed.
         def share_query(filter)
@@ -522,6 +549,69 @@ module Booking
         @club_name = row.club_name
         @slots = slots_view(date, row)
         erb :slots, layout: :layout
+      end
+
+      # Hours this person booked at the club, as one message for whoever they
+      # play with. Reached by ticking hours on the club's screen — any hours,
+      # free or not, because the Grid may not have seen the booking yet — and
+      # adjusted here with the two pickers. A span that is not on offer goes
+      # back to the hours to tick again.
+      get "/date/:date/club/:slug/game" do
+        require_visitor!
+
+        date = parse_date(params[:date])
+        redirect(to("/")) if date.nil?
+
+        club = enabled_club(params[:slug])
+        halt(404) unless club
+
+        row = horizon_tables.fetch(date).rows.find { _1.club_slug == club.slug }
+        @span = HourSpan.pick(params, date:, columns: row.cells.map(&:starts_at))
+        redirect(to("/date/#{date}/club/#{club.slug}")) unless @span
+
+        @date = date.to_s
+        @weekday = weekday_short(date)
+        @date_label = date_label(date)
+        @club = club
+        @game = game_at(club, @span)
+        @text = Messages.game(@game, weather: game_weather(@game))
+        @event = @game.to_event
+        erb :game, layout: :layout
+      end
+
+      # A Game as the group sees it: the link in the message. Open to anybody
+      # who has it, because the people it is sent to need not use the bot —
+      # and everything on it is either in the URL already or public: the club,
+      # its pin, the Forecast. With `.ics` on the end it is the event itself,
+      # for every calendar that is not Google's.
+      #
+      # Not limited to the Booking horizon: a link in a chat outlives the
+      # week it was sent in, and nothing on it goes stale but the Forecast,
+      # which simply stops being drawn.
+      get %r{/game/([a-z0-9-]+)/(\d{4}-\d{2}-\d{2})/(\d{1,2})-(\d{1,2})(\.ics)?} do |slug, raw_date, from, to, ics|
+        club = enabled_club(slug)
+        date = begin
+          Date.iso8601(raw_date)
+        rescue Date::Error
+          nil
+        end
+        halt(404) unless club && date
+
+        span = HourSpan.pick({ from:, to: }, date:, columns: club.opening_hours.starts_on(date))
+        halt(404) unless span
+
+        @game = game_at(club, span)
+        @event = @game.to_event
+
+        if ics
+          content_type "text/calendar; charset=utf-8"
+          # Inline, so iOS offers to add it rather than to save a file.
+          headers "Content-Disposition" => %(inline; filename="padel-#{slug}-#{span.date}.ics")
+          Calendar.ics(@event)
+        else
+          @weather = game_weather(@game)
+          erb :game_card, layout: :layout
+        end
       end
 
       # One date's free courts as one message, to send to whoever you play

@@ -51,6 +51,54 @@ module Booking
       "🎾 Free padel courts · #{day}"
     end
 
+    # --- A Game -------------------------------------------------------------
+
+    # What the group gets when somebody has booked: where, when, whether it
+    # will rain on it, what it costs, the pin, and the link that puts it in a
+    # calendar. Plain text for the reason the Rundown is — it leaves through
+    # the share sheet or the clipboard, and neither carries markup.
+    def game(game, weather: nil)
+      place = ["📍", game.place, game.maps_url].compact
+      [
+        "🎾 Court booked · #{game.club_name}",
+        game_when(game),
+        weather && weather_tag(weather),
+        game.price && "💸 #{game.price} an hour",
+        (place.join(" ") if place.size > 1),
+        game.card_url && "📅 Add to calendar: #{game.card_url}"
+      ].compact.join("\n")
+    end
+
+    # "Tue 14 Oct, 19:00–21:00": the date the game starts on, by the clock —
+    # an hour after midnight is the next day's, whatever page it was ticked on.
+    def game_when(game)
+      starts = Clock.to_local(game.starts_at)
+
+      "#{DAY_NAMES[starts.wday]} #{starts.day} #{starts.strftime("%b")}, #{local_clock(game.starts_at)}–#{local_clock(game.ends_at)}"
+    end
+
+    def game_title(game) = "🎾 Padel · #{game.club_name}"
+
+    # The calendar event's notes: what you would want to hand over at the
+    # desk, and the way back to everything else.
+    def game_details(game)
+      [
+        game.price && "#{game.price} an hour",
+        game.maps_url && "Map: #{game.maps_url}",
+        game.booking_url && "Booking page: #{game.booking_url}"
+      ].compact.join("\n")
+    end
+
+    # The Slots screen's button, before and after anything is ticked. Without
+    # JS it is always the first; with it, the second until a tick arrives.
+    def game_pick = "Share the hours I booked"
+
+    def game_pick_none = "Booked here? Tick the hours to share them"
+
+    def game_to_google = "Google Calendar ↗"
+
+    def game_to_ics = "Apple & other calendars"
+
     def local_clock(utc_time) = Clock.to_local(utc_time).strftime("%H:%M")
 
     def time_range(watch) = "#{clock(watch.from_minute)}–#{clock(watch.to_minute)}"

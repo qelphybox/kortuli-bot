@@ -5,6 +5,10 @@
   played and offers nothing, rather than a button that would refuse.
   Beside each hour, the Forecast for it — the rain is what decides between
   this club and one with a roof.
+  Every hour not yet over can be ticked, free or taken — the Grid may not
+  have seen a booking yet — and the ticked ones become a Game to share. The
+  boxes belong to the form under the list by its id, because a row's own
+  Watch form sits between them and HTML does not nest forms.
 %>
 <header class="app-head app-head--sub">
   <a class="back" href="/date/<%= @date %>" aria-label="Back to clubs">←</a>
@@ -18,15 +22,23 @@
 <ul class="slots">
   <% @slots.each do |s| %>
     <li class="slot-row <%= s[:free] ? "is-free" : "is-taken" %>">
-      <span class="slot-row__body">
-        <span class="slot-row__time"><%= s[:time] %></span>
-        <span class="slot-row__meta">
-          <span class="slot-row__state"><%= s[:state] %></span>
-          <% if (hour = s[:weather]) %>
-            <span class="slot-row__weather<%= " is-wet" if hour.wet? %><%= " is-damp" if hour.damp? %>"><%= Booking::Messages.weather_tag(hour) %></span>
-          <% end %>
+      <label class="slot-row__label">
+        <% if s[:pickable] %>
+          <input class="slot-row__pick" type="checkbox" name="hours[]" value="<%= s[:hour] %>" form="game-pick"
+                 aria-label="I booked <%= @club_name %> at <%= s[:time] %>">
+        <% else %>
+          <span class="slot-row__pick is-blank" aria-hidden="true"></span>
+        <% end %>
+        <span class="slot-row__body">
+          <span class="slot-row__time"><%= s[:time] %></span>
+          <span class="slot-row__meta">
+            <span class="slot-row__state"><%= s[:state] %></span>
+            <% if (hour = s[:weather]) %>
+              <span class="slot-row__weather<%= " is-wet" if hour.wet? %><%= " is-damp" if hour.damp? %>"><%= Booking::Messages.weather_tag(hour) %></span>
+            <% end %>
+          </span>
         </span>
-      </span>
+      </label>
       <% if s[:free] %>
         <a class="slot-row__book" data-external href="<%= s[:deeplink] %>"
            aria-label="<%= @club_name %> at <%= s[:time] %>, book">Book ↗</a>
@@ -44,5 +56,10 @@
     </li>
   <% end %>
 </ul>
+
+<form class="game-pick" id="game-pick" method="get" action="/date/<%= @date %>/club/<%= @club_slug %>/game">
+  <button class="cta" type="submit" data-game-pick
+          data-none="<%= Booking::Messages.game_pick_none %>"><%= Booking::Messages.game_pick %></button>
+</form>
 
 <%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_slots } %>

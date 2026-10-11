@@ -29,6 +29,14 @@ every Club, or narrowed to a span of hours that may run past midnight, and to
 the Favourites or a handful of Clubs ticked by hand.
 _Avoid_: digest, summary, export, share
 
+**Game**:
+Hours somebody has booked themselves at one Club — one stretch of them on
+one date — told to the people they play with: where, when, the Forecast, the
+price, the pin, and a link that puts it in a calendar. Whatever the person
+says they booked, taken or free, because the Grid may not have caught up.
+Never stored; it lives in its URL, which is also the link the group gets.
+_Avoid_: booking, reservation, match
+
 **Opening hours**:
 The hours a club offers at all, declared per club rather than observed. They
 decide how long a row is; no source tells us reliably.

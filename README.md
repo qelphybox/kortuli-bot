@@ -119,6 +119,20 @@ an empty message. It leaves through Telegram's own share sheet
 (`t.me/share/url`, no inline mode, no Bot API call) or the clipboard, for
 every other messenger.
 
+Once you have booked, every hour on a club's screen has a tick, free or
+taken alike — the booking may not have reached us yet. Tick the hours, press
+**Share the hours I booked**, and they become a **Game**: one message with
+the club, the day and the stretch (`Wed 14 Oct, 19:00–21:00`), the wettest
+hour's Forecast, the price, the pin in Google Maps and a link to add it to a
+calendar. Ticking 19:00 and 21:00 takes 20:00 with them, since a booking is
+one stretch; two pickers on the next screen move either end. It leaves the
+way a Rundown does — share sheet or clipboard — and the same screen puts it
+in your own calendar. The link in the message is `/game/<club>/<date>/19-21`,
+the one page of the app that opens without Telegram, because the people it
+goes to need not use the bot: Google Calendar's own "add" link, and the
+same URL with `.ics` on the end for Apple's Calendar and everything else.
+Nothing is stored — the URL is the whole Game.
+
 Tapping an hour that is **gone** asks to be told when it comes back: one tap,
 no form, a watch on exactly that club and that hour. Hours that have already
 started, and hours past the booking horizon, are drawn without a button —

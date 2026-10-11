@@ -1,0 +1,38 @@
+<%#
+  A Game as the group sees it — the page behind the link in the message, open
+  without a session, because the people it was sent to need not use the bot.
+  Its job is the two calendar buttons; the rest says what they would be
+  adding. Plain links throughout: this is a browser tab, not the mini app.
+%>
+<header class="app-head app-head--sub">
+  <span class="app-head__title">
+    <span class="app-head__club">🎾 <%= h(@game.club_name) %></span>
+    <span class="app-head__sub"><%= h(Booking::Messages.game_when(@game)) %></span>
+  </span>
+</header>
+
+<section class="share game-card">
+  <dl class="facts">
+    <% if @weather %>
+      <dt>Forecast</dt>
+      <dd class="<%= "is-wet" if @weather.wet? %>"><%= Booking::Messages.weather_tag(@weather) %></dd>
+    <% end %>
+    <% if @game.price %>
+      <dt>Price</dt>
+      <dd><%= h(@game.price) %> an hour</dd>
+    <% end %>
+    <% if @game.place %>
+      <dt>Where</dt>
+      <dd><%= h(@game.place) %></dd>
+    <% end %>
+  </dl>
+
+  <a class="cta" href="<%= h(Booking::Calendar.google_url(@event)) %>" target="_blank" rel="noopener">
+    <%= Booking::Messages.game_to_google %>
+  </a>
+  <a class="btn-secondary" href="<%= h(@game.card_url) %>.ics"><%= Booking::Messages.game_to_ics %></a>
+  <% if @game.maps_url %>
+    <a class="btn-secondary" href="<%= h(@game.maps_url) %>" target="_blank" rel="noopener">Open in Google Maps ↗</a>
+  <% end %>
+  <a class="btn-tertiary" href="<%= h(bot_url) %>">Found free courts with @<%= h(settings.bot_username) %></a>
+</section>
