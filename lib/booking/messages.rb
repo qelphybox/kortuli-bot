@@ -168,6 +168,36 @@ module Booking
 
     def favourite_remove = "Remove from favourites"
 
+    # --- The Forecast --------------------------------------------------------
+
+    # One line over a date's clubs: when it will rain, if it will.
+    def weather_outlook(outlook)
+      if outlook.wet? then "#{outlook.icon} Rain likely #{weather_runs(outlook.wet_runs)}"
+      elsif outlook.damp? then "#{outlook.icon} Showers possible #{weather_runs(outlook.damp_runs)}"
+      else
+        low, high = outlook.temperatures
+        ["🌤 No rain expected", ("#{low.round}–#{high.round}°" if low)].compact.join(" · ")
+      end
+    end
+
+    # Said whenever the list has been reordered for it, so the order does not
+    # look like a mistake.
+    def weather_roofed_first = "Clubs with a roof come first."
+
+    # Beside one hour: "🌧 Rain 70% · 14°", "🌦 30% · 16°", "☀️ 21°".
+    def weather_tag(hour)
+      chance = ("#{hour.rain_chance}%" if hour.rain_chance)
+      temperature = ("#{hour.temperature.round}°" if hour.temperature)
+      said =
+        if hour.wet? then ["Rain", chance].compact.join(" ")
+        elsif hour.damp? then chance
+        end
+
+      [hour.icon, [said, temperature].compact.join(" · ")].join(" ").strip
+    end
+
+    def weather_runs(runs) = runs.map { "#{local_clock(_1)}–#{local_clock(_2)}" }.join(", ")
+
     # --- A Club's Profile ---------------------------------------------------
 
     # "2 indoor · 3 covered": every court counted, under its Cover.

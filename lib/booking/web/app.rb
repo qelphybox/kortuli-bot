@@ -253,6 +253,29 @@ module Booking
           end
         end
 
+        # The Forecast by the instant each hour starts, read once per request
+        # for the same reason the tables are.
+        def forecast = @forecast ||= settings.repos.forecast.hours.to_h { [_1.starts_at.to_i, _1] }
+
+        def weather_at(starts_at) = forecast[starts_at.to_i]
+
+        # The Forecast over the hours a date's page draws that are still to
+        # come — this morning's rain is no reason to book a roof tonight. Nil
+        # where the Forecast has nothing to say, so nothing is drawn.
+        def outlook(table, now: Clock.now)
+          hours = table.columns.select { _1 + 3600 > now }.filter_map { weather_at(_1) }
+
+          Weather::Outlook.new(hours:) if hours.any?
+        end
+
+        # Every court of the club in the open, as far as its Profile says. A
+        # club without a Profile is not assumed to be either.
+        def open_air?(slug)
+          covers = profile(slug)&.covers.to_a
+
+          covers.any? && covers.all? { |cover, _| cover == "outdoor" }
+        end
+
         def any_free?(table) = table.rows.any? { |row| row.cells.any?(&:free?) }
 
         # One dict per horizon date, in the shape the Dates template reads.
@@ -270,6 +293,7 @@ module Booking
               date_label: date_label(date),
               today: date == horizon.first,
               any_free:,
+              weather: outlook(table)&.icon,
               headline: any_free ? "#{open_clubs} #{open_clubs == 1 ? "club" : "clubs"}" : "fully booked",
               sub: any_free ? "#{free_cells} #{free_cells == 1 ? "slot" : "slots"}" : nil
             }
@@ -280,9 +304,11 @@ module Booking
         # come first, then the fully-booked ones — dimmed rather than hidden,
         # so the eye reads "we did look" rather than "the club is gone".
         # Within each half, Favourites lead: they are the rows the eye is
-        # hunting for.
+        # hunting for — unless rain is likely, when the clubs entirely in the
+        # open sink below the rest of their half, favourite or not.
         def clubs_view(date)
           table = horizon_tables.fetch(date)
+          wet = !!outlook(table)&.wet?
           rows = table.rows.map do |row|
             free_cells = row.cells.select(&:free?)
             any_free = free_cells.any?
@@ -298,6 +324,7 @@ module Booking
               name: row.club_name,
               any_free:,
               favourite: favourite?(row.club_slug),
+              rained_off: wet && open_air?(row.club_slug),
               cover: cover_tag(row.club_slug),
               sub:
             }
@@ -305,7 +332,7 @@ module Booking
 
           # The index breaks ties, because Ruby's sort_by is not stable and
           # the rows already arrive in an order worth keeping.
-          rows.each_with_index.sort_by { |c, i| [c[:any_free] ? 0 : 1, c[:favourite] ? 0 : 1, i] }.map(&:first)
+          rows.each_with_index.sort_by { |c, i| [c[:any_free] ? 0 : 1, c[:rained_off] ? 1 : 0, c[:favourite] ? 0 : 1, i] }.map(&:first)
         end
 
         # One dict per hour on the selected club-and-date. "Watching" is
@@ -327,6 +354,7 @@ module Booking
               free: cell.free?,
               askable: !cell.free? && askable?(starts_at),
               watching: watching_this,
+              weather: weather_at(starts_at),
               state:,
               deeplink: cell.deeplink
             }
@@ -470,6 +498,7 @@ module Booking
         @weekday = weekday_short(date)
         @date_label = date_label(date)
         @clubs = clubs_view(date)
+        @outlook = outlook(horizon_tables.fetch(date))
         erb :clubs, layout: :layout
       end
 

@@ -37,6 +37,7 @@
           <span class="date-row__weekday">
             <span><%= d[:weekday] %></span>
             <% if d[:today] %><span class="badge">Today</span><% end %>
+            <% if d[:weather] %><span class="date-row__weather" title="Rain in the forecast"><%= d[:weather] %></span><% end %>
           </span>
           <span class="date-row__date"><%= d[:date_label] %></span>
         </span>

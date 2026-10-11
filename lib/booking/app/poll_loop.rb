@@ -5,7 +5,8 @@ module Booking
   module App
     # Mirrors club configuration into the database, then walks every Club on a
     # schedule and sends what the walk turned up. The only process that writes
-    # Slots, and the only one that speaks first.
+    # Slots, and the only one that speaks first. Keeps the Forecast too, on a
+    # slower clock of its own.
     class PollLoop
       def self.run = new.run
 
@@ -41,6 +42,15 @@ module Booking
           poller.tick
         rescue StandardError => e
           @logger.call("poll: tick crashed — #{e.class}: #{e.message}")
+        end
+
+        # Its own job rather than a step of the tick: a different source on a
+        # different clock, and a club timing out must not hold the sky up.
+        refresh = Weather::Refresh.new(http: Http.new, forecast: @repos.forecast, logger: @logger)
+        scheduler.every(Config.weather_interval, first: :now, overlap: false) do
+          refresh.call
+        rescue StandardError => e
+          @logger.call("weather: refresh crashed — #{e.class}: #{e.message}")
         end
       end
 

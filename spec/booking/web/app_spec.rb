@@ -11,14 +11,16 @@ RSpec.describe Booking::Web::App do
   # are what is under test, not Sequel. Watches and Favourites are the real
   # repositories over an in-memory database, because here the web *writes* —
   # and a faked repository would prove only that the route called the method
-  # it was written to call.
-  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites)
+  # it was written to call. The Forecast is real too, because filling it is
+  # simpler than faking it.
+  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast)
   FakeClubs = Struct.new(:enabled)
   FakeSlots = Struct.new(:all)
 
   let(:db) { Booking::DB.connect("sqlite:/") }
   let(:watches) { Booking::Repo::Watches.new(db) }
   let(:favourites) { Booking::Repo::Favourites.new(db) }
+  let(:forecast) { Booking::Repo::Forecast.new(db) }
   let(:today) { Booking::Clock.local_date(Booking::Clock.now) }
   let(:clubs) do
     [
@@ -53,7 +55,7 @@ RSpec.describe Booking::Web::App do
       )
     }
   end
-  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites) }
+  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast) }
 
   let(:owner_id) { 7 }
   let(:log_dir) { Dir.mktmpdir }
@@ -1241,6 +1243,80 @@ RSpec.describe Booking::Web::App do
     end
   end
 
+  describe "the forecast" do
+    let(:tomorrow) { today + 1 }
+
+    def forecast_hour(at, chance:, temperature: 14.0)
+      Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc(at), rain_chance: chance, rain_mm: 0.0,
+                                 code: 3, temperature:, day: false)
+    end
+
+    def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+
+    describe "with rain likely in the evening" do
+      before do
+        forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: [19, 20].include?(_1) ? 80 : 0) })
+      end
+
+      it "says when it will rain above the date's clubs" do
+        sign_in
+        get "/date/#{tomorrow}"
+
+        expect(last_response.body).to include("🌧 Rain likely 19:00–21:00")
+        expect(last_response.body).to include(Booking::Messages.weather_roofed_first)
+      end
+
+      # Kus Tba's courts are all in the open. Starred, it would lead; on a
+      # wet evening the club with a roof — or at least not known to lack
+      # one — comes first anyway.
+      it "sinks the clubs entirely in the open, even a favourite" do
+        sign_in(user_id: 42)
+        favourites.add(42, "kus-tba-padel")
+        get "/date/#{tomorrow}"
+
+        expect(club_names_in_order).to eq(["Padel Club 2", "Kus Tba Padel"])
+      end
+
+      it "marks each hour wet or not beside it" do
+        sign_in
+        get "/date/#{tomorrow}/club/kus-tba-padel"
+
+        expect(last_response.body).to include('<span class="slot-row__weather is-wet">🌧 Rain 80% · 14°</span>')
+        expect(last_response.body).to include('<span class="slot-row__weather">☁️ 14°</span>')
+      end
+
+      it "marks the date as rainy on the home screen" do
+        sign_in
+        get "/"
+
+        expect(last_response.body.scan("date-row__weather").size).to eq(1)
+      end
+    end
+
+    describe "with a dry day" do
+      before { forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: 0) }) }
+
+      it "says it will stay dry, and leaves the favourites leading" do
+        sign_in(user_id: 42)
+        favourites.add(42, "kus-tba-padel")
+        get "/date/#{tomorrow}"
+
+        expect(last_response.body).to include("🌤 No rain expected · 14–14°")
+        expect(club_names_in_order).to eq(["Kus Tba Padel", "Padel Club 2"])
+      end
+    end
+
+    # Before the poller's first refresh, or past the end of what it fetched.
+    it "draws nothing where there is no forecast" do
+      sign_in
+      get "/date/#{tomorrow}"
+      expect(last_response.body).not_to include('class="weather')
+
+      get "/date/#{tomorrow}/club/kus-tba-padel"
+      expect(last_response.body).not_to include("slot-row__weather")
+    end
+  end
+
   describe "the dashboard" do
     def log(process, *lines)
       File.write(Booking::Ops::LogFile.path(log_dir, process), lines.map { "#{_1}\n" }.join, encoding: Encoding::UTF_8)
@@ -1295,7 +1371,7 @@ RSpec.describe Booking::Web::App do
       it "weighs the database, the disk under it, and the last day's activity" do
         get "/admin"
 
-        expect(last_response.body).to include("Database", "Disk", "Active watches", "rows")
+        expect(last_response.body).to include("Database", "Disk", "Active watches", "rows", "Forecast")
       end
 
       it "lists the latest lines that report trouble" do

@@ -15,6 +15,8 @@ module Booking
 
       Activity = Data.define(:people, :active_watches, :notified_24h, :freed_24h)
 
+      Forecast = Data.define(:fetched_at, :hours)
+
       # A club and how its last Poll went. `state` is the outcome, unless the
       # poll is old enough that the outcome no longer says anything: then it
       # is "stale", and "never" for a club with no poll on record at all.
@@ -75,6 +77,15 @@ module Booking
           notified_24h: @db[:notifications].where { sent_at >= since }.count,
           freed_24h: @db[:events].where(kind: "became_available").where { occurred_at >= since }.count
         )
+      end
+
+      # When the poller last got a Forecast, and how many hours it holds. Old
+      # means Open-Meteo has stopped answering, and every rain mark in the app
+      # is a guess from back then.
+      def forecast
+        repo = Repo::Forecast.new(@db)
+
+        Forecast.new(fetched_at: repo.fetched_at, hours: @db[:forecast_hours].count)
       end
 
       def logs = LogSearch.new(dir: @log_dir)

@@ -3,6 +3,8 @@
   club's booking page; a taken hour that is still ahead offers a one-tap
   Watch — one message when it frees up. An hour already begun cannot be
   played and offers nothing, rather than a button that would refuse.
+  Beside each hour, the Forecast for it — the rain is what decides between
+  this club and one with a roof.
 %>
 <header class="app-head app-head--sub">
   <a class="back" href="/date/<%= @date %>" aria-label="Back to clubs">←</a>
@@ -18,7 +20,12 @@
     <li class="slot-row <%= s[:free] ? "is-free" : "is-taken" %>">
       <span class="slot-row__body">
         <span class="slot-row__time"><%= s[:time] %></span>
-        <span class="slot-row__state"><%= s[:state] %></span>
+        <span class="slot-row__meta">
+          <span class="slot-row__state"><%= s[:state] %></span>
+          <% if (hour = s[:weather]) %>
+            <span class="slot-row__weather<%= " is-wet" if hour.wet? %><%= " is-damp" if hour.damp? %>"><%= Booking::Messages.weather_tag(hour) %></span>
+          <% end %>
+        </span>
       </span>
       <% if s[:free] %>
         <a class="slot-row__book" data-external href="<%= s[:deeplink] %>"
