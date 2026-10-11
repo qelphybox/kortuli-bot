@@ -218,3 +218,31 @@
     # number, so this is also how many it asks about.
     courts: 3
     court_aliases: {}
+
+# Lemans Padel books through its own PHP API on a subdomain of the WordPress
+# site, open to anyone. The adapter reads the court list from it every tick,
+# so nothing here pins the courts.
+- slug: lemans-padel
+  name: Lemans Padel
+  adapter: lemans
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    booking_url: "https://lemanspadel.ge/book-padel/"
+    sapadelo: lemans-padel
+    # 50 for weekday starts before 17:00, 70 evenings and weekends; the same
+    # on every court. The court list's `duration_prices` says a flat 70 — the
+    # real rate is per start, from /availability/courts.
+    price: "50–70 GEL"
+    # Starts run 08:00 to a last one at 01:00, which the source dates to the
+    # morning after.
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
+    # No window on the server or in the widget's picker: a date a year out
+    # reads entirely free. Two weeks, as for PadelHub.
+    max_days: 14
+    # The source answers per court, so a cell can say how many of the four are
+    # free.
+    courts: 4
+    court_aliases: {}

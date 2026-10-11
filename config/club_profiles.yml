@@ -239,3 +239,35 @@ clubs:
       sun: '08:00–02:00'
     prices:
     - gel: 80
+  lemans-padel:
+    source: https://sapadelo.com/georgia/clubs/lemans-padel
+    area: Lisi
+    phone: "+995574126101"
+    lat: 41.7447805
+    lng: 44.7102926
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    - name: Court 4
+      cover: outdoor
+    hours:
+      mon: '09:00–02:00'
+      tue: '09:00–02:00'
+      wed: '09:00–02:00'
+      thu: '09:00–02:00'
+      fri: '09:00–02:00'
+      sat: '09:00–02:00'
+      sun: '09:00–02:00'
+    prices:
+    - gel: 70
+    - gel: 50
+      from: '09:00'
+      to: '17:00'
+    - gel: 70
+      days:
+      - sat
+      - sun
