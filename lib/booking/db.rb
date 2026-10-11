@@ -22,8 +22,13 @@ module Booking
 
     def connection = @connection ||= connect
 
+    # The file behind a sqlite:// URL, or nil for an in-memory database.
+    def path(url = Config.database_url)
+      url[%r{\Asqlite://(?!/)(.+)\z}, 1] || url[%r{\Asqlite://(/.+)\z}, 1]
+    end
+
     def ensure_directory(url)
-      path = url[%r{\Asqlite://(?!/)(.+)\z}, 1] || url[%r{\Asqlite:///(.+)\z}, 1]
+      path = path(url)
       FileUtils.mkdir_p(File.dirname(path)) if path
     end
   end

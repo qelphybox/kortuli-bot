@@ -794,3 +794,100 @@ button { color: inherit; }
 }
 
 .profile .disclaimer a { color: var(--muted); }
+
+/* --- Dashboard. The owner's screen, built from the Profile's sections and
+       facts, plus three things only it needs: a state pill, a meter, and a
+       log drawn as the terminal would draw it. ---------------------------- */
+.ops-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.ops-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ops-row__body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ops-row__name { font: 600 14.5px/1.2 "IBM Plex Sans", sans-serif; }
+.ops-row__sub {
+  color: var(--muted);
+  font: 400 12px/1.35 "IBM Plex Mono", ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+
+.ops-note { margin: 0; color: var(--muted); font-size: 13px; }
+
+/* Green is fine, red is broken, and an outline is "cannot tell" — the one
+   that should make you look twice, because silence is how a broken adapter
+   looks from outside. */
+.state {
+  flex-shrink: 0;
+  padding: 4px 8px 3px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.state--up, .state--ok { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.state--failed, .state--stale { background: var(--danger); border-color: var(--danger); color: #fff; }
+.state--suspect { border-color: var(--danger); color: var(--danger); }
+
+.meter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--chip);
+  overflow: hidden;
+}
+.meter span { display: block; height: 100%; background: var(--accent); }
+.meter.is-high span { background: var(--danger); }
+
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.log__line {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line);
+  font: 400 11.5px/1.45 "IBM Plex Mono", ui-monospace, monospace;
+  overflow-wrap: anywhere;
+}
+.log__line.is-problem { color: var(--danger); }
+.log__line mark { background: var(--chip); color: inherit; outline: 1px solid var(--accent); border-radius: 2px; }
+.log__process {
+  margin-right: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.log-search {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px 8px;
+}
+.log-search input[type="search"], .log-search select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--fg);
+  font: 400 15px/1.2 "IBM Plex Mono", ui-monospace, monospace;
+}
+.log-search__row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.log-search__row select { flex: 1 1 140px; width: auto; }
+.log-search__toggle { display: flex; align-items: center; gap: 6px; font-size: 13.5px; }
+.log-search .btn-secondary { padding: 11px 16px; cursor: pointer; }
+
+.log-results { display: flex; flex-direction: column; gap: 10px; padding: 8px 20px calc(32px + env(safe-area-inset-bottom)); }

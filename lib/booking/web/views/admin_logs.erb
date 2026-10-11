@@ -1,0 +1,42 @@
+<%#
+  The three processes' logs in one list, newest first. The form is a GET, so
+  a search is a URL: refresh re-runs it, and back steps through earlier ones.
+%>
+<header class="app-head app-head--sub">
+  <a class="back" href="/admin" aria-label="Back to the dashboard">←</a>
+  <span class="app-head__title-solo">Logs</span>
+</header>
+
+<form class="log-search" method="get" action="/admin/logs">
+  <label class="visually-hidden" for="log-q">Search</label>
+  <input id="log-q" type="search" name="q" value="<%= h(@query) %>" placeholder="padel-club-2, timeout, 409…" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div class="log-search__row">
+    <label class="visually-hidden" for="log-process">Process</label>
+    <select id="log-process" name="process">
+      <option value="">All processes</option>
+      <% Booking::Ops::LogSearch::PROCESSES.each do |process| %>
+        <option value="<%= process %>"<%= " selected" if @process == process %>><%= process %></option>
+      <% end %>
+    </select>
+    <label class="log-search__toggle">
+      <input type="checkbox" name="problems" value="1"<%= " checked" if @only_problems %>>
+      Problems only
+    </label>
+    <button class="btn-secondary" type="submit">Search</button>
+  </div>
+</form>
+
+<section class="log-results">
+  <% if @result.lines.empty? %>
+    <p class="muted empty">Nothing in the logs matches.</p>
+  <% else %>
+    <p class="ops-note">
+      <%= @result.lines.size %> <%= @result.lines.size == 1 ? "line" : "lines" %>, newest first<%= " — older matches left out; narrow the search to reach them" if @result.truncated %>.
+    </p>
+    <ul class="log">
+      <% @result.lines.each do |line| %>
+        <li class="log__line<%= " is-problem" if line.problem? %>"><span class="log__process"><%= line.process %></span><%= highlight(line.text, @query) %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</section>

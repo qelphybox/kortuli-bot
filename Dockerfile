@@ -50,9 +50,9 @@ EXPOSE 8080
 
 # No HEALTHCHECK on purpose. The mini app answers /up and kamal-proxy asks it,
 # which covers the process that can be asked. For the other two the honest
-# check — "is the poll loop still ticking?" — needs a heartbeat the MVP
-# deliberately does not have, and a process-is-alive check would only restate
-# what Docker already reports.
+# check — "is the poll loop still ticking?" — is each club's last Poll, which
+# the owner's /admin dashboard reads; a container-level check would only
+# restate what Docker already reports, and restart nothing usefully.
 #
 # The default is the bot because Kamal's other two roles name their own
 # command; this is only what you get running the image bare.

@@ -101,3 +101,23 @@ _Avoid_: available, cancellation, opened
 How far ahead we look, ours rather than a club's. A club's own window is its
 `max_days` and can be shorter.
 _Avoid_: window, range, lookahead
+
+## Running it
+
+**Poll**:
+One read of one Club's free Slots, and how it went: `ok`, `suspect` (an
+answer the differ refused to believe, so the snapshot was kept) or `failed`
+(the source could not be read). Only the last one per Club is kept.
+_Avoid_: fetch, scrape, check
+
+**Heartbeat**:
+A process saying it is still running, every thirty seconds, into a file of
+its own. Proves the process is up, not that it is working — a stale Poll is
+what says the poll loop has stopped.
+_Avoid_: ping, health check, liveness
+
+**Dashboard**:
+The owner's screen in the mini app: Heartbeats, every Club's last Poll, the
+database and the disk under it, and the logs to search. Exists for
+`OWNER_TELEGRAM_ID` alone; to anybody else it is not there.
+_Avoid_: admin panel, monitoring, status page

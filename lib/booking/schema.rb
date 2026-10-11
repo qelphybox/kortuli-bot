@@ -86,6 +86,15 @@ module Booking
         unique %i[user_id club_slug]
       end
 
+      # The last Poll of each club and how it went, overwritten every tick.
+      # State rather than history: the log keeps the history.
+      db.create_table?(:polls) do
+        String :club_slug, primary_key: true
+        DateTime :polled_at, null: false
+        String :outcome, null: false
+        String :summary, null: false
+      end
+
       # `create_table?` does nothing to a table that already exists, and by the
       # time the Dated watch arrived there were watches in the file. Guarded so
       # it is as re-runnable as everything above it.

@@ -4,7 +4,20 @@ module Booking
   # There is no alerting, so this log *is* the health check — which makes one
   # timestamp format across every line the difference between grepping journald
   # and squinting at it. Injectable everywhere so tests can read what was said.
-  def self.default_logger = ->(line) { $stdout.puts("#{Clock.now.iso8601} #{line}") }
+  def self.default_logger = ->(line) { log(line) }
+
+  # Set by Boot, and only there: a process being started keeps a copy of its
+  # log where the dashboard can search it. Requiring the library writes no
+  # files.
+  class << self
+    attr_accessor :log_file
+  end
+
+  def self.log(line)
+    stamped = "#{Clock.now.iso8601} #{line}"
+    $stdout.puts(stamped)
+    log_file&.write(stamped)
+  end
 end
 
 require_relative "booking/config"
@@ -27,6 +40,11 @@ require_relative "booking/repo/watches"
 require_relative "booking/repo/notifications"
 require_relative "booking/repo/events"
 require_relative "booking/repo/favourites"
+require_relative "booking/repo/polls"
+require_relative "booking/ops/log_file"
+require_relative "booking/ops/heartbeat"
+require_relative "booking/ops/host"
+require_relative "booking/ops/dashboard"
 require_relative "booking/adapters"
 require_relative "booking/http"
 require_relative "booking/repos"

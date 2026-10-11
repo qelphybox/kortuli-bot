@@ -1,4 +1,5 @@
 require "rack/test"
+require "tmpdir"
 
 RSpec.describe Booking::Web::App do
   include Rack::Test::Methods
@@ -54,6 +55,12 @@ RSpec.describe Booking::Web::App do
   end
   let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites) }
 
+  let(:owner_id) { 7 }
+  let(:log_dir) { Dir.mktmpdir }
+  let(:dashboard) { Booking::Ops::Dashboard.new(db:, database_path: nil, log_dir:, poll_every: 300) }
+
+  after { FileUtils.rm_rf(log_dir) }
+
   def app
     described_class.tap do |a|
       a.set :telegram_token, token
@@ -61,6 +68,8 @@ RSpec.describe Booking::Web::App do
       a.set :visitor_sessions, sessions
       a.set :repos, repos
       a.set :club_profiles, club_profiles
+      a.set :owner_id, owner_id
+      a.set :dashboard, dashboard
     end
   end
 
@@ -1229,6 +1238,103 @@ RSpec.describe Booking::Web::App do
 
       expect(last_response.body).to include('<span class="club-row__cover">outdoor</span>')
       expect(last_response.body.scan("club-row__cover").size).to eq(1)
+    end
+  end
+
+  describe "the dashboard" do
+    def log(process, *lines)
+      File.write(Booking::Ops::LogFile.path(log_dir, process), lines.map { "#{_1}\n" }.join, encoding: Encoding::UTF_8)
+    end
+
+    before do
+      Booking::Repo::Clubs.new(db).upsert(slug: "padel-club-2", name: "Padel Club 2", adapter: "reservio")
+      Booking::Repo::Polls.new(db).record("padel-club-2", outcome: :failed, summary: "failed — timeout")
+      Booking::Ops::Heartbeat.new(dir: log_dir, process: "poller").beat
+      log("poller", "2026-10-11T10:04:00Z poll padel-club-2: failed — timeout", "2026-10-11T10:05:00Z poll kus-tba-padel: 40 free")
+      log("bot", "2026-10-11T10:02:00Z telegram: <script>alert(1)</script> listening")
+    end
+
+    it "sends somebody without a session to /start" do
+      get "/admin"
+
+      expect(last_response).to be_redirect
+      expect(last_response.location).to end_with("/start")
+    end
+
+    # Anybody else gets the same answer as for a page that is not there.
+    it "does not exist for anybody but the owner" do
+      sign_in(user_id: 42)
+
+      get "/admin"
+      expect(last_response.status).to eq(404)
+      get "/admin/logs?q=poll"
+      expect(last_response.status).to eq(404)
+    end
+
+    it "is linked from the dates screen for the owner alone" do
+      sign_in(user_id: 42)
+      get "/"
+      expect(last_response.body).not_to include('href="/admin"')
+
+      sign_in(user_id: owner_id)
+      get "/"
+      expect(last_response.body).to include('href="/admin"')
+    end
+
+    describe "for the owner" do
+      before { sign_in(user_id: owner_id) }
+
+      it "shows which processes are beating and how each club's last poll went" do
+        get "/admin"
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to include("poller", "state--up", "state--missing")
+        expect(last_response.body).to include("Padel Club 2", "failed — timeout", "state--failed")
+      end
+
+      it "weighs the database, the disk under it, and the last day's activity" do
+        get "/admin"
+
+        expect(last_response.body).to include("Database", "Disk", "Active watches", "rows")
+      end
+
+      it "lists the latest lines that report trouble" do
+        get "/admin"
+
+        expect(last_response.body).to include("2026-10-11T10:04:00Z poll padel-club-2: failed — timeout")
+        expect(last_response.body).not_to include("kus-tba-padel: 40 free")
+      end
+
+      it "searches the logs, marking what matched" do
+        get "/admin/logs", q: "KUS-TBA"
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to include("<mark>kus-tba</mark>-padel: 40 free")
+        expect(last_response.body).not_to include("telegram:")
+      end
+
+      it "narrows the search to one process, or to trouble" do
+        get "/admin/logs", process: "bot"
+        expect(last_response.body).to include("listening")
+        expect(last_response.body).not_to include("poll padel-club-2")
+
+        get "/admin/logs", problems: "1"
+        expect(last_response.body).to include("failed — timeout")
+        expect(last_response.body).not_to include("listening")
+      end
+
+      it "escapes what the log says, so a line cannot become markup" do
+        get "/admin/logs", q: "<script>"
+
+        expect(last_response.body).to include("<mark>&lt;script&gt;</mark>alert(1)")
+        expect(last_response.body).not_to include("<script>alert(1)")
+      end
+
+      it "says so when nothing matches" do
+        get "/admin/logs", q: "nothing like this"
+
+        expect(last_response.body).to include("Nothing in the logs matches.")
+      end
     end
   end
 
