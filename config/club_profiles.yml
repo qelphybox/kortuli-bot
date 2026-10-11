@@ -1,0 +1,241 @@
+# Written by `bundle exec rake sapadelo:import` — edit config/clubs.yml
+# (settings.sapadelo) and run it again rather than editing this by hand.
+#
+# Each club's Profile: the cover over every court, where it is, and the
+# hours and prices it lists on sapadelo.com. For people to read; nothing
+# that decides a Cell looks at it.
+checked_on: '2026-10-11'
+clubs:
+  kus-tba-padel:
+    source: https://sapadelo.com/georgia/clubs/kus-tba-padel
+    area: Turtle Lake
+    address: Turtle Lake
+    phone: "+995585889977"
+    lat: 41.700688
+    lng: 44.7570599
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    - name: Court 4
+      cover: outdoor
+    - name: Court 5
+      cover: outdoor
+    - name: Court 6
+      cover: outdoor
+    - name: Court 7
+      cover: outdoor
+    - name: Court 8
+      cover: outdoor
+    hours:
+      mon: 10:00–02:00
+      tue: 10:00–02:00
+      wed: 10:00–02:00
+      thu: 10:00–02:00
+      fri: 10:00–02:00
+      sat: 10:00–02:00
+      sun: 10:00–02:00
+    prices:
+    - gel: 80
+  gymbreeze-ninoshvili:
+    source: https://sapadelo.com/georgia/clubs/gymbreeze-ninoshvili
+    area: Chugureti
+    address: 64 Egnate Ninoshvili St
+    phone: "+995511433310"
+    lat: 41.7182925
+    lng: 44.7972449
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    - name: Court 4
+      cover: outdoor
+    - name: Court 5
+      cover: outdoor
+    - name: Court 6
+      cover: outdoor
+    - name: Court 7
+      cover: outdoor
+    - name: Court 8
+      cover: outdoor
+    - name: Court 9
+      cover: outdoor
+    hours:
+      mon: '08:00–02:00'
+      tue: '08:00–02:00'
+      wed: '08:00–02:00'
+      thu: '08:00–02:00'
+      fri: '08:00–02:00'
+      sat: '08:00–02:00'
+      sun: '08:00–02:00'
+    prices:
+    - gel: 60
+    - gel: 40
+      from: '11:00'
+      to: '18:00'
+    - gel: 60
+      days:
+      - sat
+      - sun
+  gymbreeze-radio-city:
+    source: https://sapadelo.com/georgia/clubs/gymbreeze-radio-city
+    area: Gldani
+    address: 3 Barbare Bairamashvili
+    phone: "+995511433310"
+    lat: 41.7806209
+    lng: 44.8245941
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    hours:
+      mon: '08:00–01:00'
+      tue: '08:00–01:00'
+      wed: '08:00–01:00'
+      thu: '08:00–01:00'
+      fri: '08:00–01:00'
+      sat: '08:00–01:00'
+      sun: '08:00–01:00'
+    prices:
+    - gel: 30
+  gymbreeze-sport-palace:
+    source: https://sapadelo.com/georgia/clubs/gymbreeze-sports-palace
+    area: Saburtalo
+    lat: 41.720102
+    lng: 44.779204
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    - name: Court 4
+      cover: outdoor
+    hours:
+      mon: 18:00–00:00
+      tue: 18:00–00:00
+      wed: 18:00–00:00
+      thu: 18:00–00:00
+      fri: 18:00–00:00
+      sat: 18:00–00:00
+      sun: 18:00–00:00
+    prices:
+    - gel: 60
+  padelbade-krtsanisi:
+    source: https://sapadelo.com/georgia/clubs/padelbade-krtsanisi
+    area: Ortachala
+    address: 7 Giorgi Guramishvili St
+    phone: '0322500549'
+    lat: 41.6738582
+    lng: 44.8262025
+    courts:
+    - name: Black 1
+      cover: indoor
+    - name: Black 2
+      cover: indoor
+    - name: Blue 1
+      cover: covered
+    - name: Blue 2
+      cover: covered
+    - name: Blue 3
+      cover: covered
+    hours:
+      mon: '08:00–02:00'
+      tue: '08:00–02:00'
+      wed: '08:00–02:00'
+      thu: '08:00–02:00'
+      fri: '08:00–02:00'
+      sat: '08:00–02:00'
+      sun: '08:00–02:00'
+    prices:
+    - gel: 80
+  padelbade-dighomi:
+    source: https://sapadelo.com/georgia/clubs/padelbade-dighomi
+    area: Didi Dighomi
+    address: 240 Davit Aghmashenebeli Ave
+    phone: '0322500549'
+    lat: 41.8050415
+    lng: 44.7686565
+    courts:
+    - name: Brick Red (Road)
+      cover: covered
+    - name: Green (Wall)
+      cover: indoor
+    hours:
+      mon: '08:00–02:00'
+      tue: '08:00–02:00'
+      wed: '08:00–02:00'
+      thu: '08:00–02:00'
+      fri: '08:00–02:00'
+      sat: '08:00–02:00'
+      sun: '08:00–02:00'
+    prices:
+    - gel: 60
+    - gel: 80
+      from: '18:00'
+      to: '02:00'
+    - gel: 80
+      from: '08:00'
+      to: '02:00'
+      days:
+      - sat
+      - sun
+  padelhub:
+    source: https://sapadelo.com/georgia/clubs/padelhub
+    area: Saburtalo
+    address: 39 Petre Kavtaradze St
+    phone: "+995599739729"
+    lat: 41.7217041
+    lng: 44.7222487
+    courts:
+    - name: Closed Court
+      cover: covered
+    - name: Open Court
+      cover: outdoor
+    hours:
+      mon: '08:00–01:00'
+      tue: '08:00–01:00'
+      wed: '08:00–01:00'
+      thu: '08:00–01:00'
+      fri: '08:00–01:00'
+      sat: '08:00–01:00'
+      sun: '08:00–01:00'
+    prices:
+    - gel: 60
+    - gel: 40
+      from: '08:00'
+      to: '15:00'
+  padel-academy:
+    source: https://sapadelo.com/georgia/clubs/padel-academy
+    area: Saburtalo
+    address: 26 Petre Kavtaradze St
+    phone: "+995599471133"
+    lat: 41.720704
+    lng: 44.734202
+    courts:
+    - name: Court 1
+      cover: indoor
+    - name: Court 2
+      cover: indoor
+    - name: Court 3
+      cover: indoor
+    hours:
+      mon: '08:00–02:00'
+      tue: '08:00–02:00'
+      wed: '08:00–02:00'
+      thu: '08:00–02:00'
+      fri: '08:00–02:00'
+      sat: '08:00–02:00'
+      sun: '08:00–02:00'
+    prices:
+    - gel: 80

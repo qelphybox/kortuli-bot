@@ -11,6 +11,7 @@ app.set :bot_username, Booking::Config.bot_username
 app.set :visitor_sessions, Booking::Web::Session.for_token(Booking::Config.telegram_token)
 # Read-only from here: the poller owns everything the grid displays.
 app.set :repos, Booking::App.repos
+app.set :club_profiles, Booking::ClubProfile.load
 
 Booking.default_logger.call("boot: web on :#{Booking::Config.web_port}")
 

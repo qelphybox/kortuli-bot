@@ -1,0 +1,91 @@
+<%#
+  One club's Profile: what its courts are under, where it is, the hours and
+  prices it lists. None of it is ours — it is the club's own directory
+  listing — so the screen says where it came from, and the free hours stay on
+  the date screens, which read the booking system instead.
+%>
+<header class="app-head app-head--sub">
+  <a class="back" href="<%= @back %>" aria-label="Back">←</a>
+  <span class="app-head__title">
+    <span class="app-head__club"><%= h(@club.name) %></span>
+    <% if @profile&.area %>
+      <span class="app-head__sub"><%= h(@profile.area) %></span>
+    <% end %>
+  </span>
+</header>
+
+<section class="profile">
+  <% if @profile.nil? %>
+    <p class="disclaimer"><%= Booking::Messages.profile_missing %></p>
+  <% else %>
+    <% if @profile.courts.any? %>
+      <div class="profile__section">
+        <h2 class="profile__label">Courts</h2>
+        <p class="profile__lede"><%= Booking::Messages.cover_summary(@profile.covers) %></p>
+        <ul class="courts">
+          <% @profile.courts.each do |court| %>
+            <li class="court">
+              <span class="court__name"><%= h(court.name) %></span>
+              <span class="cover cover--<%= h(court.cover) %>"><%= Booking::Messages.cover_label(court.cover) %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <% if @profile.located? || @profile.address %>
+      <div class="profile__section">
+        <h2 class="profile__label">Where</h2>
+        <% if @profile.address %>
+          <p class="profile__text"><%= h(@profile.address) %></p>
+        <% end %>
+        <% if @profile.located? %>
+          <a class="btn-secondary" data-external href="<%= h(@profile.maps_url) %>" target="_blank" rel="noopener">Open in Google Maps ↗</a>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @profile.hour_runs.any? %>
+      <div class="profile__section">
+        <h2 class="profile__label">Hours</h2>
+        <dl class="facts">
+          <% @profile.hour_runs.each do |first, last, hours| %>
+            <dt><%= Booking::Messages.day_run(first, last) %></dt>
+            <dd><%= h(hours) %></dd>
+          <% end %>
+        </dl>
+      </div>
+    <% end %>
+
+    <% if @profile.prices.any? %>
+      <div class="profile__section">
+        <h2 class="profile__label">Prices · per court, per hour</h2>
+        <ul class="price-list">
+          <% @profile.prices.each do |price| %>
+            <li><%= h(Booking::Messages.price_line(price)) %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <% if @profile.phone %>
+      <div class="profile__section">
+        <h2 class="profile__label">Phone</h2>
+        <a class="profile__phone" href="tel:<%= h(@profile.phone.delete(" ")) %>"><%= h(@profile.phone) %></a>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if @club.settings["booking_url"] %>
+    <a class="cta" data-external href="<%= h(@club.settings["booking_url"]) %>" target="_blank" rel="noopener">Booking page ↗</a>
+  <% end %>
+
+  <% if @profile %>
+    <p class="disclaimer">
+      <%= h(Booking::Messages.profile_source(@profile.checked_on)) %>
+      <% if @profile.source %>
+        <a data-external href="<%= h(@profile.source) %>" target="_blank" rel="noopener">Their page ↗</a>
+      <% end %>
+    </p>
+  <% end %>
+</section>
