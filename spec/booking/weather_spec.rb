@@ -73,6 +73,28 @@ RSpec.describe Booking::Weather do
     end
   end
 
+  describe ".worst" do
+    let(:forecast) do
+      described_class.by_hour([hour(at: "2026-10-12 19:00", chance: 10), hour(at: "2026-10-12 20:00", chance: 70)])
+    end
+
+    def at(clock) = Booking::Clock.local_to_utc("2026-10-12 #{clock}")
+
+    it "is the hour a one-hour slot sits in" do
+      expect(described_class.worst(forecast, at("19:00"), at("20:00")).rain_chance).to eq(10)
+    end
+
+    # A ninety-minute game is rained off by its last half hour.
+    it "is the wettest hour a longer or offset slot touches" do
+      expect(described_class.worst(forecast, at("19:00"), at("20:30")).rain_chance).to eq(70)
+      expect(described_class.worst(forecast, at("19:30"), at("20:30")).rain_chance).to eq(70)
+    end
+
+    it "is nothing where the Forecast does not reach" do
+      expect(described_class.worst(forecast, at("22:00"), at("23:00"))).to be_nil
+    end
+  end
+
   describe described_class::Hour do
     it "is wet when rain is likely" do
       expect(hour(chance: 50)).to be_wet

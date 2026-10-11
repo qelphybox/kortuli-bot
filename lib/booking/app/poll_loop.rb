@@ -59,6 +59,7 @@ module Booking
           notifications: @repos.notifications,
           transport: Telegram::Transport.new(::Telegram::Bot::Api.new(Config.telegram_token)),
           clubs: @repos.clubs.all.to_h { [_1.slug, _1.name] },
+          forecast: @repos.forecast,
           logger: @logger
         )
       end

@@ -90,6 +90,20 @@ module Booking
 
     module_function
 
+    # The Forecast keyed by the second each hour starts, which is how both a
+    # Cell and a Slot look an hour up.
+    def by_hour(hours) = hours.to_h { [_1.starts_at.to_i, _1] }
+
+    # The one hour that matters for a stretch of time: the wettest it touches.
+    # A ninety-minute game is rained off by its last half hour as surely as by
+    # its first. Nil where the Forecast does not reach.
+    def worst(forecast, from, to)
+      first = from.to_i - (from.to_i % 3600)
+      touched = first.step(to.to_i - 1, 3600).filter_map { forecast[_1] }
+
+      touched.max_by { [_1.wet? ? 2 : _1.damp? ? 1 : 0, _1.rain_chance.to_i] }
+    end
+
     # Days counted from today in GMT, which is the timezone asked for, plus
     # two: one because a Tbilisi date starts four hours before GMT's does, and
     # one for the clubs whose evening runs past midnight.

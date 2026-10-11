@@ -142,7 +142,9 @@ expected · 14–21°` — counted over the hours still to come. When rain is
 likely, the clubs whose every court is in the open sink below the rest of
 their half, favourite or not, and the line says so. Every hour on a club's
 screen carries its own mark (`🌧 Rain 75% · 19°`, `☁️ 17°`), and the home
-screen puts a 🌧 beside a date with rain in it. It comes from
+screen puts a 🌧 beside a date with rain in it. A message about a freed
+slot carries the same mark for its hour — the wettest one it touches, so a
+ninety-minute game is not promised a dry finish. It comes from
 [Open-Meteo](https://open-meteo.com): free, no key, hourly and sixteen days
 out. The poller fetches it every hour (`WEATHER_INTERVAL`) as a job of its
 own, so a club timing out never holds it up, and a failed fetch keeps the

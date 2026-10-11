@@ -9,8 +9,11 @@ module Booking
 
     def escape(text) = text.to_s.gsub("&", "&amp;").gsub("<", "&lt;").gsub(">", "&gt;")
 
-    def slot_freed(slot, club_name)
+    # `weather` is the Forecast's hour for the slot, where there is one: the
+    # first thing anybody wonders about an open court an hour from now.
+    def slot_freed(slot, club_name, weather: nil)
       lines = ["🎾 <b>#{escape(slot.court_label)}</b> just freed up", "#{escape(club_name)} · #{when_phrase(slot)}"]
+      lines << weather_tag(weather) if weather
       lines << escape(slot.price) if slot.price
       lines << escape(slot.deeplink) if slot.deeplink
       lines.join("\n")

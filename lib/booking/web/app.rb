@@ -255,7 +255,7 @@ module Booking
 
         # The Forecast by the instant each hour starts, read once per request
         # for the same reason the tables are.
-        def forecast = @forecast ||= settings.repos.forecast.hours.to_h { [_1.starts_at.to_i, _1] }
+        def forecast = @forecast ||= Weather.by_hour(settings.repos.forecast.hours)
 
         def weather_at(starts_at) = forecast[starts_at.to_i]
 
