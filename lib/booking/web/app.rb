@@ -545,7 +545,7 @@ module Booking
         # The hours stay the whole table's, not the narrowed one's: switching
         # clubs should not throw away a span the group already agreed on.
         @span = HourSpan.from(params, date:, columns: table.columns)
-        @sheet = Rundown.build(table: @filter.narrow(table), clubs:, window: @span.window)
+        @sheet = Rundown.build(table: @filter.narrow(table), clubs:, window: @span.window, forecast:)
         @text = Messages.rundown(@sheet)
         erb :share, layout: :layout
       end

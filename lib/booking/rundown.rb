@@ -16,12 +16,16 @@ module Booking
 
     # `window` is nil for the whole day, or the Range of instants it was
     # narrowed to. `booked` names the clubs with nothing free in it, so the
-    # reader knows they were looked at rather than forgotten.
-    Sheet = Data.define(:date, :window, :entries, :booked) do
+    # reader knows they were looked at rather than forgotten. `outlook` is the
+    # Forecast over the same hours, or nil where there is none — the first
+    # question in the chat it lands in is whether the open courts will be wet.
+    Sheet = Data.define(:date, :window, :entries, :booked, :outlook) do
       def empty? = entries.empty?
     end
 
-    def self.build(table:, clubs:, window: nil, now: Clock.now)
+    # `forecast` is the Forecast keyed by the second each hour starts, as
+    # Weather.by_hour gives it.
+    def self.build(table:, clubs:, window: nil, forecast: {}, now: Clock.now)
       prices = clubs.to_h { [_1.slug, _1.settings["price"]] }
       entries = []
       booked = []
@@ -35,7 +39,15 @@ module Booking
         entries << Entry.new(club_name: row.club_name, price: prices[row.club_slug], runs: runs(free), link: free.first.deeplink)
       end
 
-      Sheet.new(date: table.date, window:, entries:, booked:)
+      Sheet.new(date: table.date, window:, entries:, booked:, outlook: outlook(table, window, forecast, now))
+    end
+
+    # Over the hours the message offers: inside the window, and not yet begun
+    # — this morning's rain says nothing about tonight's game.
+    def self.outlook(table, window, forecast, now)
+      hours = table.columns.select { _1 > now && (window.nil? || window.cover?(_1)) }.filter_map { forecast[_1.to_i] }
+
+      Weather::Outlook.new(hours:) if hours.any?
     end
 
     def self.runs(cells)
@@ -43,6 +55,6 @@ module Booking
         Run.new(starts_at: stretch.first.starts_at, ends_at: stretch.last.starts_at + HOUR)
       end
     end
-    private_class_method :runs
+    private_class_method :runs, :outlook
   end
 end

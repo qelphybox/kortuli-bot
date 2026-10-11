@@ -27,6 +27,7 @@ One date's free Cells as a single message meant to be forwarded — per Club,
 its stretches of free hours, its price and a link to book. The whole day and
 every Club, or narrowed to a span of hours that may run past midnight, and to
 the Favourites or a handful of Clubs ticked by hand.
+Opens with the Forecast over the hours it offers, where there is one.
 _Avoid_: digest, summary, export, share
 
 **Opening hours**:

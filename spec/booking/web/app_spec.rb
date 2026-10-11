@@ -346,6 +346,21 @@ RSpec.describe Booking::Web::App do
       expect(preview).to include("Kus Tba Padel\n10:00–11:00, 01:00–02:00")
     end
 
+    # The message is the one place the weather leaves the app, so it says
+    # what the date's list says, and how warm it gets besides.
+    it "puts the day's weather under the heading" do
+      forecast.replace((8..23).map do |hour|
+        Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc(format("%s %02d:00", day, hour)),
+                                   rain_chance: hour == 19 ? 80 : 0, rain_mm: 0.0, code: 3,
+                                   temperature: 12.0 + (hour / 4), day: false)
+      end)
+      sign_in
+      get "/date/#{day}/share"
+
+      expect(preview).to match(/\A🎾 Free padel courts · .+\n🌧 Rain likely 19:00–20:00 · 14–17°\n\n/)
+      expect(shared_text).to include("🌧 Rain likely 19:00–20:00 · 14–17°")
+    end
+
     # The share sheet sends what the preview shows; only the clipboard adds
     # the bot's link, which the sheet adds by itself.
     it "sends through Telegram's share sheet exactly the text it previews" do
