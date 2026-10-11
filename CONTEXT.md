@@ -70,6 +70,19 @@ The hours a Club's Profile says it keeps. Shown, never used to draw the Grid —
 that is Opening hours' job, and the two can disagree.
 _Avoid_: working hours, schedule
 
+**Forecast**:
+The weather over Tbilisi by the hour — the chance of rain, how much, how warm
+— from Open-Meteo, fetched by the poller every hour and replaced whole. One
+point for the whole city. For a person choosing between an open court and a
+roofed one; read by nothing that decides a Cell.
+_Avoid_: weather data, meteo
+
+**Wet hour**:
+An hour of the Forecast when rain is likely (a chance of 50% or more) or a
+thunderstorm is due. A date with one sinks the Clubs whose every court is
+`outdoor` below the rest of their half.
+_Avoid_: rainy slot, bad weather
+
 **Favourite**:
 A Club one person has starred. Theirs alone; it narrows a Rundown, leads the
 list of Clubs, and comes pre-ticked when making a Standing watch.

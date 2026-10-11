@@ -66,6 +66,10 @@ module Booking
     # dashboard measures a club's last Poll against.
     def poll_every_seconds = Rufus::Scheduler.parse_duration(poll_interval).to_i + poll_jitter
 
+    # How often the poller asks for the Forecast. Open-Meteo reruns its models
+    # hourly, so asking more often only fetches the same answer again.
+    def weather_interval = ENV.fetch("WEATHER_INTERVAL", "1h")
+
     def clubs_file = ENV.fetch("CLUBS_FILE", "config/clubs.yml")
 
     # Written by `rake sapadelo:import`; read by the web alone.

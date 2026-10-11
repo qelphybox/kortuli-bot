@@ -39,15 +39,15 @@ file and nothing else:
 | Process | Entrypoint | Job |
 |---|---|---|
 | **bot** | [bin/bot](bin/bot) | Long-polls Telegram, greets, and sets the menu button. The only one that never touches the database. |
-| **poller** | [bin/poller](bin/poller) | Owns club config, walks every club on a schedule, sends notifications. |
+| **poller** | [bin/poller](bin/poller) | Owns club config, walks every club on a schedule, sends notifications, keeps the Forecast. |
 | **web** | [bin/web](bin/web) | Serves the Telegram Mini App over Puma. |
 
 Splitting them means deploying a screen no longer interrupts polling.
 [ADR-0001](docs/adr/0001-poller-is-a-process-not-a-queue.md) records why the
 poll loop stayed a scheduler rather than becoming job-queue work.
 
-Two of the three write to the database — the poller writes slots and club
-state, the web writes watches. WAL and a busy timeout make that safe across
+Two of the three write to the database — the poller writes slots, club
+state and the Forecast, the web writes watches. WAL and a busy timeout make that safe across
 processes as well as threads, because the containers share a kernel and a
 filesystem. It is the one genuinely new operational risk in this shape.
 
@@ -134,6 +134,22 @@ each one, which is the first thing anybody asks when it rains. Profiles come
 from the clubs' own listings on sapadelo.com and say so; they are for reading,
 and the Grid still draws from declared Opening hours. Padel Club 2 is not
 listed there and has none.
+
+The **Forecast** rides along with all of it, because rain is what decides
+between an open court and a roofed one. A date's list of clubs opens with one
+line — `🌧 Rain likely 19:00–22:00`, `🌦 Showers possible …`, or `🌤 No rain
+expected · 14–21°` — counted over the hours still to come. When rain is
+likely, the clubs whose every court is in the open sink below the rest of
+their half, favourite or not, and the line says so. Every hour on a club's
+screen carries its own mark (`🌧 Rain 75% · 19°`, `☁️ 17°`), and the home
+screen puts a 🌧 beside a date with rain in it. A message about a freed
+slot carries the same mark for its hour — the wettest one it touches, so a
+ninety-minute game is not promised a dry finish. It comes from
+[Open-Meteo](https://open-meteo.com): free, no key, hourly and sixteen days
+out. The poller fetches it every hour (`WEATHER_INTERVAL`) as a job of its
+own, so a club timing out never holds it up, and a failed fetch keeps the
+last good one. Where there is no Forecast — before the first fetch — nothing
+is drawn rather than a guess. Its age is on `/admin`.
 
 Its second screen is **Watches**: everything you have asked to be told about,
 with pause, resume and delete. A standing watch names the weekdays it keeps
@@ -367,6 +383,12 @@ This is an MVP, deliberately:
 - **`poll_interval_seconds` per club is stored but not used.** One global
   interval drives a sequential pass over all clubs — deliberate, so a handful of
   clubs on shared hosting never get hit in parallel.
+- **One Forecast for the whole city.** A single point in the centre of
+  Tbilisi; the clubs sit within the model's own resolution of it, so asking
+  per club would buy ten copies of one answer. The chance of rain decides
+  what is wet, and millimetres only where the chance is missing — a single
+  model run drizzles a tenth of a millimetre into hours the ensemble gives
+  one chance in ten.
 - **Snapshots are not kept.** Current state plus a transition log, not full
   history — enough for "when do evening slots free up?", not enough to replay an
   arbitrary past moment.

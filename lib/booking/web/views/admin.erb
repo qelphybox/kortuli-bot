@@ -66,6 +66,15 @@
   </div>
 
   <div class="profile__section">
+    <h2 class="profile__label">Forecast</h2>
+    <% forecast = @dashboard.forecast %>
+    <dl class="facts">
+      <dt>Fetched</dt><dd><%= ago(forecast.fetched_at, now: @now) %></dd>
+      <dt>Hours ahead</dt><dd><%= forecast.hours %></dd>
+    </dl>
+  </div>
+
+  <div class="profile__section">
     <h2 class="profile__label">Disk</h2>
     <% disk = @dashboard.disk %>
     <% if disk %>

@@ -95,6 +95,18 @@ module Booking
         String :summary, null: false
       end
 
+      # The latest Forecast, an hour per row, replaced whole on every refresh.
+      # Like the Slots, a snapshot rather than history.
+      db.create_table?(:forecast_hours) do
+        DateTime :starts_at, primary_key: true
+        Integer :rain_chance
+        Float :rain_mm
+        Integer :code
+        Float :temperature
+        TrueClass :day
+        DateTime :fetched_at, null: false
+      end
+
       # `create_table?` does nothing to a table that already exists, and by the
       # time the Dated watch arrived there were watches in the file. Guarded so
       # it is as re-runnable as everything above it.
