@@ -43,8 +43,8 @@ _Avoid_: venue, location, site
 
 **Court-level club**:
 A Club whose source names the individual court, so its Cells can say how many
-of them are free. Padel Club 2, both Padelbade locations, PadelHub and Padel
-Academy.
+of them are free. Padel Club 2, both Padelbade locations, PadelHub, Padel
+Academy and Lemans Padel.
 _Avoid_: per-court, granular
 
 **Hour-level club**:

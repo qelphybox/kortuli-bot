@@ -9,13 +9,13 @@ directory listing.
 
 ## Where we are
 
-Nine clubs, 40 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
+Ten clubs, 44 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
 GymBreeze Ninoshvili, GymBreeze Radio City, GymBreeze Sport Palace,
-Padelbade Krtsanisi and Padelbade Dighomi (since #10), PadelHub and Padel
-Academy.
+Padelbade Krtsanisi and Padelbade Dighomi (since #10), PadelHub, Padel
+Academy and Lemans Padel.
 
-The five adapters below take that to **twelve clubs and 47 courts** without
-touching a single club that has asked not to be read.
+The two adapters still open below take that to **fourteen clubs and 54
+courts** without touching a single club that has asked not to be read.
 
 ## Decisions this plan assumes
 
@@ -45,7 +45,7 @@ survey is complete — sapadelo omits Padel Club 2, which we already watch.
 | Tbilisi Padel Didi Dighomi | 5 | BookingPress | **wave 2** |
 | Tbilisi Padel Mtatsminda | 1 | BookingPress | **wave 2** |
 | Tbilisi Padel Ilia's Garden | 1 | BookingPress | **wave 2** |
-| Lemans Padel | 4 | own | **wave 1** |
+| Lemans Padel | 4 | own | watched |
 | Padel Gldani | 3 | own (tRPC) | **wave 3** |
 | PadelHub | 3 | own (Supabase) | watched |
 | Sportscape Samgori | 4 | unknown | not researched |
@@ -114,10 +114,13 @@ Independent within a wave; ordered by courts-per-unit-of-work.
   *Best ratio in the whole plan.* Half-hour starts turned out to be half the
   inventory and are **not** watched — the Grid matches Cells on an exact hourly
   `starts_at`, so watching them is a Grid change first. Folded into wave 4.
-- **Lemans Padel** → **4 courts**. `GET https://booking.lemanspadel.ge/api/availability?date=&duration=60`,
-  no auth, explicit `available` boolean plus an `available_courts` count, and
-  `/api/availability/courts` names which are free. No server-side horizon, so
-  cap `max_days` ourselves the way `Kustba` does.
+- ~~**Lemans Padel** → **4 courts**.~~ **Done.** `GET https://booking.lemanspadel.ge/api/availability?date=&duration=60`,
+  no auth, explicit `available` boolean plus an `available_courts` count. It
+  also takes `court_id` and answers for that court alone, echoing the id —
+  which the recon missed — so this is a **court-level club** at four requests
+  a date rather than one per start. No server-side horizon, so `max_days` is
+  ours. Price is 50 on weekday starts before 17:00, 70 otherwise; the court
+  list's flat `duration_prices` is wrong about that.
 
 ### Wave 2 — needs F1
 

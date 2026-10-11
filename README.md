@@ -312,9 +312,10 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **Six sources, nine clubs.** Padel Club 2 (Reservio), Kus Tba Padel
+- **Seven sources, ten clubs.** Padel Club 2 (Reservio), Kus Tba Padel
   (`turtle-booking`), GymBreeze (three locations), Padelbade (Book & Go, two),
-  PadelHub (Supabase) and Padel Academy (its own API, behind a member login)
+  PadelHub (Supabase), Padel Academy (its own API, behind a member login) and
+  Lemans Padel (its own API, open)
   — a venue with several locations is several clubs, because they sit in
   different parts of town. `tbilisipadel.com` runs BookingPress, which needs its
   own adapter; the reconnaissance is done and lives in `docs/research/`, and
