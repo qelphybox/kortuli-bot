@@ -12,6 +12,8 @@
     business_id: "4ead107e-6791-4f9b-95d9-3588bffe0794"
     service_id: "1b9d8011-d73e-4810-bba8-4098b7ad536b"
     booking_url: "https://padel-club2.reservio.com/"
+    # No `sapadelo:` — the directory does not list this club, so it has no
+    # Profile.
     price: "50 GEL"
     # Declared rather than observed: Reservio publishes neither opening hours
     # nor bookings, so there is nothing to read them from. `to` is when the
@@ -34,6 +36,9 @@
   poll_interval_seconds: 240
   settings:
     booking_url: "https://kustbapadel.ge/book/"
+    # The club's page on sapadelo.com, where its Profile comes from — see
+    # config/club_profiles.yml and `rake sapadelo:import`.
+    sapadelo: kus-tba-padel
     price: "80 GEL"
     # Books until 02:00, so the day runs past midnight and the last hour anyone
     # can start is 01:00.
@@ -57,6 +62,7 @@
   poll_interval_seconds: 240
   settings:
     location_id: "63f663fa-1852-5bde-bf94-dee5b176de1d"
+    sapadelo: gymbreeze-ninoshvili
     booking_url: "https://gymbreeze.ge/eng"
     # Varies by hour and weekday (60 before 11:00, 40 midday, 60 after 18:00).
     # The rates are published at /facilities/locations/<id>/ if this is ever
@@ -79,6 +85,7 @@
   poll_interval_seconds: 240
   settings:
     location_id: "752155d7-39aa-53d9-bc18-682695f85244"
+    sapadelo: gymbreeze-radio-city
     booking_url: "https://gymbreeze.ge/eng"
     price: "30–40 GEL"
     opening_hours:
@@ -97,6 +104,7 @@
   poll_interval_seconds: 240
   settings:
     location_id: "7a896411-0c3a-5336-a522-a6da08b6132c"
+    sapadelo: gymbreeze-sports-palace
     booking_url: "https://gymbreeze.ge/eng"
     price: "40–60 GEL"
     opening_hours:
@@ -116,6 +124,7 @@
   poll_interval_seconds: 240
   settings:
     location_id: 163
+    sapadelo: padelbade-krtsanisi
     booking_url: "https://app.padelbade.com/"
     price: "80 GEL"
     # Declared, as every club's hours are — but derived from an observation
@@ -146,6 +155,7 @@
   poll_interval_seconds: 240
   settings:
     location_id: 141
+    sapadelo: padelbade-dighomi
     booking_url: "https://app.padelbade.com/"
     price: "80 GEL"
     # Offers a 01:00 start, so this one is declared an hour later than
@@ -169,6 +179,7 @@
   poll_interval_seconds: 240
   settings:
     booking_url: "https://www.padelhub.ge/booking"
+    sapadelo: padelhub
     # 40 for starts up to 14:00, then the court's own evening price: 60
     # outdoors, 70 under the roof.
     price: "40–70 GEL"
@@ -196,6 +207,7 @@
   poll_interval_seconds: 240
   settings:
     booking_url: "https://booking.padelacademy.ge/"
+    sapadelo: padel-academy
     price: "80 GEL"
     # Last start 01:00, filed by the source under the date before.
     opening_hours:

@@ -55,6 +55,9 @@ module Booking
 
     def clubs_file = ENV.fetch("CLUBS_FILE", "config/clubs.yml")
 
+    # Written by `rake sapadelo:import`; read by the web alone.
+    def club_profiles_file = ENV.fetch("CLUB_PROFILES_FILE", "config/club_profiles.yml")
+
     def http_timeout = Integer(ENV.fetch("HTTP_TIMEOUT", "15"))
 
     # Padel Academy shows its schedule only to a signed-in member, so polling

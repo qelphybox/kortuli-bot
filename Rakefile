@@ -47,6 +47,41 @@ task poll: :seed do
   Booking::Poller.new(repos:, notifier:, http: Booking::Http.new).tick
 end
 
+namespace :sapadelo do
+  desc "Refresh config/club_profiles.yml from sapadelo.com, for every club that names its page there"
+  task :import do
+    boot!
+    require "yaml"
+
+    http = Booking::Http.new
+    linked = YAML.safe_load_file(Booking::Config.clubs_file).filter_map do |entry|
+      theirs = entry.dig("settings", "sapadelo")
+      [entry.fetch("slug"), theirs] if theirs
+    end
+    areas = Booking::Sapadelo.areas(http.get_body(Booking::Sapadelo::CITY_URL))
+
+    profiles = linked.to_h do |slug, theirs|
+      # A directory, not a booking system: one page a second is plenty.
+      sleep 1
+      url = Booking::Sapadelo.club_url(theirs)
+      profile = Booking::Sapadelo.profile(http.get_body(url), source: url, area: areas[theirs])
+      puts "#{slug}  #{profile.fetch("courts").size} courts  #{profile.dig("hours", "mon") || "no hours"}  #{profile["area"]}"
+      [slug, profile]
+    end
+
+    path = Booking::Config.club_profiles_file
+    File.write(path, <<~YAML + YAML.dump({ "checked_on" => Date.today.iso8601, "clubs" => profiles }).delete_prefix("---\n"))
+      # Written by `bundle exec rake sapadelo:import` — edit config/clubs.yml
+      # (settings.sapadelo) and run it again rather than editing this by hand.
+      #
+      # Each club's Profile: the cover over every court, where it is, and the
+      # hours and prices it lists on sapadelo.com. For people to read; nothing
+      # that decides a Cell looks at it.
+    YAML
+    puts "wrote #{profiles.size} profiles to #{path}"
+  end
+end
+
 namespace :discover do
   desc "Find the ids needed for a Reservio club: rake 'discover:reservio[padel-club2]'"
   task :reservio, [:subdomain] do |_, args|

@@ -698,3 +698,99 @@ button { color: inherit; }
 }
 
 .share .btn-secondary { width: 100%; cursor: pointer; }
+
+/* --- Clubs directory and a club's Profile. The directory reuses the Clubs
+       screen's rows; its sub-line is description rather than news, so it
+       goes quiet instead of accent. ---------------------------------------- */
+.club-row__sub.is-quiet { color: var(--muted); }
+
+.club-row__head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
+.club-row__cover {
+  font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 20px 20px calc(32px + env(safe-area-inset-bottom));
+}
+
+.profile__section { display: flex; flex-direction: column; gap: 10px; }
+
+.profile__label {
+  margin: 0;
+  color: var(--muted);
+  font: 500 10.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.profile__lede {
+  margin: 0;
+  font: 600 18px/1.25 "IBM Plex Sans", sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.profile__text { margin: 0; font-size: 14px; }
+
+.profile__phone {
+  color: var(--fg);
+  font: 500 15px/1 "IBM Plex Mono", ui-monospace, monospace;
+  text-decoration: none;
+}
+.profile__phone:hover, .profile__phone:focus-visible { color: var(--accent); }
+
+.courts, .price-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.court, .price-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.court__name { font-size: 14px; overflow-wrap: anywhere; }
+.price-list li { font: 400 13.5px/1.3 "IBM Plex Mono", ui-monospace, monospace; }
+
+/* A filled pill for walls and a roof, an outlined one for a roof alone, and
+   a bare chip for open air — the order of how dry you stay. */
+.cover {
+  flex-shrink: 0;
+  padding: 4px 8px 3px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+  color: var(--muted);
+  font: 500 10px/1 "IBM Plex Mono", ui-monospace, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.cover--indoor { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.cover--covered { background: transparent; border-color: var(--accent); color: var(--accent); }
+
+.facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  margin: 0;
+}
+.facts dt { color: var(--muted); font-size: 13.5px; }
+.facts dd {
+  margin: 0;
+  text-align: right;
+  font: 500 14px/1.3 "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.profile .disclaimer a { color: var(--muted); }

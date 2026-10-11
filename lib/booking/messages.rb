@@ -167,5 +167,44 @@ module Booking
     def favourite_add = "Add to favourites"
 
     def favourite_remove = "Remove from favourites"
+
+    # --- A Club's Profile ---------------------------------------------------
+
+    # "2 indoor · 3 covered": every court counted, under its Cover.
+    def cover_summary(covers) = covers.map { |cover, count| "#{count} #{cover}" }.join(" · ")
+
+    # "indoor + covered": short enough to sit beside a club's name.
+    def cover_tag(covers) = covers.map(&:first).join(" + ")
+
+    def cover_label(cover) = cover.to_s.capitalize
+
+    # "Every day", "Mon–Fri", "Sat": the days one run of Listed hours covers.
+    def day_run(first, last)
+      return "Every day" if first == "mon" && last == "sun"
+
+      first == last ? first.capitalize : "#{first.capitalize}–#{last.capitalize}"
+    end
+
+    # "40 GEL · 11:00–18:00", "60 GEL · Sat, Sun", "from 40 GEL": one rule off
+    # a club's price list, per court and per hour.
+    def price_line(price)
+      amount = "#{"from " if price["from_price"]}#{price["gel"]} GEL"
+      when_parts = []
+      when_parts << price["days"].map(&:capitalize).join(", ") if price["days"]
+      when_parts << "#{price["from"]}–#{price["to"]}" if price["from"] && price["to"]
+
+      [amount, *when_parts].join(" · ")
+    end
+
+    def profile_missing = "No details for this club yet — the booking page is the place to look."
+
+    # Said under every Profile, because none of it is ours: it is what the club
+    # told a directory, and a directory can be behind.
+    def profile_source(checked_on)
+      as_of = checked_on ? ", as of #{checked_on.day} #{checked_on.strftime("%b")}" : ""
+
+      "Courts, hours and prices are the club's own listing on sapadelo.com#{as_of} — " \
+        "check with the club before you rely on them. The day's free hours come from its booking system."
+    end
   end
 end

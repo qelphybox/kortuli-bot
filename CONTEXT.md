@@ -53,6 +53,23 @@ Cells say whether, not how many. Kus Tba and all three GymBreeze locations —
 for Kus Tba by our choice, for GymBreeze because its API refuses.
 _Avoid_: per-hour, coarse, aggregate
 
+**Profile**:
+What a Club is like rather than what it has free: each court's Cover, where
+the club is, its Listed hours and prices. Read from the club's own listing on
+sapadelo.com into `config/club_profiles.yml`; for a person choosing where to
+play, and read by nothing that decides a Cell.
+_Avoid_: details, info, card
+
+**Cover**:
+What is over a court: `indoor` (walls and a roof), `covered` (a roof alone) or
+`outdoor`. A Club's courts can differ.
+_Avoid_: court type, surface, open/closed
+
+**Listed hours**:
+The hours a Club's Profile says it keeps. Shown, never used to draw the Grid —
+that is Opening hours' job, and the two can disagree.
+_Avoid_: working hours, schedule
+
 **Favourite**:
 A Club one person has starred. Theirs alone; it narrows a Rundown, leads the
 list of Clubs, and comes pre-ticked when making a Standing watch.

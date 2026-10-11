@@ -34,6 +34,24 @@ RSpec.describe Booking::Web::App do
     ]
   end
   let(:free_slots) { [] }
+  # Kus Tba has a Profile; Padel Club 2, as in config/, does not.
+  let(:club_profiles) do
+    {
+      "kus-tba-padel" => Booking::ClubProfile.from(
+        {
+          "source" => "https://sapadelo.com/georgia/clubs/kus-tba-padel",
+          "area" => "Turtle Lake",
+          "address" => "Turtle Lake",
+          "phone" => "+995585889977",
+          "lat" => 41.700688, "lng" => 44.7570599,
+          "courts" => [{ "name" => "Court 1", "cover" => "outdoor" }, { "name" => "Court 2", "cover" => "outdoor" }],
+          "hours" => %w[mon tue wed thu fri sat sun].to_h { [_1, "10:00–02:00"] },
+          "prices" => [{ "gel" => 80 }, { "gel" => 60, "from" => "10:00", "to" => "14:00" }]
+        },
+        checked_on: "2026-10-11"
+      )
+    }
+  end
   let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites) }
 
   def app
@@ -42,6 +60,7 @@ RSpec.describe Booking::Web::App do
       a.set :bot_username, "kortuli_test_bot"
       a.set :visitor_sessions, sessions
       a.set :repos, repos
+      a.set :club_profiles, club_profiles
     end
   end
 
@@ -1081,6 +1100,138 @@ RSpec.describe Booking::Web::App do
 
   # kamal-proxy will not route to a container that cannot answer this, so a
   # deploy hangs without it.
+  describe "the clubs directory" do
+    it "is reached from the dates screen" do
+      sign_in
+      get "/"
+
+      expect(last_response.body).to include('href="/clubs"')
+    end
+
+    it "lists every watched club, each opening its profile" do
+      sign_in
+      get "/clubs"
+
+      expect(last_response.body).to include("Padel Club 2").and include("Kus Tba Padel")
+      expect(last_response.body).to include('href="/clubs/kus-tba-padel"').and include('href="/clubs/padel-club-2"')
+    end
+
+    it "says where a club is and what its courts are under" do
+      sign_in
+      get "/clubs"
+
+      expect(last_response.body).to include("Turtle Lake · 2 outdoor")
+    end
+
+    it "puts favourites first" do
+      sign_in
+      post "/favourites/padel-club-2"
+      get "/clubs"
+
+      expect(last_response.body.index("Padel Club 2")).to be < last_response.body.index("Kus Tba Padel")
+    end
+
+    it "is not served to somebody without a session" do
+      get "/clubs"
+
+      expect(last_response.location).to end_with("/start")
+    end
+  end
+
+  describe "a club's profile" do
+    it "names its courts and the cover over each" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include("2 outdoor").and include("Court 1").and include("cover--outdoor")
+    end
+
+    it "opens its pin in Google Maps, outside the app" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include("https://www.google.com/maps/search/?api=1&amp;query=41.700688,44.7570599")
+      expect(last_response.body).to match(/data-external href="https:\/\/www\.google\.com\/maps/)
+    end
+
+    it "folds a week of the same hours into one line" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include("Every day").and include("10:00–02:00")
+    end
+
+    it "lists its prices, per court and per hour" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include("80 GEL").and include("60 GEL · 10:00–14:00")
+    end
+
+    it "offers a call and the booking page" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include('href="tel:+995585889977"').and include("https://kustba.example/book/")
+    end
+
+    it "says where the listing came from, and when" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include("sapadelo.com, as of 11 Oct")
+      expect(last_response.body).to include("https://sapadelo.com/georgia/clubs/kus-tba-padel")
+    end
+
+    it "says there is nothing to show for a club without one, and still links to its booking page" do
+      sign_in
+      get "/clubs/padel-club-2"
+
+      expect(last_response.body).to include(Booking::Messages.profile_missing)
+      expect(last_response.body).to include("https://padel-club2.example/")
+    end
+
+    it "is 404 for a club nobody watches" do
+      sign_in
+      get "/clubs/no-such-club"
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "goes back to the directory by default" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include('class="back" href="/clubs"')
+    end
+
+    it "is reached from a club's hours on a date, and goes back there" do
+      sign_in
+      get "/date/#{today + 1}/club/kus-tba-padel"
+      expect(last_response.body).to include(%(href="/clubs/kus-tba-padel?date=#{today + 1}"))
+
+      get "/clubs/kus-tba-padel?date=#{today + 1}"
+      expect(last_response.body).to include(%(class="back" href="/date/#{today + 1}/club/kus-tba-padel"))
+    end
+
+    it "does not go back to a date past the horizon" do
+      sign_in
+      get "/clubs/kus-tba-padel?date=#{today + 400}"
+
+      expect(last_response.body).to include('class="back" href="/clubs"')
+    end
+  end
+
+  describe "the clubs screen naming covers" do
+    it "puts what the courts are under beside a club with a profile, and nothing beside one without" do
+      sign_in
+      get "/date/#{today}"
+
+      expect(last_response.body).to include('<span class="club-row__cover">outdoor</span>')
+      expect(last_response.body.scan("club-row__cover").size).to eq(1)
+    end
+  end
+
   describe "the health endpoint" do
     it "answers without a session" do
       get "/up"

@@ -4,7 +4,9 @@
   dimmed and drops to the bottom, because the eye is hunting the ones that
   do have something. The star beside each row is where Favourites are made:
   a form post, like everything else that changes something, and outside the
-  row's link so tapping it never opens the club.
+  row's link so tapping it never opens the club. Beside each name, what its
+  courts are under, from the club's Profile — the first thing anybody asks
+  when it rains.
 %>
 <header class="app-head app-head--sub">
   <a class="back" href="/" aria-label="Back to dates">←</a>
@@ -25,7 +27,10 @@
       </form>
       <a class="club-row<%= " is-empty" unless c[:any_free] %>" href="/date/<%= @date %>/club/<%= c[:slug] %>">
         <span class="club-row__body">
-          <span class="club-row__name"><%= c[:name] %></span>
+          <span class="club-row__head">
+            <span class="club-row__name"><%= c[:name] %></span>
+            <% if c[:cover] %><span class="club-row__cover"><%= c[:cover] %></span><% end %>
+          </span>
           <span class="club-row__sub"><%= c[:sub] %></span>
         </span>
         <span class="chev" aria-hidden="true">›</span>

@@ -1,0 +1,27 @@
+<%#
+  Every watched club, whatever it has free: the place to ask "what is it
+  like?" rather than "what is open?". Each row says where the club is and
+  what its courts are under, and opens its Profile.
+%>
+<header class="app-head app-head--sub">
+  <a class="back" href="/" aria-label="Back to dates">←</a>
+  <span class="app-head__title-solo">Clubs</span>
+</header>
+
+<ul class="clubs">
+  <% @clubs.each do |c| %>
+    <li>
+      <a class="club-row" href="/clubs/<%= c[:slug] %>">
+        <span class="club-row__body">
+          <span class="club-row__name"><%= "★ " if c[:favourite] %><%= h(c[:name]) %></span>
+          <% unless c[:sub].empty? %>
+            <span class="club-row__sub is-quiet"><%= h(c[:sub]) %></span>
+          <% end %>
+        </span>
+        <span class="chev" aria-hidden="true">›</span>
+      </a>
+    </li>
+  <% end %>
+</ul>
+
+<%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_clubs } %>

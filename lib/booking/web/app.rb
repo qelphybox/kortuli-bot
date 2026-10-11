@@ -24,6 +24,10 @@ module Booking
       # into the bot chat. Injected rather than read from Config so the app is
       # renderable in specs without touching ENV.
       set :bot_username, nil
+      # Each club's Profile by slug, loaded once at boot from the file
+      # `rake sapadelo:import` writes. Static, so it is handed over rather
+      # than kept in the database: nothing at runtime ever changes it.
+      set :club_profiles, {}
       # Sinatra's own session middleware is not used — ours is one signed
       # cookie and nothing else — and its default error page leaks the app's
       # internals, so both stay off.
@@ -136,6 +140,16 @@ module Booking
 
         def clock(hour) = Messages.clock(hour * 60)
 
+        def profile(slug) = settings.club_profiles[slug]
+
+        # "indoor + covered" beside a club's name, or nothing for a club
+        # without a Profile.
+        def cover_tag(slug)
+          covers = profile(slug)&.covers.to_a
+
+          Messages.cover_tag(covers) if covers.any?
+        end
+
         # Memoised per request: every club row on the screen asks for it.
         def favourites = @favourites ||= settings.repos.favourites.for_user(visitor_id)
 
@@ -238,6 +252,7 @@ module Booking
               name: row.club_name,
               any_free:,
               favourite: favourite?(row.club_slug),
+              cover: cover_tag(row.club_slug),
               sub:
             }
           end
@@ -300,6 +315,24 @@ module Booking
         def back_to_clubs
           date = parse_date(params[:date])
           redirect(to(date ? "/date/#{date}" : "/"))
+        end
+
+        # One dict per watched Club for the directory: Favourites first, then
+        # by name — nothing here is free or taken, so there is no other order
+        # worth keeping.
+        def directory_view
+          clubs = settings.repos.clubs.enabled.sort_by { [favourite?(_1.slug) ? 0 : 1, _1.name] }
+
+          clubs.map do |club|
+            found = profile(club.slug)
+            covers = found&.covers.to_a
+            {
+              slug: club.slug,
+              name: club.name,
+              favourite: favourite?(club.slug),
+              sub: [found&.area, (Messages.cover_summary(covers) if covers.any?)].compact.join(" · ")
+            }
+          end
         end
 
         # The query a link back to Share needs to keep its clubs narrowed.
@@ -439,6 +472,30 @@ module Booking
         @sheet = Rundown.build(table: @filter.narrow(table), clubs:, window: @span.window)
         @text = Messages.rundown(@sheet)
         erb :share, layout: :layout
+      end
+
+      # Every watched club and what it is like — the courts' covers and the
+      # neighbourhood, one tap from the rest. Reached from the home screen.
+      get "/clubs" do
+        require_visitor!
+
+        @clubs = directory_view
+        erb :directory, layout: :layout
+      end
+
+      # One club's Profile: courts and their covers, a pin, Listed hours,
+      # prices. Reached from the directory, or from a club's hours on a date —
+      # `date` says which, so the back arrow returns where the tap came from.
+      get "/clubs/:slug" do
+        require_visitor!
+
+        @club = settings.repos.clubs.enabled.find { _1.slug == params[:slug] }
+        halt(404) unless @club
+
+        @profile = profile(@club.slug)
+        date = parse_date(params[:date])
+        @back = date ? "/date/#{date}/club/#{@club.slug}" : "/clubs"
+        erb :club, layout: :layout
       end
 
       # A star on a Clubs row. Post-redirect-get like the watch actions, so a

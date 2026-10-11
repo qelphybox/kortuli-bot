@@ -78,6 +78,16 @@ whether an adapter still works:
 bundle exec rake poll
 ```
 
+Refreshing every club's Profile — courts and their covers, the pin, Listed
+hours and prices — from sapadelo.com. It reads the clubs that name their page
+there (`settings.sapadelo` in [config/clubs.yml](config/clubs.yml)) and
+rewrites [config/club_profiles.yml](config/club_profiles.yml); review the diff
+and commit it. Nothing at runtime talks to sapadelo:
+
+```bash
+bundle exec rake sapadelo:import
+```
+
 Adding another Reservio club — this prints the ids to paste into
 [config/clubs.yml](config/clubs.yml):
 
@@ -113,6 +123,17 @@ Tapping an hour that is **gone** asks to be told when it comes back: one tap,
 no form, a watch on exactly that club and that hour. Hours that have already
 started, and hours past the booking horizon, are drawn without a button —
 nothing can free them up any more, or nobody has polled them.
+
+**Clubs**, linked from the home screen, is every watched club whatever it has
+free: its neighbourhood and how many courts sit indoors, under a roof, or in
+the open. A club opens its **Profile** — each court and its cover, a button
+that drops the pin in Google Maps, the hours and prices it lists, a phone
+number and the booking page. The same screen is one tap away as **Info** on a
+club's hours for a date, and the day's list of clubs names the covers beside
+each one, which is the first thing anybody asks when it rains. Profiles come
+from the clubs' own listings on sapadelo.com and say so; they are for reading,
+and the Grid still draws from declared Opening hours. Padel Club 2 is not
+listed there and has none.
 
 Its second screen is **Watches**: everything you have asked to be told about,
 with pause, resume and delete. A standing watch names the weekdays it keeps
