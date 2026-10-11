@@ -1258,6 +1258,182 @@ RSpec.describe Booking::Web::App do
     end
   end
 
+  describe "sharing a game" do
+    let(:day) { today + 1 }
+
+    def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="share__preview"[^>]*>(.*?)</pre>}m, 1].to_s)
+
+    def shared_text
+      href = last_response.body[/data-tg-share href="([^"]+)"/, 1]
+      CGI.unescape(CGI.unescapeHTML(href)[/[?&]text=([^&]*)/, 1].to_s)
+    end
+
+    # The hours a club's screen lets you tick, as the values they submit.
+    def tickable = last_response.body.scan(/name="hours\[\]" value="(\d+)" form="game-pick"/).flatten.map(&:to_i)
+
+    describe "on a club's hours" do
+      # Free or taken alike: the booking may not have reached the Grid yet,
+      # and somebody who has just booked the last court sees it as taken.
+      it "offers a tick on every hour, free or not, for the form that shares them" do
+        sign_in
+        get "/date/#{day}/club/padel-club-2"
+
+        expect(tickable).to eq((8..23).to_a)
+        expect(last_response.body).to include(%(<form class="game-pick" id="game-pick" method="get" action="/date/#{day}/club/padel-club-2/game">))
+      end
+
+      # Counted from the page's midnight, like the Share screen's pickers, so
+      # a game from 23:00 to 01:00 comes out forwards.
+      it "counts the hours after midnight on from the evening they belong to" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel"
+
+        expect(tickable.last(3)).to eq([23, 24, 25])
+      end
+
+      it "offers no tick on an hour that is already over" do
+        sign_in
+        get "/date/#{today}/club/padel-club-2"
+
+        over = (8..23).count { Booking::Clock.local_to_utc(format("%s %02d:00", today, _1)) + 3600 <= Booking::Clock.now }
+        expect(tickable).to eq((8 + over..23).to_a)
+      end
+    end
+
+    describe "the message" do
+      before { forecast.replace([Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc("#{day} 20:00"), rain_chance: 80, rain_mm: 2.0, code: 61, temperature: 13.6, day: false)]) }
+
+      it "is not served to somebody without a session" do
+        get "/date/#{day}/club/kus-tba-padel/game", hours: %w[19 20]
+
+        expect(last_response.location).to end_with("/start")
+      end
+
+      it "runs from the first hour ticked to the end of the last" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel/game", hours: %w[19 20]
+
+        expect(preview).to include("🎾 Court booked · Kus Tba Padel\n#{day.strftime("%a %-d %b")}, 19:00–21:00")
+        expect(last_response.body).to include('<option value="19" selected>').and include('<option value="21" selected>')
+      end
+
+      # A Game is one stretch: the hour between two ticks comes with them,
+      # and the preview shows it before anything leaves.
+      it "takes the hours between two ticks as well" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel/game", hours: %w[19 21]
+
+        expect(preview).to include("19:00–22:00")
+      end
+
+      it "is moved by its two pickers" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel/game", from: 23, to: 25
+
+        expect(preview).to include("23:00–01:00")
+        expect(preview).to include("/game/kus-tba-padel/#{day}/23-25")
+      end
+
+      it "says where, what the sky does over the wettest hour, and the pin" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel/game", hours: %w[19 20]
+
+        expect(preview).to include("🌧 Rain 80% · 14°")
+        expect(preview).to include("📍 Turtle Lake https://www.google.com/maps/search/?api=1&query=41.700688,44.7570599")
+        expect(preview).to include("📅 Add to calendar: http://example.org/game/kus-tba-padel/#{day}/19-21")
+      end
+
+      it "sends through Telegram's share sheet exactly the text it previews" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel/game", hours: %w[19 20]
+
+        expect("#{shared_text}\n\nvia https://t.me/kortuli_test_bot").to eq(preview)
+      end
+
+      it "puts it in the sender's own calendar in one tap, either kind" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel/game", hours: %w[19 20]
+
+        expect(last_response.body).to include("https://calendar.google.com/calendar/render?action=TEMPLATE")
+        expect(last_response.body).to include(%(href="http://example.org/game/kus-tba-padel/#{day}/19-21.ics"))
+      end
+
+      # Nothing ticked — a press without JS — or a span the club does not
+      # sell: back to the hours, to tick again.
+      it "goes back to the hours when there is nothing to share" do
+        sign_in
+        get "/date/#{day}/club/kus-tba-padel/game"
+        expect(last_response.location).to end_with("/date/#{day}/club/kus-tba-padel")
+
+        get "/date/#{day}/club/kus-tba-padel/game", from: 3, to: 5
+        expect(last_response.location).to end_with("/date/#{day}/club/kus-tba-padel")
+      end
+
+      it "is 404 for a club nobody watches" do
+        sign_in
+        get "/date/#{day}/club/no-such-club/game", hours: %w[19]
+
+        expect(last_response.status).to eq(404)
+      end
+    end
+
+    # The link in the message. The people it is sent to need not use the bot,
+    # so it opens without a session.
+    describe "the page the group opens" do
+      it "opens without a session, and says what is booked" do
+        get "/game/kus-tba-padel/#{day}/19-21"
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).to include("Kus Tba Padel").and include("19:00–21:00")
+        expect(last_response.body).to include("https://calendar.google.com/calendar/render?action=TEMPLATE")
+        expect(last_response.body).to include(%(href="http://example.org/game/kus-tba-padel/#{day}/19-21.ics"))
+        expect(last_response.body).to include("https://www.google.com/maps/search/?api=1&amp;query=41.700688,44.7570599")
+      end
+
+      # Padel Club 2 has no Profile, so there is no pin to drop.
+      it "offers no map for a club without a pin" do
+        get "/game/padel-club-2/#{day}/19-20"
+
+        expect(last_response.status).to eq(200)
+        expect(last_response.body).not_to include("Google Maps")
+      end
+
+      # A link in a chat outlives the week it was sent in.
+      it "still opens once the game has gone by" do
+        get "/game/kus-tba-padel/#{today - 30}/19-21"
+
+        expect(last_response.status).to eq(200)
+      end
+
+      it "is 404 for a club nobody watches, a span the club does not sell, or a date that is not one" do
+        ["/game/no-such-club/#{day}/19-21", "/game/kus-tba-padel/#{day}/3-5", "/game/kus-tba-padel/#{day}/21-19",
+         "/game/kus-tba-padel/2026-02-31/19-21"].each do |path|
+          get path
+
+          expect(last_response.status).to eq(404), path
+        end
+      end
+
+      describe "as a calendar file" do
+        before { get "/game/kus-tba-padel/#{day}/23-25.ics" }
+
+        it "is served as one, inline, so a phone offers to add it" do
+          expect(last_response.status).to eq(200)
+          expect(last_response.content_type).to start_with("text/calendar")
+          expect(last_response.headers["Content-Disposition"]).to start_with("inline")
+        end
+
+        it "is the hours of the game, past midnight included" do
+          body = last_response.body.gsub("\r\n ", "")
+
+          expect(body).to include("DTSTART:#{Booking::Calendar.stamp(Booking::Clock.local_to_utc("#{day} 23:00"))}")
+          expect(body).to include("DTEND:#{Booking::Calendar.stamp(Booking::Clock.local_to_utc("#{day + 1} 01:00"))}")
+          expect(body).to include("URL:http://example.org/game/kus-tba-padel/#{day}/23-25")
+        end
+      end
+    end
+  end
+
   describe "the forecast" do
     let(:tomorrow) { today + 1 }
 

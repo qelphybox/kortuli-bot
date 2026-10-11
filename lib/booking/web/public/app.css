@@ -281,6 +281,29 @@ button { color: inherit; }
 
 .slot-row__body { display: flex; flex-direction: column; gap: 4px; }
 
+/* The tick that makes an hour part of a Game. The whole left side is its
+   label, so tapping the time ticks it too. */
+.slot-row__label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  cursor: pointer;
+}
+.slot-row__pick {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.slot-row__pick.is-blank { cursor: default; }
+.slot-row:has(.slot-row__pick:checked) {
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
 .slot-row.is-taken .slot-row__body { opacity: 0.55; }
 
 .slot-row__time {
@@ -334,6 +357,32 @@ button { color: inherit; }
   color: var(--muted);
   cursor: default;
 }
+
+/* --- Sharing a Game. Under the hours, quiet until something is ticked;
+       then it follows the thumb down the list, because the hours worth
+       ticking are the evening ones at the bottom. ----------------------- */
+.game-pick { padding: 18px 20px 0; }
+.game-pick .cta[disabled] {
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-weight: 500;
+  cursor: default;
+}
+.game-pick.is-armed {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, transparent, var(--bg) 18px);
+}
+
+.calendar-add { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.calendar-add .profile__label { margin: 0; }
+.calendar-add__row { display: flex; flex-direction: column; gap: 10px; }
+
+.game-card .facts { margin-bottom: 6px; }
+.game-card .facts dd.is-wet { color: var(--rain); }
 
 /* --- New watch form -------------------------------------------------- */
 .refusals {
