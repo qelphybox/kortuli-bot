@@ -28,6 +28,11 @@ module Booking
       # `rake sapadelo:import` writes. Static, so it is handed over rather
       # than kept in the database: nothing at runtime ever changes it.
       set :club_profiles, {}
+      # The one person the dashboard opens for (the same OWNER_TELEGRAM_ID
+      # that feedback is forwarded to), and what it reads. Injected like the
+      # rest, so specs can stand both in.
+      set :owner_id, nil
+      set :dashboard, nil
       # Sinatra's own session middleware is not used — ours is one signed
       # cookie and nothing else — and its default error page leaks the app's
       # internals, so both stay off.
@@ -52,6 +57,8 @@ module Booking
         File.mtime(File.expand_path("public/app.css", __dir__)),
         File.mtime(File.expand_path("public/app.js", __dir__))
       ].max.to_i.to_s.freeze
+
+      BYTE_UNITS = %w[B KB MB GB TB].freeze
 
       helpers do
         def visitor_id = settings.visitor_sessions.user_id(request.cookies[COOKIE])
@@ -85,6 +92,45 @@ module Booking
 
         def require_visitor!
           redirect(to("/start")) unless visitor_id
+        end
+
+        def owner? = !settings.owner_id.nil? && visitor_id == settings.owner_id
+
+        # Not 403, for the reason own_watch! gives: to anybody else the
+        # dashboard does not exist.
+        def require_owner!
+          require_visitor!
+          halt(404) unless owner?
+        end
+
+        def bytes(count)
+          return "—" if count.nil?
+
+          power = count < 1024 ? 0 : [Math.log(count, 1024).floor, BYTE_UNITS.size - 1].min
+          power.zero? ? "#{count} B" : format("%.1f %s", count.fdiv(1024**power), BYTE_UNITS[power])
+        end
+
+        def percent(ratio) = "#{(ratio * 100).round}%"
+
+        def ago(time, now: Clock.now)
+          return "never" if time.nil?
+
+          seconds = (now - time).to_i
+          return "just now" if seconds < 5
+
+          [[86_400, "d"], [3600, "h"], [60, "m"], [1, "s"]].each do |size, unit|
+            return "#{seconds / size}#{unit} ago" if seconds >= size
+          end
+        end
+
+        # The log line, escaped, with every occurrence of the search phrase
+        # marked. Escaping first and then marking the escaped phrase keeps the
+        # markup ours: nothing from the line can open a tag.
+        def highlight(line, query)
+          escaped = h(line)
+          return escaped if query.to_s.strip.empty?
+
+          escaped.gsub(/#{Regexp.escape(h(query.strip))}/i) { "<mark>#{_1}</mark>" }
         end
 
         # The dates the poller actually knows about. Anything outside this
@@ -408,6 +454,7 @@ module Booking
 
         @dates = dates_view
         @watches_count = visible_watches.size
+        @owner = owner?
         erb :dates, layout: :layout
       end
 
@@ -514,6 +561,31 @@ module Booking
         require_visitor!
 
         watches_screen
+      end
+
+      # The owner's view of the running thing: the three processes, every
+      # club's last Poll, the database, the disk under it, and the most recent
+      # lines that report trouble.
+      get "/admin" do
+        require_owner!
+
+        @now = Clock.now
+        @dashboard = settings.dashboard
+        @problems = @dashboard.logs.call(problems: true, limit: 8).lines
+        erb :admin, layout: :layout
+      end
+
+      # Search across the three processes' logs, newest first. A plain
+      # phrase rather than a pattern: a regex typed into a phone is a typo
+      # waiting to happen, and an expensive one waiting to be found.
+      get "/admin/logs" do
+        require_owner!
+
+        @query = params[:q].to_s[0, 200]
+        @process = params[:process].to_s
+        @only_problems = params[:problems] == "1"
+        @result = settings.dashboard.logs.call(query: @query, process: @process, problems: @only_problems)
+        erb :admin_logs, layout: :layout
       end
 
       # The Watch form is its own screen now — the Manage list points at it

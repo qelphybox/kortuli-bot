@@ -1,0 +1,123 @@
+<%#
+  The owner's dashboard. Read top to bottom it answers, in order: is
+  everything running, is the polling working, is anybody using it, and is
+  the box about to fill up. Every number is read when the page is, so
+  Refresh is the only control it needs.
+%>
+<header class="app-head app-head--sub">
+  <a class="back" href="/" aria-label="Back to dates">←</a>
+  <span class="app-head__title-solo">Dashboard</span>
+  <a class="head-action" href="/admin">Refresh</a>
+</header>
+
+<section class="profile ops">
+  <div class="profile__section">
+    <h2 class="profile__label">Processes</h2>
+    <ul class="ops-list">
+      <% @dashboard.processes.each do |reading| %>
+        <% state = reading.state(@now) %>
+        <li class="ops-row">
+          <span class="ops-row__body">
+            <span class="ops-row__name"><%= reading.process %></span>
+            <span class="ops-row__sub">
+              <% if state == :missing %>
+                no heartbeat on record
+              <% else %>
+                beat <%= ago(reading.beat_at, now: @now) %><% if reading.started_at %> · started <%= ago(reading.started_at, now: @now) %><% end %>
+              <% end %>
+            </span>
+          </span>
+          <span class="state state--<%= state %>"><%= { up: "up", stale: "silent", missing: "unknown" }.fetch(state) %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="profile__section">
+    <h2 class="profile__label">Last poll per club</h2>
+    <ul class="ops-list">
+      <% @dashboard.polls(now: @now).each do |row| %>
+        <li class="ops-row">
+          <span class="ops-row__body">
+            <span class="ops-row__name"><%= h(row.club.name) %></span>
+            <span class="ops-row__sub">
+              <% if row.poll %>
+                <%= ago(row.poll.polled_at, now: @now) %> · <%= h(row.poll.summary) %>
+              <% else %>
+                no poll on record yet
+              <% end %>
+            </span>
+          </span>
+          <span class="state state--<%= row.state %>"><%= row.state %></span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="profile__section">
+    <h2 class="profile__label">Activity</h2>
+    <% activity = @dashboard.activity(now: @now) %>
+    <dl class="facts">
+      <dt>People</dt><dd><%= activity.people %></dd>
+      <dt>Active watches</dt><dd><%= activity.active_watches %></dd>
+      <dt>Slots freed, 24h</dt><dd><%= activity.freed_24h %></dd>
+      <dt>Notifications sent, 24h</dt><dd><%= activity.notified_24h %></dd>
+    </dl>
+  </div>
+
+  <div class="profile__section">
+    <h2 class="profile__label">Disk</h2>
+    <% disk = @dashboard.disk %>
+    <% if disk %>
+      <p class="profile__lede"><%= bytes(disk.free_bytes) %> free of <%= bytes(disk.total_bytes) %></p>
+      <div class="meter<%= " is-high" if disk.used_ratio >= 0.85 %>" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= (disk.used_ratio * 100).round %>" aria-label="Disk used">
+        <span style="width: <%= percent(disk.used_ratio) %>"></span>
+      </div>
+      <p class="ops-note"><%= percent(disk.used_ratio) %> used, measured on the volume the database lives on.</p>
+    <% else %>
+      <p class="ops-note">This machine would not say.</p>
+    <% end %>
+  </div>
+
+  <div class="profile__section">
+    <h2 class="profile__label">Database</h2>
+    <% storage = @dashboard.storage %>
+    <p class="profile__lede"><%= bytes(storage.total_bytes) %></p>
+    <dl class="facts">
+      <% storage.files.each do |name, size| %>
+        <dt><%= h(name) %></dt><dd><%= bytes(size) %></dd>
+      <% end %>
+    </dl>
+    <dl class="facts">
+      <% storage.tables.each do |table, rows| %>
+        <dt><%= h(table) %></dt><dd><%= rows %> rows</dd>
+      <% end %>
+    </dl>
+  </div>
+
+  <div class="profile__section">
+    <h2 class="profile__label">Host</h2>
+    <% load = @dashboard.load_average %>
+    <% memory = @dashboard.memory %>
+    <dl class="facts">
+      <dt>Load, 1 / 5 / 15 min</dt>
+      <dd><%= load ? load.map { format("%.2f", _1) }.join(" / ") : "—" %></dd>
+      <dt>Memory used</dt>
+      <dd><%= memory ? "#{bytes(memory.total_bytes - memory.available_bytes)} of #{bytes(memory.total_bytes)}" : "—" %></dd>
+    </dl>
+  </div>
+
+  <div class="profile__section">
+    <h2 class="profile__label">Recent problems</h2>
+    <% if @problems.empty? %>
+      <p class="ops-note">Nothing in the logs reports a failure.</p>
+    <% else %>
+      <ul class="log">
+        <% @problems.each do |line| %>
+          <li class="log__line is-problem"><span class="log__process"><%= line.process %></span><%= h(line.text) %></li>
+        <% end %>
+      </ul>
+    <% end %>
+    <a class="btn-secondary" href="/admin/logs">Search the logs</a>
+  </div>
+</section>

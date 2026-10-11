@@ -62,6 +62,13 @@ RSpec.describe Booking::Poller do
       expect(notifier.delivered).to be_empty
     end
 
+    it "writes down how the poll went, for the dashboard" do
+      poller.tick(now:)
+
+      poll = repos.polls.all.fetch("demo")
+      expect([poll.outcome, poll.polled_at, poll.summary]).to eq(["ok", now, "1 free, +0 freed, -0 taken, 0 sent"])
+    end
+
     it "records how far it has polled, so the next tick can spot a cancellation" do
       poller.tick(now:)
 
@@ -129,6 +136,12 @@ RSpec.describe Booking::Poller do
       poller.tick(now:)
 
       expect(logged.last).to include("demo").and include("suspect")
+    end
+
+    it "marks the club's last poll as suspect" do
+      poller.tick(now:)
+
+      expect(repos.polls.all.fetch("demo").outcome).to eq("suspect")
     end
 
     it "does not flood once the club comes back" do
@@ -200,6 +213,12 @@ RSpec.describe Booking::Poller do
       poller.tick(now:)
 
       expect(logged.last).to include("demo").and include("failed")
+    end
+
+    it "marks the club's last poll as failed, with the reason" do
+      poller.tick(now:)
+
+      expect(repos.polls.all.fetch("demo")).to have_attributes(outcome: "failed", summary: "failed — timeout")
     end
   end
 

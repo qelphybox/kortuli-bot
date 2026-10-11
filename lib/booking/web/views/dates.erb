@@ -21,6 +21,12 @@
     <span>Clubs · courts, hours, map</span>
     <span aria-hidden="true">›</span>
   </a>
+  <% if @owner %>
+    <a class="watches-link" href="/admin">
+      <span>Dashboard · health, logs, disk</span>
+      <span aria-hidden="true">›</span>
+    </a>
+  <% end %>
 </header>
 
 <ul class="dates">

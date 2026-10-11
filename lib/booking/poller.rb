@@ -30,16 +30,23 @@ module Booking
       previous = @repos.slots.snapshot(club.slug)
       result = @differ.diff(previous:, current: fetched, known_through: club.observed_through)
 
-      return log("poll #{club.slug}: suspect response (#{result.reason}) — snapshot kept") unless result.ok?
+      return report(club, :suspect, "suspect response (#{result.reason}) — snapshot kept", now:) unless result.ok?
 
       commit(club, fetched, window, result)
       sent = notify(result.became_available, now:)
-      log("poll #{club.slug}: #{fetched.size} free, +#{result.became_available.size} freed, " \
-          "-#{result.became_taken.size} taken, #{sent} sent#{held_back(result)}")
+      report(club, :ok, "#{fetched.size} free, +#{result.became_available.size} freed, " \
+                        "-#{result.became_taken.size} taken, #{sent} sent#{held_back(result)}", now:)
     rescue Adapters::SourceUnavailable => e
       # The club's site is the least reliable part of the system, so an
       # unreachable one is an ordinary event: skip it and keep the other clubs.
-      log("poll #{club.slug}: failed — #{e.message}")
+      report(club, :failed, "failed — #{e.message}", now:)
+    end
+
+    # Said twice on purpose: once to the log, as a line, and once to the
+    # club's row, where the dashboard reads it without parsing the line.
+    def report(club, outcome, summary, now:)
+      log("poll #{club.slug}: #{summary}")
+      @repos.polls.record(club.slug, outcome:, summary:, at: now)
     end
 
     def commit(club, fetched, window, result)

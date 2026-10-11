@@ -163,3 +163,20 @@ RSpec.describe "repositories" do
     end
   end
 end
+
+RSpec.describe Booking::Repo::Polls do
+  subject(:polls) { described_class.new(Booking::DB.connect("sqlite:/")) }
+
+  let(:at) { Time.utc(2026, 10, 11, 12, 0, 0) }
+
+  it "keeps only the latest poll of each club" do
+    polls.record("demo", outcome: :failed, summary: "failed — timeout", at:)
+    polls.record("demo", outcome: :ok, summary: "3 free", at: at + 240)
+
+    expect(polls.all.fetch("demo")).to have_attributes(outcome: "ok", summary: "3 free", polled_at: at + 240)
+  end
+
+  it "refuses an outcome the dashboard would not know how to draw" do
+    expect { polls.record("demo", outcome: :maybe, summary: "?") }.to raise_error(ArgumentError)
+  end
+end

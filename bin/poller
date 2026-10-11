@@ -3,5 +3,5 @@
 
 require_relative "../lib/booking/boot"
 
-Booking::Boot.call
+Booking::Boot.call(process: "poller")
 Booking::App::PollLoop.run

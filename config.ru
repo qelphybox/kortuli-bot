@@ -3,7 +3,7 @@
 # the other two processes could not load it.
 require_relative "lib/booking/boot"
 
-Booking::Boot.call(Booking::Config::REQUIRED_FOR_WEB)
+Booking::Boot.call(Booking::Config::REQUIRED_FOR_WEB, process: "web")
 
 app = Booking::Web::App
 app.set :telegram_token, Booking::Config.telegram_token
@@ -12,6 +12,12 @@ app.set :visitor_sessions, Booking::Web::Session.for_token(Booking::Config.teleg
 # Read-only from here: the poller owns everything the grid displays.
 app.set :repos, Booking::App.repos
 app.set :club_profiles, Booking::ClubProfile.load
+app.set :owner_id, Booking::Config.owner_id
+app.set :dashboard, Booking::Ops::Dashboard.new(
+  db: Booking::DB.connection,
+  database_path: Booking::DB.path,
+  log_dir: Booking::Config.log_dir
+)
 
 Booking.default_logger.call("boot: web on :#{Booking::Config.web_port}")
 

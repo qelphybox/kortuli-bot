@@ -1,3 +1,5 @@
+require "rufus-scheduler"
+
 module Booking
   # Environment is read here and nowhere else. No product-name prefixes on the
   # keys: the project is renameable without a sweep through the deployment.
@@ -19,8 +21,9 @@ module Booking
     REQUIRED_FOR_BOT = (REQUIRED + %w[APP_URL OWNER_TELEGRAM_ID BOT_USERNAME]).freeze
     # The web signs its session cookies with a key derived from the token (see
     # Web::Session.for_token), so it needs nothing more for that. It does build
-    # the feedback pill's deeplink and so needs the bot's public @handle.
-    REQUIRED_FOR_WEB = (REQUIRED + %w[BOT_USERNAME]).freeze
+    # the feedback pill's deeplink and so needs the bot's public @handle, and
+    # it opens the dashboard to the owner alone, so it needs to know who that is.
+    REQUIRED_FOR_WEB = (REQUIRED + %w[BOT_USERNAME OWNER_TELEGRAM_ID]).freeze
 
     # Empty counts as missing: `KEY=` in a .env or an unset variable expanded by
     # Kamal both arrive as "", and a blank token boots a process that can only
@@ -33,8 +36,14 @@ module Booking
 
     def telegram_token = ENV.fetch("TELEGRAM_TOKEN")
 
-    # The Telegram user_id that receives forwarded feedback. Fails loud on boot
-    # rather than treating an unset value as "nobody home"; see ADR-0002.
+    # Where each process keeps a searchable copy of its log and the file it
+    # touches to say it is alive. On the data mount in production, because
+    # that is the one directory all three containers share.
+    def log_dir = ENV.fetch("LOG_DIR", "data/log")
+
+    # The Telegram user_id that receives forwarded feedback, and the one
+    # person the web shows its dashboard to. Fails loud on boot rather than
+    # treating an unset value as "nobody home"; see ADR-0002.
     def owner_id = Integer(ENV.fetch("OWNER_TELEGRAM_ID"))
 
     # The bot's public @handle (without the @), used to build the mini app's
@@ -52,6 +61,10 @@ module Booking
     # Seconds of random delay before each tick, so polls do not land on the same
     # second of every interval.
     def poll_jitter = Integer(ENV.fetch("POLL_JITTER", "30"))
+
+    # The longest a healthy gap between two ticks can be, in seconds — what the
+    # dashboard measures a club's last Poll against.
+    def poll_every_seconds = Rufus::Scheduler.parse_duration(poll_interval).to_i + poll_jitter
 
     def clubs_file = ENV.fetch("CLUBS_FILE", "config/clubs.yml")
 

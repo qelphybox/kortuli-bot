@@ -3,5 +3,5 @@
 
 require_relative "../lib/booking/boot"
 
-Booking::Boot.call(Booking::Config::REQUIRED_FOR_BOT)
+Booking::Boot.call(Booking::Config::REQUIRED_FOR_BOT, process: "bot")
 Booking::App::Bot.run

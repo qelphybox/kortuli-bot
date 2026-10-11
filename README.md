@@ -62,8 +62,8 @@ bundle exec bin/poller
 bundle exec bin/web
 ```
 
-Each entrypoint asks only for what it uses: `bin/web` needs `BOT_USERNAME`,
-`bin/bot` needs `APP_URL`, `BOT_USERNAME` and
+Each entrypoint asks only for what it uses: `bin/web` needs `BOT_USERNAME`
+and `OWNER_TELEGRAM_ID`, `bin/bot` needs `APP_URL`, `BOT_USERNAME` and
 `OWNER_TELEGRAM_ID`. Only the token is shared. Locally the mini app comes up
 on `http://localhost:8080`, where it will redirect you to `/start` and then
 tell you to open it from Telegram — the signed payload it needs only exists
@@ -264,6 +264,28 @@ If that line stops appearing, or `free` sits at zero for hours, the adapter has
 broken — which looks exactly like "no cancellations happened" from the outside.
 Check it before concluding nobody wants the product.
 
+The same picture without a terminal is **`/admin`** in the mini app, which
+opens for `OWNER_TELEGRAM_ID` alone (anybody else gets a 404) and is linked
+from the owner's home screen. It shows:
+
+- each process's **Heartbeat** — `up`, `silent` once it is more than 90
+  seconds old, or `unknown`;
+- every club's **last Poll** — `ok`, `suspect`, `failed`, `stale` once it is
+  three ticks old, or `never`;
+- people, active watches, and the last 24 hours' freed slots and
+  notifications;
+- free space on the disk the database lives on, the size of `booking.db` and
+  its WAL, rows per table, and the host's load and memory;
+- the latest lines that report trouble, and a search across all three logs
+  at `/admin/logs`, by phrase, by process, or for trouble only.
+
+Docker's own logs cannot be read from another container, so each process
+also keeps a copy of what it prints in `data/log/<process>.log` on the data
+mount (rolled over to `.1` at 5 MB, so a couple of weeks of polling) and
+touches `data/log/<process>.beat` every 30 seconds. `kamal app logs` is
+unchanged. Puma's request lines and anything written to stderr go to Docker
+alone.
+
 ## The parts that will bite
 
 Four things break a naive version of this, all handled and all covered by tests:
@@ -339,7 +361,8 @@ This is an MVP, deliberately:
   excavation.
 - **No rate limit per user.** The unique index on `notifications` stops repeats
   about the *same* slot; nothing caps the count of *different* slots per hour.
-- **No alerting.** A broken adapter shows up in the log, not in your inbox.
+- **No alerting.** A broken adapter shows up in the log and on `/admin`, not
+  in your inbox — you have to look.
 - **`poll_interval_seconds` per club is stored but not used.** One global
   interval drives a sequential pass over all clubs — deliberate, so a handful of
   clubs on shared hosting never get hit in parallel.
