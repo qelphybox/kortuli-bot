@@ -130,7 +130,7 @@ RSpec.describe Booking::Web::App do
 
       get "/"
       expect(last_response.status).to eq(200)
-      expect(last_response.body).to include('class="dates"')
+      expect(last_response.body).to include('class="dates')
     end
 
     it "refuses a payload signed with a different token" do
@@ -168,32 +168,32 @@ RSpec.describe Booking::Web::App do
     end
 
     # Looking, a Rundown and a Game all start from a date, so the dates are
-    # the screen. Watching is the side door: still one tap away, but behind
-    # the Menu rather than a button over the list.
-    describe "its menu" do
-      def menu = last_response.body[%r{<details class="menu".*?</details>}m].to_s
+    # the screen. Watching and the clubs are the other two tabs: one tap
+    # away, but under the thumb rather than over the list.
+    describe "its tabs" do
+      def tabs = last_response.body[%r{<nav class="tabbar".*?</nav>}m].to_s
 
-      it "reaches the create-a-watch form, the watches and the clubs" do
+      it "reach the watches and the clubs" do
         sign_in
         get "/"
 
-        expect(menu).to include('href="/watches/new"', 'href="/watches"', 'href="/clubs"')
+        expect(tabs).to include('href="/watches"', 'href="/clubs"')
       end
 
-      it "leaves nothing but the dates outside it" do
+      it "leave nothing but the dates outside them" do
         sign_in
         get "/"
 
-        outside = last_response.body.sub(menu, "")
-        expect(outside).not_to include('href="/watches', 'href="/clubs"', 'class="cta"')
+        outside = last_response.body.sub(tabs, "")
+        expect(outside).not_to include('href="/watches', 'href="/clubs"')
       end
 
-      it "counts the watches somebody already has" do
+      it "count the watches somebody already has" do
         watches.create(user_id: 42, club_slugs: ["padel-club-2"], weekdays: [5], from_minute: 1140, to_minute: 1320)
         sign_in(user_id: 42)
         get "/"
 
-        expect(menu).to include('<span class="menu__count">1</span>')
+        expect(tabs).to include('<span class="tab__count">1</span>')
       end
     end
 
@@ -320,6 +320,53 @@ RSpec.describe Booking::Web::App do
 
         expect(last_response.location).to end_with("/")
       end
+
+      # The same star sits on a club's Profile, and turns over there.
+      it "goes back to the club's profile when starred from it, keeping its date" do
+        sign_in(user_id: 42)
+        post "/favourites/kus-tba-padel", back: "profile", date: today.to_s
+
+        expect(last_response.location).to end_with("/clubs/kus-tba-padel?date=#{today}")
+        expect(favourites.for_user(42)).to eq(Set["kus-tba-padel"])
+      end
+    end
+
+    # The week as tabs over the list, so the next day is one tap away.
+    it "links every date across the horizon, marking the one on screen" do
+      sign_in
+      get "/date/#{today + 1}"
+
+      strip = last_response.body[%r{<nav class="strip".*?</nav>}m].to_s
+      expect(strip.scan(%r{href="/date/[\d-]+"}).size).to eq(Booking::Config.horizon_days)
+      expect(strip).to include(%(href="/date/#{today + 1}" aria-current="date"))
+    end
+
+    describe "narrowed by the chips" do
+      def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+
+      # Kus Tba has a Profile with every court outdoors; Padel Club 2 has no
+      # Profile, so neither is known to have a roof.
+      it "keeps only the clubs with a roof when asked for covered ones" do
+        sign_in
+        get "/date/#{today}?only=covered"
+
+        expect(club_names_in_order).to be_empty
+      end
+
+      it "keeps only the favourites when asked for them" do
+        sign_in(user_id: 42)
+        favourites.add(42, "padel-club-2")
+        get "/date/#{today}?only=favourites"
+
+        expect(club_names_in_order).to eq(["Padel Club 2"])
+      end
+
+      it "shows every club for anything it does not know" do
+        sign_in
+        get "/date/#{today}?only=nonsense"
+
+        expect(club_names_in_order).to contain_exactly("Padel Club 2", "Kus Tba Padel")
+      end
     end
   end
 
@@ -331,7 +378,7 @@ RSpec.describe Booking::Web::App do
        slot(club: "kus-tba-padel", court: "any", at: "#{day + 1} 01:00")]
     end
 
-    def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="share__preview"[^>]*>(.*?)</pre>}m, 1].to_s)
+    def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="copy-source"[^>]*>(.*?)</pre>}m, 1].to_s)
 
     def shared_text
       href = last_response.body[/data-tg-share href="([^"]+)"/, 1]
@@ -828,7 +875,7 @@ RSpec.describe Booking::Web::App do
         expect(form).to include('name="weekdays[]"').and include("Mon").and include("Sun")
         expect(form).to include('name="from_hour"').and include('name="to_hour"')
         # The whole point of the ticket: one submit, not four messages.
-        expect(form.scan(/<button|type="submit"/).size).to eq(1)
+        expect(form.scan(/<button(?![^>]*type="button")/).size).to eq(1)
       end
 
       it "takes clubs, weekdays and both ends of the range in one step" do
@@ -839,7 +886,7 @@ RSpec.describe Booking::Web::App do
         # more click on from there.
         get "/watches"
 
-        expect(listed).to include("Padel Club 2").and include("Mon, Fri · 19:00–22:00")
+        expect(listed).to include("Padel Club 2").and include("Mon, Fri").and include("19:00–22:00")
       end
 
       # The moment after the form is accepted. Post-redirect-get lands
@@ -1072,7 +1119,7 @@ RSpec.describe Booking::Web::App do
       sign_in
       get "/clubs/kus-tba-padel"
 
-      expect(last_response.body).to include('class="back" href="/clubs"')
+      expect(last_response.body).to include('href="/clubs" aria-label="Back"')
     end
 
     it "is reached from a club's hours on a date, and goes back there" do
@@ -1081,31 +1128,35 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include(%(href="/clubs/kus-tba-padel?date=#{today + 1}"))
 
       get "/clubs/kus-tba-padel?date=#{today + 1}"
-      expect(last_response.body).to include(%(class="back" href="/date/#{today + 1}/club/kus-tba-padel"))
+      expect(last_response.body).to include(%(href="/date/#{today + 1}/club/kus-tba-padel" aria-label="Back"))
     end
 
     it "does not go back to a date past the horizon" do
       sign_in
       get "/clubs/kus-tba-padel?date=#{today + 400}"
 
-      expect(last_response.body).to include('class="back" href="/clubs"')
+      expect(last_response.body).to include('href="/clubs" aria-label="Back"')
     end
   end
 
   describe "the clubs screen naming covers" do
+    let(:free_slots) do
+      [slot(club: "padel-club-2", at: "#{today + 1} 18:00"), slot(club: "kus-tba-padel", court: "any", at: "#{today + 1} 18:00")]
+    end
+
     it "puts what the courts are under beside a club with a profile, and nothing beside one without" do
       sign_in
-      get "/date/#{today}"
+      get "/date/#{today + 1}"
 
-      expect(last_response.body).to include('<span class="club-row__cover">outdoor</span>')
-      expect(last_response.body.scan("club-row__cover").size).to eq(1)
+      expect(last_response.body).to include('<span class="tag tag--outdoor">outdoor</span>')
+      expect(last_response.body.scan('class="tag tag--').size).to eq(1)
     end
   end
 
   describe "sharing a game" do
     let(:day) { today + 1 }
 
-    def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="share__preview"[^>]*>(.*?)</pre>}m, 1].to_s)
+    def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="copy-source"[^>]*>(.*?)</pre>}m, 1].to_s)
 
     def shared_text
       href = last_response.body[/data-tg-share href="([^"]+)"/, 1]
@@ -1123,7 +1174,7 @@ RSpec.describe Booking::Web::App do
         get "/date/#{day}/club/padel-club-2"
 
         expect(tickable).to eq((8..23).to_a)
-        expect(last_response.body).to include(%(<form class="game-pick" id="game-pick" method="get" action="/date/#{day}/club/padel-club-2/game">))
+        expect(last_response.body).to include(%(<form class="game-pick dock" id="game-pick" method="get" action="/date/#{day}/club/padel-club-2/game">))
       end
 
       # Counted from the page's midnight, like the Share screen's pickers, so
@@ -1297,7 +1348,7 @@ RSpec.describe Booking::Web::App do
         sign_in
         get "/date/#{tomorrow}"
 
-        expect(last_response.body).to include("🌧 Rain likely 19:00–21:00")
+        expect(last_response.body).to include("Rain likely 19:00–21:00")
         expect(last_response.body).to include(Booking::Messages.weather_roofed_first)
       end
 
@@ -1316,15 +1367,15 @@ RSpec.describe Booking::Web::App do
         sign_in
         get "/date/#{tomorrow}/club/kus-tba-padel"
 
-        expect(last_response.body).to include('<span class="slot-row__weather is-wet">🌧 Rain 80% · 14°</span>')
-        expect(last_response.body).to include('<span class="slot-row__weather">☁️ 14°</span>')
+        expect(last_response.body).to include('<span class="hour__weather is-wet" title="🌧 Rain 80% · 14°">☂ 80% · 14°</span>')
+        expect(last_response.body).to include('<span class="hour__weather" title="☁️ 14°">14°</span>')
       end
 
       it "marks the date as rainy on the home screen" do
         sign_in
         get "/"
 
-        expect(last_response.body.scan("date-row__weather").size).to eq(1)
+        expect(last_response.body.scan('class="rain-chip"').size).to eq(1)
       end
     end
 
@@ -1336,7 +1387,7 @@ RSpec.describe Booking::Web::App do
         favourites.add(42, "kus-tba-padel")
         get "/date/#{tomorrow}"
 
-        expect(last_response.body).to include("🌤 No rain expected · 14–14°")
+        expect(last_response.body).to include("No rain expected").and include("14–14°")
         expect(club_names_in_order).to eq(["Kus Tba Padel", "Padel Club 2"])
       end
     end
@@ -1348,7 +1399,7 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).not_to include('class="weather')
 
       get "/date/#{tomorrow}/club/kus-tba-padel"
-      expect(last_response.body).not_to include("slot-row__weather")
+      expect(last_response.body).not_to include("hour__weather")
     end
   end
 

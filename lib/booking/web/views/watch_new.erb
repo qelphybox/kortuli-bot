@@ -1,63 +1,86 @@
 <%#
   One step, not four messages: clubs, weekdays and both ends of the range
-  go up together. Checkboxes rather than a typed list, so a club that is
-  not watched cannot be asked for. What was picked is rendered back,
-  because a refusal that also empties the form punishes the person for
-  reading it.
+  go up together. Checkboxes drawn as chips and day squares rather than a
+  typed list, so a club that is not watched cannot be asked for. What was
+  picked is rendered back, because a refusal that also empties the form
+  punishes the person for reading it. The Weekdays and Weekend shortcuts
+  only tick boxes, and only exist once JavaScript runs.
 %>
-<header class="app-head app-head--sub">
-  <a class="back" href="/" aria-label="Back to dates">←</a>
-  <span class="app-head__title-solo">Watch a slot</span>
+<% refused_days = @refusals.include?(Booking::Messages.pick_at_least_one_day) %>
+<header class="bar">
+  <div class="bar__row">
+    <a class="icon-btn" href="/watches" aria-label="Back to watches"><%= icon(:back) %></a>
+    <h1 class="bar__h1 bar__h1--caps">Watch a slot</h1>
+  </div>
 </header>
 
-<% if @refusals.any? %>
-  <ul class="refusals">
-    <% @refusals.each do |reason| %>
-      <li><%= reason %></li>
-    <% end %>
-  </ul>
-<% end %>
-
 <form class="new-watch" method="post" action="/watches">
-  <fieldset>
-    <legend>Clubs</legend>
-    <% @clubs.each do |club| %>
-      <label class="choice">
-        <input type="checkbox" name="club_slugs[]" value="<%= club.slug %>"<%= " checked" if picked_club?(club.slug) %>>
-        <%= club.name %>
-      </label>
-    <% end %>
-  </fieldset>
-
-  <fieldset>
-    <legend>Days</legend>
-    <% weekday_choices.each do |day, name| %>
-      <label class="choice">
-        <input type="checkbox" name="weekdays[]" value="<%= day %>"<%= " checked" if picked_day?(day) %>>
-        <%= name %>
-      </label>
-    <% end %>
-  </fieldset>
-
-  <fieldset class="range">
-    <legend>Time window</legend>
-    <label>From
-      <select name="from_hour">
-        <% start_hours.each do |hour| %>
-          <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :from_hour) %>><%= clock(hour) %></option>
+  <main class="page page--wide-gap">
+    <% if @refusals.any? %>
+      <ul class="alerts refusals">
+        <% @refusals.each do |reason| %>
+          <li class="alert" role="alert"><%= icon(:alert) %><%= reason %></li>
         <% end %>
-      </select>
-    </label>
-    <span class="dash" aria-hidden="true">–</span>
-    <label>Until
-      <select name="to_hour">
-        <% end_hours.each do |hour| %>
-          <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :to_hour) %>><%= clock(hour) %></option>
-        <% end %>
-      </select>
-    </label>
-  </fieldset>
+      </ul>
+    <% end %>
 
-  <button class="cta">Start watching</button>
-  <p class="disclaimer">kortuli never books or pays. You get a message with a link.</p>
+    <fieldset class="group">
+      <legend class="field__label">Clubs</legend>
+      <div class="pick-list">
+        <% @clubs.each do |club| %>
+          <label class="toggle-chip">
+            <input type="checkbox" name="club_slugs[]" value="<%= club.slug %>"<%= " checked" if picked_club?(club.slug) %>>
+            <span><%= club.name %></span>
+          </label>
+        <% end %>
+      </div>
+    </fieldset>
+
+    <fieldset class="group<%= " is-refused" if refused_days %>">
+      <legend class="field__label">Days</legend>
+      <div class="day-picks">
+        <% weekday_choices.each do |day, name| %>
+          <label class="day-pick">
+            <input type="checkbox" name="weekdays[]" value="<%= day %>"<%= " checked" if picked_day?(day) %> aria-label="<%= name %>">
+            <span aria-hidden="true"><%= name[0] %></span>
+          </label>
+        <% end %>
+      </div>
+      <div class="presets js-only">
+        <button type="button" data-days="1,2,3,4,5">Weekdays</button>
+        <button type="button" data-days="6,0">Weekend</button>
+      </div>
+    </fieldset>
+
+    <fieldset class="group">
+      <legend class="field__label">Time window</legend>
+      <div class="field-row">
+        <label class="field">
+          <span class="field__label field__label--soft">From</span>
+          <span class="select">
+            <select name="from_hour">
+              <% start_hours.each do |hour| %>
+                <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :from_hour) %>><%= clock(hour) %></option>
+              <% end %>
+            </select>
+          </span>
+        </label>
+        <label class="field">
+          <span class="field__label field__label--soft">Until</span>
+          <span class="select">
+            <select name="to_hour">
+              <% end_hours.each do |hour| %>
+                <option value="<%= hour %>"<%= " selected" if picked_hour?(hour, :to_hour) %>><%= clock(hour) %></option>
+              <% end %>
+            </select>
+          </span>
+        </label>
+      </div>
+    </fieldset>
+  </main>
+
+  <div class="dock">
+    <button class="btn btn--ball cta"><%= icon(:bell, size: 18) %>Start watching</button>
+    <p class="dock__note">kortuli never books or pays. You get a message with a link.</p>
+  </div>
 </form>

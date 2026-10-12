@@ -1,0 +1,16 @@
+<%#
+  The three places a person lives: the courts by date, what they watch, and
+  the clubs themselves. Drawn on those three screens only — anything deeper
+  has a back arrow instead. `current` is which of them this is.
+%>
+<nav class="tabbar" aria-label="Main">
+  <a class="tab" href="/"<%= ' aria-current="page"' if current == :courts %>>
+    <span class="tab__icon"><%= icon(:courts) %></span>Courts
+  </a>
+  <a class="tab" href="/watches"<%= ' aria-current="page"' if current == :watches %>>
+    <span class="tab__icon"><%= icon(:bell) %><% if watches_count.positive? %><span class="tab__count"><%= watches_count %></span><% end %></span>Watches
+  </a>
+  <a class="tab" href="/clubs"<%= ' aria-current="page"' if current == :clubs %>>
+    <span class="tab__icon"><%= icon(:pin) %></span>Clubs
+  </a>
+</nav>

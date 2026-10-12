@@ -1,55 +1,81 @@
 <%#
-  Hourly slots for one club on one date: free or taken, and beside each
-  hour the Forecast for it — the rain is what decides between this club and
-  one with a roof. The club's booking page is a single link in the header
-  rather than a button on every free row, because every row would point at
-  the same page.
+  Every hour a single club sells on one date, as a tile: free or taken, and
+  the Forecast for it — the rain is what decides between this club and one
+  with a roof. The club's booking page is a single button in the header
+  rather than one on every free tile, because every tile would point at the
+  same page.
+
   Every hour not yet over can be ticked, free or taken — the Grid may not
-  have seen a booking yet — and the ticked ones become a Game to share. The
-  boxes belong to the form under the list by its id.
+  have seen a booking yet — and the ticked ones become a Game to share. Each
+  tile is a label around its checkbox, and the boxes belong to the form in
+  the dock by its id, so ticking works without JavaScript.
 %>
-<header class="app-head app-head--sub">
-  <a class="back" href="/date/<%= @date %>" aria-label="Back to clubs">←</a>
-  <span class="app-head__title">
-    <span class="app-head__club"><%= @club_name %></span>
-    <span class="app-head__sub"><%= @weekday %> · <%= @date_label %></span>
-  </span>
-  <span class="head-actions">
-    <a class="head-action" href="/clubs/<%= @club_slug %>?date=<%= @date %>">Info</a>
+<header class="bar">
+  <div class="bar__row">
+    <a class="icon-btn" href="/date/<%= @date %>" aria-label="Back to clubs"><%= icon(:back) %></a>
+    <div class="bar__title">
+      <h1 class="bar__h1"><%= @club_name %></h1>
+      <div class="bar__sub"><%= [@weekday, @date_label, @area].compact.join(" · ") %></div>
+    </div>
+    <a class="icon-btn" href="/clubs/<%= @club_slug %>?date=<%= @date %>" aria-label="About <%= @club_name %>"><%= icon(:info) %></a>
     <% if @booking_url %>
-      <a class="head-action is-primary" data-external href="<%= @booking_url %>"
-         aria-label="Book at <%= @club_name %>">Book ↗</a>
+      <a class="pill pill--ball" data-external href="<%= @booking_url %>"
+         aria-label="Book at <%= @club_name %>">Book <%= icon(:external, size: 16) %></a>
     <% end %>
-  </span>
+  </div>
+  <div class="stats">
+    <div class="stat stat--slab">
+      <div class="stat__n"><%= @free_hours %></div>
+      <div class="stat__what"><%= @free_hours == 1 ? "hour free" : "hours free" %></div>
+    </div>
+    <% if @price %>
+      <div class="stat">
+        <div class="stat__n"><%= @price.first %><% if @price.last %><small> <%= @price.last %></small><% end %></div>
+        <div class="stat__what">per hour</div>
+      </div>
+    <% end %>
+    <% if @courts %>
+      <div class="stat">
+        <div class="stat__n"><%= @courts.first %></div>
+        <div class="stat__what"><%= @courts.last %></div>
+      </div>
+    <% end %>
+  </div>
 </header>
 
-<ul class="slots">
-  <% @slots.each do |s| %>
-    <li class="slot-row <%= s[:free] ? "is-free" : "is-taken" %>">
-      <label class="slot-row__label">
-        <% if s[:pickable] %>
-          <input class="slot-row__pick" type="checkbox" name="hours[]" value="<%= s[:hour] %>" form="game-pick"
-                 aria-label="I booked <%= @club_name %> at <%= s[:time] %>">
-        <% else %>
-          <span class="slot-row__pick is-blank" aria-hidden="true"></span>
-        <% end %>
-        <span class="slot-row__body">
-          <span class="slot-row__time"><%= s[:time] %></span>
-          <span class="slot-row__meta">
-            <span class="slot-row__state"><%= s[:state] %></span>
-            <% if (hour = s[:weather]) %>
-              <span class="slot-row__weather<%= " is-wet" if hour.wet? %><%= " is-damp" if hour.damp? %>"><%= Booking::Messages.weather_tag(hour) %></span>
-            <% end %>
-          </span>
-        </span>
-      </label>
-    </li>
+<main class="page">
+  <div class="hint-row">
+    <p>Booked some hours? Tick them and share with your group.</p>
+    <div class="legend"><span class="is-free">Free</span><span class="is-taken">Taken</span></div>
+  </div>
+
+  <% if @outlook && (@outlook.wet? || @outlook.damp?) %>
+    <div class="notice notice--slim"><%= icon(:rain, size: 16) %><%= Booking::Messages.weather_headline(@outlook) %></div>
   <% end %>
-</ul>
 
-<form class="game-pick" id="game-pick" method="get" action="/date/<%= @date %>/club/<%= @club_slug %>/game">
-  <button class="cta" type="submit" data-game-pick
-          data-none="<%= Booking::Messages.game_pick_none %>"><%= Booking::Messages.game_pick %></button>
+  <div class="hours slots">
+    <% @slots.each do |s| %>
+      <label class="hour <%= s[:free] ? "is-free" : "is-taken" %><%= " is-past" unless s[:pickable] %>">
+        <span class="hour__top">
+          <span class="hour__time"><%= s[:label] %></span>
+          <% if s[:pickable] %>
+            <input class="hour__pick" type="checkbox" name="hours[]" value="<%= s[:hour] %>" form="game-pick"
+                   aria-label="I booked <%= @club_name %> at <%= s[:time] %>">
+          <% end %>
+        </span>
+        <span class="hour__state hour__state--plain"><%= s[:state] %></span>
+        <span class="hour__state hour__state--mine">My game</span>
+        <% if (hour = s[:weather]) %>
+          <span class="hour__weather<%= " is-wet" if hour.wet? %><%= " is-damp" if hour.damp? %>" title="<%= Booking::Messages.weather_tag(hour) %>"><%= hour_weather(hour) %></span>
+        <% end %>
+      </label>
+    <% end %>
+  </div>
+
+  <%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_slots } %>
+</main>
+
+<form class="game-pick dock" id="game-pick" method="get" action="/date/<%= @date %>/club/<%= @club_slug %>/game">
+  <button class="btn btn--slab" type="submit" data-game-pick
+          data-none="<%= Booking::Messages.game_pick_none %>"><%= icon(:share, size: 18) %><span><%= Booking::Messages.game_pick %></span></button>
 </form>
-
-<%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_slots } %>

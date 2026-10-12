@@ -60,6 +60,11 @@ module Booking
 
       BYTE_UNITS = %w[B KB MB GB TB].freeze
 
+      # The ways a date's clubs can be narrowed, beside "all of them".
+      CLUB_FILTERS = %w[covered favourites].freeze
+
+      helpers Icons
+
       helpers do
         def visitor_id = settings.visitor_sessions.user_id(request.cookies[COOKIE])
 
@@ -174,9 +179,6 @@ module Booking
 
         def watch_clubs(watch) = Messages.clubs_phrase(watch, club_names)
 
-        # Reads as both the class and the label, so the two cannot drift apart.
-        def watch_kind(watch) = watch.dated? ? "dated" : "standing"
-
         # The form renders from the same lists Submission validates against, so
         # the two cannot answer differently about what was on offer.
         def weekday_choices = MONDAY_FIRST.map { [_1, Messages::DAY_NAMES[_1]] }
@@ -187,14 +189,6 @@ module Booking
         def clock(hour) = Messages.clock(hour * 60)
 
         def profile(slug) = settings.club_profiles[slug]
-
-        # "indoor + covered" beside a club's name, or nothing for a club
-        # without a Profile.
-        def cover_tag(slug)
-          covers = profile(slug)&.covers.to_a
-
-          Messages.cover_tag(covers) if covers.any?
-        end
 
         # Memoised per request: every club row on the screen asks for it.
         def favourites = @favourites ||= settings.repos.favourites.for_user(visitor_id)
@@ -211,13 +205,8 @@ module Booking
         def picked_hour?(hour, which) = @submitted&.public_send(which) == hour
 
         # A Dated watch names its one day; a Standing one names the weekdays it
-        # keeps coming back on. Reading either tells you which it is before the
-        # badge next to it does.
-        def watch_when(watch)
-          days = watch.dated? ? day_label(watch.date) : Messages.days_phrase(watch.weekdays)
-
-          "#{days} · #{Messages.time_range(watch)}"
-        end
+        # keeps coming back on.
+        def watch_days(watch) = watch.dated? ? day_label(watch.date) : Messages.days_phrase(watch.weekdays)
 
         def day_label(date) = date.strftime("%a %-d %b")
 
@@ -260,26 +249,108 @@ module Booking
           covers.any? && covers.all? { |cover, _| cover == "outdoor" }
         end
 
+        # At least one court under a roof — what "Covered" narrows a day to.
+        def roofed?(slug) = profile(slug)&.covers.to_a.any? { |cover, _| cover != "outdoor" }
+
+        # What a date's clubs are narrowed to: everything, the ones with a
+        # roof, or the Favourites. Anything else is everything.
+        def club_filter = CLUB_FILTERS.include?(params[:only]) ? params[:only] : nil
+
+        def filter_clubs(clubs, only)
+          case only
+          when "covered" then clubs.select { _1[:roofed] }
+          when "favourites" then clubs.select { _1[:favourite] }
+          else clubs
+          end
+        end
+
+        # The price a club declares in config, "80 GEL" or "40–70 GEL".
+        def club_price(slug) = enabled_club(slug)&.settings&.fetch("price", nil)
+
+        # The same price split for a big number and a small unit: ["80", "GEL"].
+        def price_parts(slug)
+          price = club_price(slug) or return nil
+          amount, unit = price.split(" ", 2)
+
+          [amount, unit]
+        end
+
+        # A club's courts, said in one tile: "8 outdoor courts" when they are
+        # all alike, "5 courts" when they are not, nothing without a Profile.
+        def courts_stat(slug)
+          covers = profile(slug)&.covers.to_a
+          return nil if covers.empty?
+
+          count = covers.sum { _2 }
+          noun = count == 1 ? "court" : "courts"
+          [count, covers.size == 1 ? "#{covers.first.first} #{noun}" : noun]
+        end
+
+        # An hour's Forecast said small enough for a tile: "☂ 30% · 17°" when
+        # rain is a question, just the temperature when it is not.
+        def hour_weather(hour)
+          temperature = ("#{hour.temperature.round}°" if hour.temperature)
+          rain = (["☂", ("#{hour.rain_chance}%" if hour.rain_chance)].compact.join(" ") if hour.wet? || hour.damp?)
+
+          [rain, temperature].compact.join(" · ")
+        end
+
+        # Two letters a club is recognised by in a list: "KT" for Kus Tba
+        # Padel, "GR" for GymBreeze Radio City, "P2" for Padel Club 2 (a
+        # number is what tells it apart), "PH" for PadelHub.
+        def initials(name)
+          words = name.split
+          return "#{words.first[0]}#{words.last}".upcase if words.size > 1 && words.last.match?(/\A\d+\z/)
+          return "#{words[0][0]}#{words[1][0]}".upcase if words.size > 1
+
+          capitals = name.scan(/[[:upper:]]/)
+          (capitals.size >= 2 ? capitals.first(2).join : name[0, 2]).upcase
+        end
+
         def any_free?(table) = table.rows.any? { |row| row.cells.any?(&:free?) }
 
         # One dict per horizon date, in the shape the Dates template reads.
         # A day with anything free names the number of clubs and the number
-        # of hours; a day with nothing shows "fully booked" and dims itself.
+        # of hours; a day with nothing says "fully booked" and dims itself.
+        # `share` is the day's free hours against the busiest day's, for the
+        # bar under each row — relative, because "126 of how many?" has no
+        # honest answer when clubs keep different hours.
         def dates_view
-          horizon_tables.map do |date, table|
+          days = horizon_tables.map do |date, table|
             open_clubs = table.rows.count { |row| row.cells.any?(&:free?) }
             free_cells = table.rows.sum { |row| row.cells.count(&:free?) }
-            any_free = open_clubs.positive?
 
             {
               date: date.to_s,
               weekday: weekday_short(date),
               date_label: date_label(date),
               today: date == horizon.first,
-              any_free:,
+              any_free: open_clubs.positive?,
               weather: outlook(table)&.icon,
-              headline: any_free ? "#{open_clubs} #{open_clubs == 1 ? "club" : "clubs"}" : "fully booked",
-              sub: any_free ? "#{free_cells} #{free_cells == 1 ? "slot" : "slots"}" : nil
+              open_clubs:,
+              free_cells:,
+              clubs_label: count_label(open_clubs, "club"),
+              slots_label: count_label(free_cells, "slot")
+            }
+          end
+          busiest = [days.map { _1[:free_cells] }.max.to_i, 1].max
+
+          days.each { _1[:share] = (_1[:free_cells] * 100.0 / busiest).round }
+        end
+
+        def count_label(count, noun) = "#{count} #{count == 1 ? noun : "#{noun}s"}"
+
+        # The week as a row of tabs over a date's clubs: one tap to the next
+        # day without going back, and a dot where rain is likely.
+        def day_strip(current)
+          horizon_tables.map do |date, table|
+            sky = outlook(table)
+            {
+              date: date.to_s,
+              weekday: weekday_short(date),
+              day: date.day,
+              current: date == current,
+              wet: !!sky && (sky.wet? || sky.damp?)
             }
           end
         end
@@ -297,20 +368,16 @@ module Booking
             free_cells = row.cells.select(&:free?)
             any_free = free_cells.any?
             earliest = free_cells.first
-            sub =
-              if any_free
-                "from #{hour_label(earliest.starts_at)}:00 · #{free_cells.size} #{free_cells.size == 1 ? "slot" : "slots"} left"
-              else
-                "fully booked"
-              end
             {
               slug: row.club_slug,
               name: row.club_name,
               any_free:,
+              free_count: free_cells.size,
               favourite: favourite?(row.club_slug),
               rained_off: wet && open_air?(row.club_slug),
-              cover: cover_tag(row.club_slug),
-              sub:
+              roofed: roofed?(row.club_slug),
+              covers: profile(row.club_slug)&.covers.to_a.map(&:first),
+              sub: [("from #{hour_label(earliest.starts_at)}:00" if earliest), club_price(row.club_slug)].compact.join(" · ")
             }
           end
 
@@ -327,6 +394,7 @@ module Booking
 
             {
               time: "#{format("%02d", hour)}:00 – #{format("%02d", hour + 1)}:00",
+              label: "#{format("%02d", hour)}:00",
               # Ticked to share as a Game. Counted from the page's midnight,
               # so an hour after it comes out as 24 rather than 0. An hour
               # already over has nothing left to tell anybody about.
@@ -351,9 +419,13 @@ module Booking
 
         # Back to the Clubs screen it was tapped on, so the star turns over
         # in place. A date that is not on offer any more lands on the Dates
-        # screen instead, where every star is one tap away again.
+        # screen instead, where every star is one tap away again. A star on a
+        # club's Profile turns over there, keeping the date it was reached
+        # from.
         def back_to_clubs
           date = parse_date(params[:date])
+          return redirect(to("/clubs/#{params[:slug]}#{"?date=#{date}" if date}")) if params[:back] == "profile"
+
           redirect(to(date ? "/date/#{date}" : "/"))
         end
 
@@ -369,13 +441,18 @@ module Booking
             {
               slug: club.slug,
               name: club.name,
+              initials: initials(club.name),
+              roofed: roofed?(club.slug),
               favourite: favourite?(club.slug),
               sub: [found&.area, (Messages.cover_summary(covers) if covers.any?)].compact.join(" · ")
             }
           end
         end
 
-        def enabled_club(slug) = settings.repos.clubs.enabled.find { _1.slug == slug }
+        # Memoised per request: every club card on a date asks for its price.
+        def enabled_clubs = @enabled_clubs ||= settings.repos.clubs.enabled
+
+        def enabled_club(slug) = enabled_clubs.find { _1.slug == slug }
 
         # The Game a span at a club makes, carrying the public link that
         # describes it — the one the group gets, and the one a calendar
@@ -405,8 +482,11 @@ module Booking
         end
 
         def visible_watches
-          settings.repos.watches.for_user(visitor_id).reject(&:expired?)
+          @visible_watches ||= settings.repos.watches.for_user(visitor_id).reject(&:expired?)
         end
+
+        # The number on the Watches tab, wherever the tabs are drawn.
+        def watches_count = visible_watches.size
 
         # The whole screen, so a refusal can re-render it without the route
         # having to remember what the GET assembles.
@@ -421,15 +501,6 @@ module Booking
           erb :watch_new, layout: :layout
         end
 
-        # Reads back the watch that was just created, in the same voice the
-        # rest of the screens use: a Standing one names its days, a Dated one
-        # names its date.
-        def confirm_summary(watch)
-          clubs = watch_clubs(watch)
-          when_line = watch_when(watch)
-
-          "#{clubs} · #{when_line}"
-        end
       end
 
       # kamal-proxy holds a deploy open until this answers, so it must never
@@ -485,7 +556,11 @@ module Booking
         @date = date.to_s
         @weekday = weekday_short(date)
         @date_label = date_label(date)
-        @clubs = clubs_view(date)
+        @strip = day_strip(date)
+        @only = club_filter
+        all = clubs_view(date)
+        @open_count = all.count { _1[:any_free] }
+        @clubs = filter_clubs(all, @only)
         @outlook = outlook(horizon_tables.fetch(date))
         erb :clubs, layout: :layout
       end
@@ -509,8 +584,13 @@ module Booking
         @date_label = date_label(date)
         @club_slug = row.club_slug
         @club_name = row.club_name
+        @area = profile(row.club_slug)&.area
         @booking_url = enabled_club(row.club_slug)&.settings&.fetch("booking_url", nil)
         @slots = slots_view(date, row)
+        @free_hours = row.cells.count { _1.free? && _1.starts_at + 3600 > Clock.now }
+        @price = price_parts(row.club_slug)
+        @courts = courts_stat(row.club_slug)
+        @outlook = outlook(table)
         erb :slots, layout: :layout
       end
 
@@ -537,7 +617,8 @@ module Booking
         @date_label = date_label(date)
         @club = club
         @game = game_at(club, @span)
-        @text = Messages.game(@game, weather: game_weather(@game))
+        @weather = game_weather(@game)
+        @text = Messages.game(@game, weather: @weather)
         @event = @game.to_event
         erb :game, layout: :layout
       end
@@ -622,8 +703,8 @@ module Booking
         halt(404) unless @club
 
         @profile = profile(@club.slug)
-        date = parse_date(params[:date])
-        @back = date ? "/date/#{date}/club/#{@club.slug}" : "/clubs"
+        @date = parse_date(params[:date])
+        @back = @date ? "/date/#{@date}/club/#{@club.slug}" : "/clubs"
         erb :club, layout: :layout
       end
 
@@ -705,7 +786,7 @@ module Booking
         watch = settings.repos.watches.find(Integer(params[:id].to_s, exception: false))
         redirect(to("/watches")) unless watch && watch.user_id == visitor_id
 
-        @summary = confirm_summary(watch)
+        @watch = watch
         erb :confirm, layout: :layout
       end
 

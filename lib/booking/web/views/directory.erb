@@ -1,27 +1,38 @@
 <%#
   Every watched club, whatever it has free: the place to ask "what is it
   like?" rather than "what is open?". Each row says where the club is and
-  what its courts are under, and opens its Profile.
+  what its courts are under, and opens its Profile; a club with a roof wears
+  its initials dark. The search narrows the list as it is typed, by name or
+  area, and only exists once JavaScript runs.
 %>
-<header class="app-head app-head--sub">
-  <a class="back" href="/" aria-label="Back to dates">←</a>
-  <span class="app-head__title-solo">Clubs</span>
+<header class="topbar">
+  <h1 class="topbar__title">Clubs</h1>
+  <span class="topbar__aside"><%= @clubs.size %> watched · Tbilisi</span>
 </header>
 
-<ul class="clubs">
-  <% @clubs.each do |c| %>
-    <li>
-      <a class="club-row" href="/clubs/<%= c[:slug] %>">
-        <span class="club-row__body">
-          <span class="club-row__name"><%= "★ " if c[:favourite] %><%= h(c[:name]) %></span>
-          <% unless c[:sub].empty? %>
-            <span class="club-row__sub is-quiet"><%= h(c[:sub]) %></span>
-          <% end %>
-        </span>
-        <span class="chev" aria-hidden="true">›</span>
-      </a>
-    </li>
-  <% end %>
-</ul>
+<main class="page page--flush">
+  <label class="search js-only">
+    <%= icon(:search, size: 18) %>
+    <span class="visually-hidden">Search clubs</span>
+    <input type="search" placeholder="Club or area" autocomplete="off" data-club-search>
+  </label>
 
-<%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_clubs } %>
+  <ul class="card clubs">
+    <% @clubs.each do |c| %>
+      <li data-club-match="<%= h("#{c[:name]} #{c[:sub]}".downcase) %>">
+        <a class="club-line" href="/clubs/<%= c[:slug] %>">
+          <span class="initials<%= " is-roofed" if c[:roofed] %>" aria-hidden="true"><%= h(c[:initials]) %></span>
+          <span class="club-line__body">
+            <span class="club-line__name"><span><%= h(c[:name]) %></span><% if c[:favourite] %><%= star %><span class="visually-hidden">Favourite</span><% end %></span>
+            <span class="club-line__meta"><%= c[:sub].empty? ? "No directory profile yet" : h(c[:sub]) %></span>
+          </span>
+          <span class="chev"><%= icon(:chevron, size: 18) %></span>
+        </a>
+      </li>
+    <% end %>
+  </ul>
+
+  <%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_clubs } %>
+</main>
+
+<%= erb :_tabs, locals: { current: :clubs } %>

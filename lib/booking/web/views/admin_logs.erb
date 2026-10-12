@@ -2,9 +2,11 @@
   The three processes' logs in one list, newest first. The form is a GET, so
   a search is a URL: refresh re-runs it, and back steps through earlier ones.
 %>
-<header class="app-head app-head--sub">
-  <a class="back" href="/admin" aria-label="Back to the dashboard">←</a>
-  <span class="app-head__title-solo">Logs</span>
+<header class="bar">
+  <div class="bar__row">
+    <a class="icon-btn" href="/admin" aria-label="Back to the dashboard"><%= icon(:back) %></a>
+    <h1 class="bar__title bar__h1 bar__h1--caps">Logs</h1>
+  </div>
 </header>
 
 <form class="log-search" method="get" action="/admin/logs">

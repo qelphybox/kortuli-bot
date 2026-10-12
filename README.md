@@ -98,19 +98,24 @@ bundle exec rake "discover:reservio[padel-club2]"
 ## Using it
 
 The **mini app** shows the week: one row per club, one column per hour, one
-page per date. The home screen is the dates and nothing else, because
-looking, sharing a Rundown and sharing a Game all start from one of them;
-everything else — watches, the clubs directory and, for the owner, the
-Dashboard — sits behind its **Menu**. A club's screen for a date says which
+page per date. The home screen is the dates — today big, with its free slots
+and clubs, and the rest of the week under it with a bar for how busy each day
+is — because looking, sharing a Rundown and sharing a Game all start from one
+of them. Watches and the clubs directory are the other two of three **tabs**
+along the bottom; the owner also gets a **Dashboard** chip in the corner. A
+date's screen carries the whole week as a strip of tabs, so the next day is
+one tap away. A club's screen for a date says which
 hours are free and carries one **Book ↗** in its header, out to that club's
 booking page — every hour would link to the same page. An hour outside a
 club's opening hours is left blank rather than drawn as taken. Clubs
 whose source names the court say how many of them are free (`2/4`); the rest
 can only say that something is (`✓`).
 
-The star beside each club on a date's list makes it a **Favourite**: one
-tap, kept per person. Favourites lead their half of that list, and come
-already ticked on the form that creates a standing watch.
+The star beside each club on a date's list, or in the corner of its Profile,
+makes it a **Favourite**: one tap, kept per person. Favourites lead their half
+of that list, and come already ticked on the form that creates a standing
+watch. Two chips over the list narrow it to the clubs with a roof, or to the
+Favourites.
 
 A date's **Share** button turns it into one message for whoever you play
 with: every club with something free, its free hours folded into stretches
@@ -129,7 +134,7 @@ every other messenger.
 
 Once you have booked, every hour on a club's screen has a tick, free or
 taken alike — the booking may not have reached us yet. Tick the hours, press
-**Share the hours I booked**, and they become a **Game**: one message with
+**Share my game**, and they become a **Game**: one message with
 the club, the day and the stretch (`Wed 14 Oct, 19:00–21:00`), the wettest
 hour's Forecast, the price, the pin in Google Maps and a link to add it to a
 calendar. Ticking 19:00 and 21:00 takes 20:00 with them, since a booking is
@@ -141,7 +146,7 @@ goes to need not use the bot: Google Calendar's own "add" link, and the
 same URL with `.ics` on the end for Apple's Calendar and everything else.
 Nothing is stored — the URL is the whole Game.
 
-**Clubs**, in the home screen's Menu, is every watched club whatever it has
+**Clubs**, the third tab, is every watched club whatever it has
 free: its neighbourhood and how many courts sit indoors, under a roof, or in
 the open. A club opens its **Profile** — each court and its cover, a button
 that drops the pin in Google Maps, the hours and prices it lists, a phone
@@ -154,12 +159,12 @@ listed there and has none.
 
 The **Forecast** rides along with all of it, because rain is what decides
 between an open court and a roofed one. A date's list of clubs opens with one
-line — `🌧 Rain likely 19:00–22:00`, `🌦 Showers possible …`, or `🌤 No rain
-expected · 14–21°` — counted over the hours still to come. When rain is
+banner — "Rain likely 19:00–22:00", "Showers possible …", or "No rain
+expected" with the day's temperatures — counted over the hours still to come. When rain is
 likely, the clubs whose every court is in the open sink below the rest of
 their half, favourite or not, and the line says so. Every hour on a club's
-screen carries its own mark (`🌧 Rain 75% · 19°`, `☁️ 17°`), and the home
-screen puts a 🌧 beside a date with rain in it, and a date's Share message
+screen carries its own mark (`☂ 75% · 19°`, or just `17°` when it stays
+dry), the home screen puts a Rain chip beside a date with rain in it, and a date's Share message
 opens with its line. A message about a freed slot carries the same mark for
 its hour — the wettest one it touches, so a ninety-minute game is not
 promised a dry finish. It comes from
@@ -169,7 +174,7 @@ own, so a club timing out never holds it up, and a failed fetch keeps the
 last good one. Where there is no Forecast — before the first fetch — nothing
 is drawn rather than a guess. Its age is on `/admin`.
 
-**Watches** — the Menu's first entry — is everything you have asked to be
+**Watches** — the middle tab — is everything you have asked to be
 told about, with pause, resume and delete. A standing watch names the weekdays
 it keeps coming back on; a dated one names its single day and says `Dated`.
 Nothing makes dated watches any more — tapping a taken hour used to — but the
@@ -301,7 +306,7 @@ Check it before concluding nobody wants the product.
 
 The same picture without a terminal is **`/admin`** in the mini app, which
 opens for `OWNER_TELEGRAM_ID` alone (anybody else gets a 404) and is linked
-from the owner's Menu. It shows:
+from the Dashboard chip on the owner's home screen. It shows:
 
 - each process's **Heartbeat** — `up`, `silent` once it is more than 90
   seconds old, or `unknown`;
