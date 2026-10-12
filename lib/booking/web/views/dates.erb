@@ -4,29 +4,43 @@
   anything open then. A day with nothing open is dimmed rather than hidden,
   so the eye reads "we did look and there was nothing" rather than "this
   club shut down".
+
+  The dates are the whole screen on purpose: looking, sharing a Rundown and
+  sharing a Game all start from one of them. Everything else — watches, the
+  clubs directory, the owner's Dashboard — waits behind the Menu. It is a
+  <details>, so it opens without JavaScript, like everything else here.
 %>
 <header class="app-head">
   <div class="app-head__row">
     <span class="brand">kortuli</span>
+    <details class="menu" data-menu>
+      <summary class="menu__toggle">
+        <span aria-hidden="true">☰</span>
+        <span>Menu</span>
+      </summary>
+      <nav class="menu__panel">
+        <a class="menu__item" href="/watches">
+          <span>Your watches</span>
+          <% if @watches_count.positive? %><span class="menu__count"><%= @watches_count %></span><% end %>
+        </a>
+        <a class="menu__item" href="/watches/new">
+          <span>Watch a slot</span>
+          <span class="menu__hint">when it frees up</span>
+        </a>
+        <a class="menu__item" href="/clubs">
+          <span>Clubs</span>
+          <span class="menu__hint">courts, hours, map</span>
+        </a>
+        <% if @owner %>
+          <a class="menu__item" href="/admin">
+            <span>Dashboard</span>
+            <span class="menu__hint">health, logs, disk</span>
+          </a>
+        <% end %>
+      </nav>
+    </details>
   </div>
-  <p class="tagline">Open courts in Tbilisi. We watch, you book.</p>
-  <a class="cta" href="/watches/new">+ Watch a slot</a>
-  <% if @watches_count.positive? %>
-    <a class="watches-link" href="/watches">
-      <span><%= @watches_count %> <%= @watches_count == 1 ? "active watch" : "active watches" %></span>
-      <span aria-hidden="true">›</span>
-    </a>
-  <% end %>
-  <a class="watches-link" href="/clubs">
-    <span>Clubs · courts, hours, map</span>
-    <span aria-hidden="true">›</span>
-  </a>
-  <% if @owner %>
-    <a class="watches-link" href="/admin">
-      <span>Dashboard · health, logs, disk</span>
-      <span aria-hidden="true">›</span>
-    </a>
-  <% end %>
+  <p class="tagline">Open courts in Tbilisi. Pick a day, book it, tell your group.</p>
 </header>
 
 <ul class="dates">

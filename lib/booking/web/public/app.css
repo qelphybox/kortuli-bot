@@ -60,7 +60,7 @@ button { color: inherit; }
 }
 
 /* --- Sticky header. Same box on every screen, laid out one of two ways:
-       the home screen has brand + tagline + CTA; every other screen has a
+       the home screen has brand + Menu + tagline; every other screen has a
        back arrow and a title. --------------------------------------------- */
 .app-head {
   position: sticky;
@@ -92,6 +92,7 @@ button { color: inherit; }
   max-width: 30ch;
   text-wrap: pretty;
 }
+.tagline:last-child { margin-bottom: 0; }
 
 .app-head--sub {
   display: flex;
@@ -151,17 +152,74 @@ button { color: inherit; }
 }
 .cta:active { transform: scale(0.985); }
 
-.watches-link {
-  margin-top: 10px;
-  display: flex;
+/* --- The home screen's Menu: everything that is not the dates. A
+       <details>, so it opens without JavaScript; the panel drops over the
+       list rather than pushing it down, because the dates are the page. -- */
+.menu { position: relative; }
+
+.menu__toggle {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 2px;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 13px;
   color: var(--muted);
   font: 500 12.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.menu__toggle::-webkit-details-marker { display: none; }
+.menu__toggle:hover, .menu__toggle:focus-visible,
+.menu[open] .menu__toggle { color: var(--fg); border-color: var(--fg); }
+
+.menu__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 6;
+  width: max-content;
+  max-width: calc(100vw - 40px);
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+
+.menu__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 12px;
+  border-radius: 9px;
+  color: var(--fg);
+  font: 500 14.5px/1.2 "IBM Plex Sans", sans-serif;
   text-decoration: none;
 }
-.watches-link:hover, .watches-link:focus-visible { color: var(--fg); }
+.menu__item:hover, .menu__item:focus-visible { background: var(--chip); }
+
+.menu__item > :first-child { white-space: nowrap; }
+
+.menu__hint {
+  color: var(--muted);
+  font: 400 11.5px/1.2 "IBM Plex Mono", ui-monospace, monospace;
+  text-align: right;
+}
+
+.menu__count {
+  min-width: 22px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--chip);
+  color: var(--fg);
+  font: 600 11.5px/1 "IBM Plex Mono", ui-monospace, monospace;
+  text-align: center;
+}
 
 .footer-cta { padding: 20px; }
 
@@ -341,15 +399,19 @@ button { color: inherit; }
 .slot-row__book:active { transform: scale(0.97); }
 
 .slot-row form { margin: 0; }
+/* Asking to hear about a taken hour is the side door: muted, dashed, beside
+   a row that is already dimmed, so Book is the only button the eye lands
+   on. */
 .slot-row__watch {
-  border: 1px solid var(--line);
+  border: 1px dashed var(--line);
   background: transparent;
-  color: var(--fg);
+  color: var(--muted);
   border-radius: 9px;
-  padding: 8px 15px;
-  font: 500 13px/1 "IBM Plex Sans", sans-serif;
+  padding: 8px 10px;
+  font: 500 12.5px/1 "IBM Plex Sans", sans-serif;
   cursor: pointer;
 }
+.slot-row__watch:hover, .slot-row__watch:focus-visible { color: var(--fg); background: var(--chip); }
 .slot-row__watch:active { transform: scale(0.97); }
 .slot-row__watch.is-on {
   border-color: transparent;
