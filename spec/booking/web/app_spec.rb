@@ -167,13 +167,34 @@ RSpec.describe Booking::Web::App do
       expect(horizon.all? { last_response.body.include?(_1) }).to be(true)
     end
 
-    # There is no menu but Telegram's own, so the CTA on the home screen has
-    # to be the way in to making a watch.
-    it "reaches the create-a-watch form" do
-      sign_in
-      get "/"
+    # Looking, a Rundown and a Game all start from a date, so the dates are
+    # the screen. Watching is the side door: still one tap away, but behind
+    # the Menu rather than a button over the list.
+    describe "its menu" do
+      def menu = last_response.body[%r{<details class="menu".*?</details>}m].to_s
 
-      expect(last_response.body).to include('href="/watches/new"')
+      it "reaches the create-a-watch form, the watches and the clubs" do
+        sign_in
+        get "/"
+
+        expect(menu).to include('href="/watches/new"', 'href="/watches"', 'href="/clubs"')
+      end
+
+      it "leaves nothing but the dates outside it" do
+        sign_in
+        get "/"
+
+        outside = last_response.body.sub(menu, "")
+        expect(outside).not_to include('href="/watches', 'href="/clubs"', 'class="cta"')
+      end
+
+      it "counts the watches somebody already has" do
+        watches.create(user_id: 42, club_slugs: ["padel-club-2"], weekdays: [5], from_minute: 1140, to_minute: 1320)
+        sign_in(user_id: 42)
+        get "/"
+
+        expect(menu).to include('<span class="menu__count">1</span>')
+      end
     end
 
     # The escape hatch out of the app and into the bot chat. See ADR-0002 —
@@ -615,8 +636,8 @@ RSpec.describe Booking::Web::App do
       expect(last_response.location).to end_with("/start")
     end
 
-    # There is no link to keep anywhere and no menu but Telegram's own, so the
-    # two screens have to reach each other.
+    # There is no link to keep anywhere, so the two screens have to reach
+    # each other — the way there is the home screen's Menu.
     it "is reachable from the dates screen once a watch exists, and reaches it back" do
       standing
       sign_in(user_id: 42)

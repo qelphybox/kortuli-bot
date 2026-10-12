@@ -98,7 +98,10 @@ bundle exec rake "discover:reservio[padel-club2]"
 ## Using it
 
 The **mini app** shows the week: one row per club, one column per hour, one
-page per date. A free hour links out to that club's booking page; an hour
+page per date. The home screen is the dates and nothing else, because
+looking, sharing a Rundown and sharing a Game all start from one of them;
+everything else — watches, the clubs directory and, for the owner, the
+Dashboard — sits behind its **Menu**. A free hour links out to that club's booking page; an hour
 outside a club's opening hours is left blank rather than drawn as taken. Clubs
 whose source names the court say how many of them are free (`2/4`); the rest
 can only say that something is (`✓`).
@@ -141,7 +144,7 @@ no form, a watch on exactly that club and that hour. Hours that have already
 started, and hours past the booking horizon, are drawn without a button —
 nothing can free them up any more, or nobody has polled them.
 
-**Clubs**, linked from the home screen, is every watched club whatever it has
+**Clubs**, in the home screen's Menu, is every watched club whatever it has
 free: its neighbourhood and how many courts sit indoors, under a roof, or in
 the open. A club opens its **Profile** — each court and its cover, a button
 that drops the pin in Google Maps, the hours and prices it lists, a phone
@@ -169,8 +172,8 @@ own, so a club timing out never holds it up, and a failed fetch keeps the
 last good one. Where there is no Forecast — before the first fetch — nothing
 is drawn rather than a guess. Its age is on `/admin`.
 
-Its second screen is **Watches**: everything you have asked to be told about,
-with pause, resume and delete. A standing watch names the weekdays it keeps
+**Watches** — the Menu's first entry — is everything you have asked to be
+told about, with pause, resume and delete. A standing watch names the weekdays it keeps
 coming back on; a dated one — the kind a tapped hour makes — names its single
 day and says `Dated`. Pausing
 stops a watch matching without losing it, and a dated watch drops off the list
@@ -300,7 +303,7 @@ Check it before concluding nobody wants the product.
 
 The same picture without a terminal is **`/admin`** in the mini app, which
 opens for `OWNER_TELEGRAM_ID` alone (anybody else gets a 404) and is linked
-from the owner's home screen. It shows:
+from the owner's Menu. It shows:
 
 - each process's **Heartbeat** — `up`, `silent` once it is more than 90
   seconds old, or `unknown`;
