@@ -1,69 +1,77 @@
 <%#
-  The home screen. One row per day of the horizon, from today outward. Each
-  row is a link into the day: tapping it opens the list of clubs that have
-  anything open then. A day with nothing open is dimmed rather than hidden,
-  so the eye reads "we did look and there was nothing" rather than "this
-  club shut down".
+  The home screen: today, big, and then the rest of the week. Each date is a
+  link into the day — looking, sharing a Rundown and sharing a Game all start
+  from one. A day with nothing open is dimmed rather than hidden, so the eye
+  reads "we did look and there was nothing" rather than "this club shut
+  down". The bar under each day is its free hours against the week's busiest.
 
-  The dates are the whole screen on purpose: looking, sharing a Rundown and
-  sharing a Game all start from one of them. Everything else — watches, the
-  clubs directory, the owner's Dashboard — waits behind the Menu. It is a
-  <details>, so it opens without JavaScript, like everything else here.
+  Watches and the clubs directory are the other two tabs; the owner's
+  Dashboard is a chip beside the city, because nobody else has one.
 %>
-<header class="app-head">
-  <div class="app-head__row">
-    <span class="brand">kortuli</span>
-    <details class="menu" data-menu>
-      <summary class="menu__toggle">
-        <span aria-hidden="true">☰</span>
-        <span>Menu</span>
-      </summary>
-      <nav class="menu__panel">
-        <a class="menu__item" href="/watches">
-          <span>Your watches</span>
-          <% if @watches_count.positive? %><span class="menu__count"><%= @watches_count %></span><% end %>
-        </a>
-        <a class="menu__item" href="/watches/new">
-          <span>Watch a slot</span>
-          <span class="menu__hint">when it frees up</span>
-        </a>
-        <a class="menu__item" href="/clubs">
-          <span>Clubs</span>
-          <span class="menu__hint">courts, hours, map</span>
-        </a>
-        <% if @owner %>
-          <a class="menu__item" href="/admin">
-            <span>Dashboard</span>
-            <span class="menu__hint">health, logs, disk</span>
-          </a>
-        <% end %>
-      </nav>
-    </details>
-  </div>
-  <p class="tagline">Open courts in Tbilisi. Pick a day, book it, tell your group.</p>
+<% today, *week = @dates %>
+<header class="brand-row">
+  <span class="brand"><%= ball %><span class="brand__word">KORTULI</span></span>
+  <span class="brand-row__aside">
+    <% if @owner %>
+      <a class="pill pill--small" href="/admin"><%= icon(:gauge, size: 14) %>Dashboard</a>
+    <% end %>
+    <span class="pill pill--small"><%= icon(:pin, size: 14) %>Tbilisi</span>
+  </span>
 </header>
 
-<ul class="dates">
-  <% @dates.each do |d| %>
-    <li>
-      <a class="date-row<%= " is-empty" unless d[:any_free] %>" href="/date/<%= d[:date] %>">
-        <span class="date-row__day">
-          <span class="date-row__weekday">
-            <span><%= d[:weekday] %></span>
-            <% if d[:today] %><span class="badge">Today</span><% end %>
-            <% if d[:weather] %><span class="date-row__weather" title="Rain in the forecast"><%= d[:weather] %></span><% end %>
-          </span>
-          <span class="date-row__date"><%= d[:date_label] %></span>
-        </span>
-        <span class="date-row__meta">
-          <span class="date-row__headline<%= " is-empty" unless d[:any_free] %>"><%= d[:headline] %></span>
-          <% if d[:sub] %>
-            <span class="date-row__sub"><%= d[:sub] %></span>
-          <% end %>
-        </span>
-      </a>
-    </li>
-  <% end %>
-</ul>
+<main class="page page--roomy">
+  <p class="lede">Free padel courts across Tbilisi. Pick a day, book it, tell your group.</p>
 
-<%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_dates } %>
+  <a class="hero" href="/date/<%= today[:date] %>">
+    <%= court(:hero, "hero__court") %>
+    <span class="hero__eyebrow">Today · <%= today[:weekday] %>, <%= today[:date_label] %></span>
+    <span class="hero__count">
+      <span class="hero__number"><%= today[:free_cells] %></span>
+      <span class="hero__what">
+        free <%= today[:free_cells] == 1 ? "slot" : "slots" %>
+        <span><%= today[:any_free] ? "at #{today[:clubs_label]}" : "fully booked" %></span>
+      </span>
+    </span>
+    <span class="hero__foot">
+      <span class="hero__next"><% if week.first %>Tomorrow: <%= week.first[:slots_label] %><% end %></span>
+      <span class="hero__go">See courts <%= icon(:arrow, size: 16) %></span>
+    </span>
+  </a>
+
+  <section class="section">
+    <div class="section__head">
+      <h2 class="section__title">This week</h2>
+    </div>
+    <ul class="dates card">
+      <% week.each do |d| %>
+        <li>
+          <a class="day-row<%= " is-empty" unless d[:any_free] %>" href="/date/<%= d[:date] %>">
+            <span class="day-row__day">
+              <span class="day-row__dow"><%= d[:weekday] %></span>
+              <span class="day-row__date"><%= d[:date_label] %></span>
+            </span>
+            <span class="day-row__body">
+              <span class="day-row__count">
+                <% if d[:any_free] %>
+                  <span class="day-row__slots"><%= d[:free_cells] %></span>
+                  <span class="day-row__clubs"><%= d[:free_cells] == 1 ? "slot" : "slots" %> · <%= d[:clubs_label] %></span>
+                <% else %>
+                  <span class="day-row__clubs">fully booked</span>
+                <% end %>
+              </span>
+              <span class="meter-bar"><span style="width: <%= d[:share] %>%"></span></span>
+            </span>
+            <% if d[:weather] %>
+              <span class="rain-chip" title="Rain in the forecast"><%= icon(:rain, size: 14) %>Rain</span>
+            <% end %>
+            <span class="chev"><%= icon(:chevron, size: 18) %></span>
+          </a>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_dates } %>
+</main>
+
+<%= erb :_tabs, locals: { current: :courts } %>

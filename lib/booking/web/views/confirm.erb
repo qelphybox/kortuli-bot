@@ -4,12 +4,22 @@
   ping you" — arrives attached to what was just created, and a refresh
   quietly re-renders the card rather than creating a second watch.
 %>
-<div class="confirm">
-  <div class="confirm__card">
-    <span class="confirm__tick" aria-hidden="true">✓</span>
-    <p class="confirm__lede">We'll ping you on Telegram when a slot opens</p>
-    <p class="confirm__sub"><%= @summary %></p>
+<main class="done">
+  <div class="done__main">
+    <%= done %>
+    <h1 class="done__title">You're on<br>the lookout</h1>
+    <p class="done__lede">We'll ping you on Telegram the moment a slot opens.</p>
+    <div class="done__card">
+      <div class="watch__top">
+        <span class="state-pill">Watching</span>
+        <span class="watch__time"><%= Booking::Messages.time_range(@watch) %></span>
+      </div>
+      <div class="watch__clubs"><%= watch_clubs(@watch) %></div>
+      <div class="watch__when"><%= watch_days(@watch) %></div>
+    </div>
   </div>
-  <a class="btn-secondary" href="/watches">Manage watches</a>
-  <a class="btn-tertiary" href="/">Back to dates</a>
-</div>
+  <div class="done__actions">
+    <a class="btn btn--ball" href="/watches">Manage watches</a>
+    <a class="btn btn--outline" href="/">Back to dates</a>
+  </div>
+</main>

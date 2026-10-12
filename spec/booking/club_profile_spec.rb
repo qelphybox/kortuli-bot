@@ -74,7 +74,6 @@ RSpec.describe Booking::ClubProfile do
   describe "in words" do
     it "sums the covers up" do
       expect(Booking::Messages.cover_summary(profile.covers)).to eq("1 indoor · 2 covered · 1 outdoor")
-      expect(Booking::Messages.cover_tag(profile.covers)).to eq("indoor + covered + outdoor")
     end
 
     it "names a run of days" do

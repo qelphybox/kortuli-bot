@@ -2,90 +2,116 @@
   One club's Profile: what its courts are under, where it is, the hours and
   prices it lists. None of it is ours — it is the club's own directory
   listing — so the screen says where it came from, and the free hours stay on
-  the date screens, which read the booking system instead.
+  the date screens, which read the booking system instead; the dock leads
+  back to them, and out to the club's own booking page.
+
+  The star in the corner makes the club a Favourite, as the one beside its
+  name on a date's list does, and turns over here.
 %>
-<header class="app-head app-head--sub">
-  <a class="back" href="<%= @back %>" aria-label="Back">←</a>
-  <span class="app-head__title">
-    <span class="app-head__club"><%= h(@club.name) %></span>
+<% courts = courts_stat(@club.slug) %>
+<% price = price_parts(@club.slug) %>
+<% runs = @profile&.hour_runs.to_a %>
+<% daily = runs.size == 1 && runs.first[0] == "mon" && runs.first[1] == "sun" %>
+<% favourite = favourite?(@club.slug) %>
+<main>
+  <section class="profile-hero">
+    <%= court(:profile, "profile-hero__court") %>
+    <div class="profile-hero__bar">
+      <a class="icon-btn" href="<%= @back %>" aria-label="Back"><%= icon(:back) %></a>
+      <form class="fav" method="post" action="/favourites/<%= @club.slug %><%= "/delete" if favourite %>">
+        <input type="hidden" name="back" value="profile">
+        <% if @date %><input type="hidden" name="date" value="<%= @date %>"><% end %>
+        <button class="fav__star<%= " is-on" if favourite %>" aria-pressed="<%= favourite %>"
+                aria-label="<%= favourite ? Booking::Messages.favourite_remove : Booking::Messages.favourite_add %>"><%= star(size: 18) %></button>
+      </form>
+    </div>
+    <h1 class="profile-hero__name"><%= h(@club.name) %></h1>
     <% if @profile&.area %>
-      <span class="app-head__sub"><%= h(@profile.area) %></span>
+      <div class="profile-hero__area"><%= icon(:pin, size: 16) %><%= h(@profile.area) %></div>
     <% end %>
-  </span>
-</header>
-
-<section class="profile">
-  <% if @profile.nil? %>
-    <p class="disclaimer"><%= Booking::Messages.profile_missing %></p>
-  <% else %>
-    <% if @profile.courts.any? %>
-      <div class="profile__section">
-        <h2 class="profile__label">Courts</h2>
-        <p class="profile__lede"><%= Booking::Messages.cover_summary(@profile.covers) %></p>
-        <ul class="courts">
-          <% @profile.courts.each do |court| %>
-            <li class="court">
-              <span class="court__name"><%= h(court.name) %></span>
-              <span class="cover cover--<%= h(court.cover) %>"><%= Booking::Messages.cover_label(court.cover) %></span>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
-
-    <% if @profile.located? || @profile.address %>
-      <div class="profile__section">
-        <h2 class="profile__label">Where</h2>
-        <% if @profile.address %>
-          <p class="profile__text"><%= h(@profile.address) %></p>
+    <% if courts || price || daily %>
+      <div class="profile-hero__stats">
+        <% if courts %>
+          <div><div class="profile-hero__n"><%= courts.first %></div><div class="profile-hero__what"><%= courts.last %></div></div>
         <% end %>
-        <% if @profile.located? %>
-          <a class="btn-secondary" data-external href="<%= h(@profile.maps_url) %>" target="_blank" rel="noopener">Open in Google Maps ↗</a>
+        <% if price %>
+          <div><div class="profile-hero__n"><%= h(price.first) %></div><div class="profile-hero__what"><%= h(price.last) %> / hour</div></div>
+        <% end %>
+        <% if daily %>
+          <div><div class="profile-hero__n"><%= h(runs.first[2].gsub(":00", "")) %></div><div class="profile-hero__what">every day</div></div>
         <% end %>
       </div>
     <% end %>
+  </section>
 
-    <% if @profile.hour_runs.any? %>
-      <div class="profile__section">
-        <h2 class="profile__label">Hours</h2>
-        <dl class="facts">
-          <% @profile.hour_runs.each do |first, last, hours| %>
-            <dt><%= Booking::Messages.day_run(first, last) %></dt>
-            <dd><%= h(hours) %></dd>
-          <% end %>
-        </dl>
-      </div>
-    <% end %>
-
-    <% if @profile.prices.any? %>
-      <div class="profile__section">
-        <h2 class="profile__label">Prices · per court, per hour</h2>
-        <ul class="price-list">
-          <% @profile.prices.each do |price| %>
-            <li><%= h(Booking::Messages.price_line(price)) %></li>
-          <% end %>
-        </ul>
-      </div>
-    <% end %>
-
-    <% if @profile.phone %>
-      <div class="profile__section">
-        <h2 class="profile__label">Phone</h2>
-        <a class="profile__phone" href="tel:<%= h(@profile.phone.delete(" ")) %>"><%= h(@profile.phone) %></a>
-      </div>
-    <% end %>
-  <% end %>
-
-  <% if @club.settings["booking_url"] %>
-    <a class="cta" data-external href="<%= h(@club.settings["booking_url"]) %>" target="_blank" rel="noopener">Booking page ↗</a>
-  <% end %>
-
-  <% if @profile %>
-    <p class="disclaimer">
-      <%= h(Booking::Messages.profile_source(@profile.checked_on)) %>
-      <% if @profile.source %>
-        <a data-external href="<%= h(@profile.source) %>" target="_blank" rel="noopener">Their page ↗</a>
+  <div class="page page--roomy">
+    <% if @profile.nil? %>
+      <p class="note"><%= Booking::Messages.profile_missing %></p>
+    <% else %>
+      <% if @profile.courts.any? %>
+        <section class="section">
+          <h2 class="field__label">Courts · <%= Booking::Messages.cover_summary(@profile.covers) %></h2>
+          <ul class="courts">
+            <% @profile.courts.each do |court| %>
+              <li class="court">
+                <%= court_tile %>
+                <span class="court__name"><%= h(court.name) %></span>
+                <span class="cover cover--<%= h(court.cover) %>"><%= Booking::Messages.cover_label(court.cover) %></span>
+              </li>
+            <% end %>
+          </ul>
+        </section>
       <% end %>
-    </p>
+
+      <% if @profile.located? || @profile.address %>
+        <section class="info-card">
+          <% if @profile.located? %>
+            <a class="info-row info-row--link" data-external href="<%= h(@profile.maps_url) %>" target="_blank" rel="noopener">
+              <span><%= h([@profile.address, "Open in Google Maps"].compact.join(" · ")) %></span>
+              <span class="info-row__value is-link"><%= icon(:external, size: 16) %></span>
+            </a>
+          <% else %>
+            <div class="info-row"><span class="info-row__what">Where</span><span class="info-row__value"><%= h(@profile.address) %></span></div>
+          <% end %>
+        </section>
+      <% end %>
+
+      <% if runs.any? || @profile.prices.any? || @profile.phone %>
+        <section class="info-card">
+          <% runs.each do |first, last, hours| %>
+            <div class="info-row">
+              <span class="info-row__what">Hours</span>
+              <span class="info-row__value"><%= Booking::Messages.day_run(first, last) %> <%= h(hours) %></span>
+            </div>
+          <% end %>
+          <% @profile.prices.each do |listed| %>
+            <div class="info-row">
+              <span class="info-row__what">Price · per court, per hour</span>
+              <span class="info-row__value"><%= h(Booking::Messages.price_line(listed)) %></span>
+            </div>
+          <% end %>
+          <% if @profile.phone %>
+            <a class="info-row" href="tel:<%= h(@profile.phone.delete(" ")) %>">
+              <span class="info-row__what">Phone</span>
+              <span class="info-row__value is-link"><%= h(@profile.phone) %></span>
+            </a>
+          <% end %>
+        </section>
+      <% end %>
+
+      <p class="disclaimer">
+        <%= h(Booking::Messages.profile_source(@profile.checked_on)) %>
+        <% if @profile.source %>
+          <a data-external href="<%= h(@profile.source) %>" target="_blank" rel="noopener">Their page ↗</a>
+        <% end %>
+      </p>
+    <% end %>
+  </div>
+</main>
+
+<div class="dock <%= @club.settings["booking_url"] ? "dock--even" : "" %>">
+  <a class="btn btn--outline" href="/date/<%= @date || horizon.first %>/club/<%= @club.slug %>"><%= @date ? "Free hours" : "Free hours today" %></a>
+  <% if @club.settings["booking_url"] %>
+    <a class="btn btn--ball" data-external href="<%= h(@club.settings["booking_url"]) %>" target="_blank" rel="noopener">Book a court <%= icon(:external, size: 16) %></a>
   <% end %>
-</section>
+</div>

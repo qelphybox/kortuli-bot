@@ -1,22 +1,34 @@
 <%#
-  Nothing here is meant to be read. Telegram puts initData in the URL
-  fragment, which browsers never send upstream, so the only way the server
-  can see it is if this page posts it back. Then we reload, and the real page
-  is served on the session that exchange produced.
+  Telegram puts initData in the URL fragment, which browsers never send
+  upstream, so the only way the server can see it is if this page posts it
+  back. Then we reload, and the real page is served on the session that
+  exchange produced. Inside Telegram this flashes past; opened anywhere else
+  it is the splash that says where the app lives, and the line under the
+  headline says what went wrong if anything did.
 
   The script is inline rather than in app.js so the exchange costs no extra
   round trip before anyone is signed in.
 %>
-<main class="waiting">
-  <p id="status">Opening…</p>
-  <noscript>This app needs JavaScript to tell Telegram who you are.</noscript>
+<main class="splash">
+  <%= court(:splash, "splash__court") %>
+  <span class="brand"><%= ball(size: 34, outline: false) %><span class="brand__word">KORTULI</span></span>
+  <div class="splash__copy">
+    <h1 class="splash__title">Find a<br><span>free court.</span><br>Play tonight.</h1>
+    <p class="splash__lede" id="status">Opening…</p>
+    <noscript><p class="splash__lede">This app needs JavaScript to tell Telegram who you are.</p></noscript>
+  </div>
+  <div class="splash__foot">
+    <a class="btn" href="<%= h(bot_url) %>"><%= icon(:send) %>Open @<%= h(settings.bot_username) %></a>
+    <p class="splash__note">Never books or pays — it links you to the club.</p>
+  </div>
 </main>
 
 <script>
   (function () {
+    var status = document.getElementById("status");
     var payload = window.Telegram && Telegram.WebApp && Telegram.WebApp.initData;
     if (!payload) {
-      document.getElementById("status").textContent = "Open this from the bot in Telegram.";
+      status.textContent = "Kortuli lives inside Telegram. Open it from the bot to see free padel courts across Tbilisi.";
       return;
     }
 
@@ -29,10 +41,10 @@
         // Replace rather than assign: this page must not sit in the back stack.
         window.location.replace("/");
       } else {
-        document.getElementById("status").textContent = "Telegram did not vouch for this session.";
+        status.textContent = "Telegram did not vouch for this session.";
       }
     }).catch(function () {
-      document.getElementById("status").textContent = "Could not reach the server.";
+      status.textContent = "Could not reach the server.";
     });
   })();
 </script>

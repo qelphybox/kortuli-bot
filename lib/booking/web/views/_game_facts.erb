@@ -1,0 +1,16 @@
+<%#
+  A Game's three facts — the rain, the price, the place — as the Share
+  screen's preview and the group's card both lay them out. `weather` is the
+  Forecast's worst hour over the game, or nil.
+%>
+<dl class="facts-grid">
+  <% if weather %>
+    <div><dt>Forecast</dt><dd class="<%= "is-wet" if weather.wet? %><%= "is-damp" if weather.damp? %>"><%= hour_weather(weather) %></dd></div>
+  <% end %>
+  <% if game.price %>
+    <div><dt>Price</dt><dd><%= h(game.price) %>/h</dd></div>
+  <% end %>
+  <% if game.place %>
+    <div><dt>Where</dt><dd><%= h(game.place) %></dd></div>
+  <% end %>
+</dl>

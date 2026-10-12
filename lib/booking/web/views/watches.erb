@@ -1,46 +1,62 @@
 <%#
   Everything this person has asked to be told about. Standing and Dated
   are one thing downstream, so they list together — the difference on
-  screen is that a Dated watch names its one day, and says so. The form
-  that creates a new one lives at its own URL now; the button below points
-  at it.
+  screen is that a Standing watch lights the weekdays it comes back on,
+  and a Dated one names its one day instead, and says so. The form that
+  creates a new one lives at its own URL; the button below points at it.
 %>
-<header class="app-head app-head--sub">
-  <a class="back" href="/" aria-label="Back to dates">←</a>
-  <span class="app-head__title-solo">Your watches</span>
+<% letters = %w[M T W T F S S] %>
+<header class="topbar">
+  <div>
+    <h1 class="topbar__title">Watches</h1>
+    <div class="topbar__sub">We ping you when a slot frees up</div>
+  </div>
+  <span class="topbar__aside"><span class="topbar__count"><%= @watches.count(&:active?) %></span> active</span>
 </header>
 
-<% if @watches.empty? %>
-  <p class="muted empty"><%= Booking::Messages.no_watches_in_app %></p>
-<% else %>
-  <ul class="watches">
-    <% @watches.each do |watch| %>
-      <li class="watch<%= " is-paused" unless watch.active? %>">
-        <div class="watch__body">
-          <p class="clubs">
-            <span class="kind <%= watch_kind(watch) %>"><%= watch_kind(watch).capitalize %></span>
-            <%= watch_clubs(watch) %>
-          </p>
-          <p class="when">
-            <%= watch_when(watch) %><%= " · Paused" unless watch.active? %>
-          </p>
-        </div>
-        <%# Ordinary form posts rather than fetch(): the session cookie is
-            SameSite=Lax, so a form on somebody else's site cannot carry it,
-            and the app needs no JavaScript to manage a watch. %>
-        <div class="actions">
-          <% if watch.active? %>
-            <form method="post" action="/watches/<%= watch.id %>/pause"><button>Pause</button></form>
+<main class="page page--flush">
+  <% if @watches.empty? %>
+    <p class="empty"><%= Booking::Messages.no_watches_in_app %></p>
+  <% else %>
+    <ul class="watches">
+      <% @watches.each do |watch| %>
+        <li class="watch<%= " is-paused" unless watch.active? %>">
+          <div class="watch__top">
+            <span class="watch__badges">
+              <span class="state-pill"><%= watch.active? ? "Watching" : "Paused" %></span>
+              <% if watch.dated? %><span class="state-pill state-pill--soft">Dated</span><% end %>
+            </span>
+            <span class="watch__time"><%= Booking::Messages.time_range(watch) %></span>
+          </div>
+          <div class="watch__clubs"><%= watch_clubs(watch) %></div>
+          <% if watch.dated? %>
+            <div class="watch__when"><%= watch_days(watch) %></div>
           <% else %>
-            <form method="post" action="/watches/<%= watch.id %>/resume"><button>Resume</button></form>
+            <div class="letters" role="img" aria-label="Standing: <%= watch_days(watch) %>">
+              <% Booking::Web::MONDAY_FIRST.each_with_index do |day, i| %>
+                <span class="<%= "is-on" if watch.weekdays.include?(day) %>" aria-hidden="true"><%= letters[i] %></span>
+              <% end %>
+            </div>
           <% end %>
-          <form method="post" action="/watches/<%= watch.id %>/delete"><button class="danger">Delete</button></form>
-        </div>
-      </li>
-    <% end %>
-  </ul>
-<% end %>
+          <%# Ordinary form posts rather than fetch(): the session cookie is
+              SameSite=Lax, so a form on somebody else's site cannot carry it,
+              and the app needs no JavaScript to manage a watch. %>
+          <div class="watch__actions">
+            <% if watch.active? %>
+              <form method="post" action="/watches/<%= watch.id %>/pause"><button class="watch__toggle">Pause</button></form>
+            <% else %>
+              <form method="post" action="/watches/<%= watch.id %>/resume"><button class="watch__toggle">Resume</button></form>
+            <% end %>
+            <form method="post" action="/watches/<%= watch.id %>/delete">
+              <button class="watch__delete" aria-label="Delete watch"><%= icon(:trash, size: 18) %></button>
+            </form>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
 
-<div class="footer-cta">
-  <a class="cta" href="/watches/new">+ Watch a slot</a>
-</div>
+  <a class="btn btn--ball" href="/watches/new"><%= icon(:plus, size: 18) %>Watch a slot</a>
+</main>
+
+<%= erb :_tabs, locals: { current: :watches } %>

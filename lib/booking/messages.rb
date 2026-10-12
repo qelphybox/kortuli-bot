@@ -92,9 +92,9 @@ module Booking
 
     # The Slots screen's button, before and after anything is ticked. Without
     # JS it is always the first; with it, the second until a tick arrives.
-    def game_pick = "Share the hours I booked"
+    def game_pick = "Share my game"
 
-    def game_pick_none = "Booked here? Tick the hours to share them"
+    def game_pick_none = "Tick the hours you booked"
 
     def game_to_google = "Google Calendar ↗"
 
@@ -224,9 +224,16 @@ module Booking
 
     # One line over a date's clubs: when it will rain, if it will.
     def weather_outlook(outlook)
-      if outlook.wet? then "#{outlook.icon} Rain likely #{weather_runs(outlook.wet_runs)}"
-      elsif outlook.damp? then "#{outlook.icon} Showers possible #{weather_runs(outlook.damp_runs)}"
-      else ["🌤 No rain expected", temperature_range(outlook)].compact.join(" · ")
+      if outlook.wet? || outlook.damp? then "#{outlook.icon} #{weather_headline(outlook)}"
+      else ["🌤 #{weather_headline(outlook)}", temperature_range(outlook)].compact.join(" · ")
+      end
+    end
+
+    # The same line without its icon, for a screen that draws its own.
+    def weather_headline(outlook)
+      if outlook.wet? then "Rain likely #{weather_runs(outlook.wet_runs)}"
+      elsif outlook.damp? then "Showers possible #{weather_runs(outlook.damp_runs)}"
+      else "No rain expected"
       end
     end
 
@@ -266,9 +273,6 @@ module Booking
 
     # "2 indoor · 3 covered": every court counted, under its Cover.
     def cover_summary(covers) = covers.map { |cover, count| "#{count} #{cover}" }.join(" · ")
-
-    # "indoor + covered": short enough to sit beside a club's name.
-    def cover_tag(covers) = covers.map(&:first).join(" + ")
 
     def cover_label(cover) = cover.to_s.capitalize
 
