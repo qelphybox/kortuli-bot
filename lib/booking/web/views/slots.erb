@@ -1,14 +1,12 @@
 <%#
-  Hourly slots for one club on one date. A free hour links out to the
-  club's booking page; a taken hour that is still ahead offers a one-tap
-  Watch — one message when it frees up. An hour already begun cannot be
-  played and offers nothing, rather than a button that would refuse.
-  Beside each hour, the Forecast for it — the rain is what decides between
-  this club and one with a roof.
+  Hourly slots for one club on one date: free or taken, and beside each
+  hour the Forecast for it — the rain is what decides between this club and
+  one with a roof. The club's booking page is a single link in the header
+  rather than a button on every free row, because every row would point at
+  the same page.
   Every hour not yet over can be ticked, free or taken — the Grid may not
   have seen a booking yet — and the ticked ones become a Game to share. The
-  boxes belong to the form under the list by its id, because a row's own
-  Watch form sits between them and HTML does not nest forms.
+  boxes belong to the form under the list by its id.
 %>
 <header class="app-head app-head--sub">
   <a class="back" href="/date/<%= @date %>" aria-label="Back to clubs">←</a>
@@ -16,7 +14,13 @@
     <span class="app-head__club"><%= @club_name %></span>
     <span class="app-head__sub"><%= @weekday %> · <%= @date_label %></span>
   </span>
-  <a class="head-action" href="/clubs/<%= @club_slug %>?date=<%= @date %>">Info</a>
+  <span class="head-actions">
+    <a class="head-action" href="/clubs/<%= @club_slug %>?date=<%= @date %>">Info</a>
+    <% if @booking_url %>
+      <a class="head-action is-primary" data-external href="<%= @booking_url %>"
+         aria-label="Book at <%= @club_name %>">Book ↗</a>
+    <% end %>
+  </span>
 </header>
 
 <ul class="slots">
@@ -39,20 +43,6 @@
           </span>
         </span>
       </label>
-      <% if s[:free] %>
-        <a class="slot-row__book" data-external href="<%= s[:deeplink] %>"
-           aria-label="<%= @club_name %> at <%= s[:time] %>, book">Book ↗</a>
-      <% elsif s[:askable] %>
-        <form method="post" action="/watches/dated">
-          <input type="hidden" name="club_slug" value="<%= @club_slug %>">
-          <input type="hidden" name="starts_at" value="<%= s[:starts_at] %>">
-          <input type="hidden" name="date" value="<%= @date %>">
-          <button class="slot-row__watch<%= " is-on" if s[:watching] %>"<%= " disabled" if s[:watching] %>
-                  aria-label="Watch <%= @club_name %> at <%= s[:time] %>">
-            <%= s[:watching] ? "Watching" : "Watch" %>
-          </button>
-        </form>
-      <% end %>
     </li>
   <% end %>
 </ul>

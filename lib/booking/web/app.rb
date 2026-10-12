@@ -210,22 +210,6 @@ module Booking
         def picked_day?(day) = !!@submitted&.picked_day?(day)
         def picked_hour?(hour, which) = @submitted&.public_send(which) == hour
 
-        # The Slots screen asks this before drawing a Watch button, so it
-        # never offers a tap the route would only refuse.
-        def askable?(at) = TappedHour.askable?(at, horizon:)
-
-        # Tapping means "tell me about this hour", so an existing watch on it is
-        # woken rather than duplicated. Two watches on one hour would mean two
-        # messages about it, which the notifications index cannot prevent
-        # because it dedupes per watch — and doing nothing at all would answer
-        # with a success the person has no way of seeing.
-        def ask_about(tapped)
-          existing = settings.repos.watches.for_user(visitor_id).find { tapped.asked_by?(_1) }
-          return settings.repos.watches.create(user_id: visitor_id, **tapped.to_watch) unless existing
-
-          settings.repos.watches.set_active(existing.id, true) unless existing.active?
-        end
-
         # A Dated watch names its one day; a Standing one names the weekdays it
         # keeps coming back on. Reading either tells you which it is before the
         # badge next to it does.
@@ -335,46 +319,23 @@ module Booking
           rows.each_with_index.sort_by { |c, i| [c[:any_free] ? 0 : 1, c[:rained_off] ? 1 : 0, c[:favourite] ? 0 : 1, i] }.map(&:first)
         end
 
-        # One dict per hour on the selected club-and-date. "Watching" is
-        # queried once per screen from the user's own list, so a slot that
-        # already has a Dated watch on it renders as such.
+        # One dict per hour on the selected club-and-date.
         def slots_view(date, row)
-          watching = watched_hours(date, row.club_slug)
-
           row.cells.map do |cell|
             starts_at = cell.starts_at
             hour = hour_label(starts_at).to_i
-            time = "#{format("%02d", hour)}:00 – #{format("%02d", hour + 1)}:00"
-            watching_this = watching.include?(Clock.to_local(starts_at).hour * 60 + Clock.to_local(starts_at).min)
-            state = cell.free? ? "free" : watching_this ? "watching" : "taken"
 
             {
-              time:,
-              starts_at: starts_at.iso8601,
+              time: "#{format("%02d", hour)}:00 – #{format("%02d", hour + 1)}:00",
               # Ticked to share as a Game. Counted from the page's midnight,
               # so an hour after it comes out as 24 rather than 0. An hour
               # already over has nothing left to tell anybody about.
               hour: HourSpan.offset(date, starts_at),
               pickable: starts_at + 3600 > Clock.now,
               free: cell.free?,
-              askable: !cell.free? && askable?(starts_at),
-              watching: watching_this,
               weather: weather_at(starts_at),
-              state:,
-              deeplink: cell.deeplink
+              state: cell.free? ? "free" : "taken"
             }
-          end
-        end
-
-        # The minutes-of-day this person has an active, not-yet-expired dated
-        # watch on for a given (date, club). The Slots screen renders those
-        # as "watching" rather than as a fresh Watch button.
-        def watched_hours(date, club_slug)
-          settings.repos.watches.for_user(visitor_id).each_with_object(Set.new) do |w, out|
-            next unless w.dated? && w.date == date && w.active? && !w.expired?
-            next unless w.club_slugs.include?(club_slug)
-
-            out << w.from_minute
           end
         end
 
@@ -530,8 +491,9 @@ module Booking
       end
 
       # The hours a single club sells on one date, tapped from the Clubs
-      # screen. Free hours link out; taken hours that are still ahead offer
-      # a one-tap Watch.
+      # screen: which are free, and the weather over each. The club's booking
+      # page is one link in the header — every Cell would point at the same
+      # page anyway.
       get "/date/:date/club/:slug" do
         require_visitor!
 
@@ -547,6 +509,7 @@ module Booking
         @date_label = date_label(date)
         @club_slug = row.club_slug
         @club_name = row.club_name
+        @booking_url = enabled_club(row.club_slug)&.settings&.fetch("booking_url", nil)
         @slots = slots_view(date, row)
         erb :slots, layout: :layout
       end
@@ -744,25 +707,6 @@ module Booking
 
         @summary = confirm_summary(watch)
         erb :confirm, layout: :layout
-      end
-
-      # The main scenario, and deliberately the shortest route in the file:
-      # an hour is gone, and you want to be told when it is not. Everything
-      # the watch needs is already in the Cell that was tapped.
-      post "/watches/dated" do
-        require_visitor!
-
-        tapped = TappedHour.from(params, watched_slugs: enabled_slugs, horizon:)
-        halt(422) unless tapped
-
-        ask_about(tapped)
-
-        # Back to the Slots screen it was tapped on, so the newly-watched
-        # hour renders as "Watching" without a second click. The page is not
-        # always the hour's own date: one after midnight is drawn under the
-        # evening it belongs to.
-        page_date = parse_date(params[:date]) || horizon.first
-        redirect(to("/date/#{page_date}/club/#{tapped.club_slug}"))
       end
 
       # Post-redirect-get throughout, so a watch is never paused twice by a
