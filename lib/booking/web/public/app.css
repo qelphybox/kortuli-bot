@@ -110,9 +110,17 @@
 
 html { background: var(--ground); }
 
+/* A column at least as tall as the screen, so the tab bar and a screen's
+   dock sit on its bottom edge even when there is little above them —
+   `sticky` alone only holds them there once the page scrolls. Telegram
+   publishes the height it actually shows; a browser falls back to the
+   dynamic viewport, and an old one to plain vh. */
 body {
   margin: 0;
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  min-height: var(--tg-viewport-stable-height, 100dvh);
   background: var(--ground);
   color: var(--ink);
   font: 400 15px/1.45 var(--text);
@@ -317,8 +325,10 @@ html:not(.js) .js-only { display: none; }
 
 .btn-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-/* The screen's one decision, kept in reach under the thumb. */
+/* The screen's one decision, kept in reach under the thumb: on the bottom
+   edge of a short screen, and stuck there while a long one scrolls. */
 .dock {
+  margin-top: auto;
   position: sticky;
   bottom: 0;
   z-index: 5;
@@ -331,10 +341,14 @@ html:not(.js) .js-only { display: none; }
 }
 .dock--split { display: grid; grid-template-columns: 1fr 2fr; }
 .dock--even { display: grid; grid-template-columns: 1fr 1fr; }
+/* The watch form wraps its own dock, so it is the form that has to reach
+   the bottom for the dock inside it to get there. */
+.new-watch { flex: 1 0 auto; display: flex; flex-direction: column; }
 .dock__note { text-align: center; font-size: 12px; color: var(--muted); }
 
 /* --- Tabs: the three places a person lives. ---------------------------- */
 .tabbar {
+  margin-top: auto;
   position: sticky;
   bottom: 0;
   z-index: 6;
