@@ -110,7 +110,7 @@ button { color: inherit; }
 }
 .back:hover, .back:focus-visible { color: var(--accent); }
 
-.app-head__title { display: flex; flex-direction: column; gap: 3px; }
+.app-head__title { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .app-head__title-solo { font: 600 18px/1.1 "IBM Plex Sans", sans-serif; letter-spacing: -0.015em; }
 
 .app-head__weekday {
@@ -386,39 +386,6 @@ button { color: inherit; }
 }
 .slot-row__weather.is-damp { color: var(--fg); }
 .slot-row__weather.is-wet { color: var(--rain); font-weight: 500; }
-
-.slot-row__book {
-  background: var(--accent);
-  color: var(--on-accent);
-  border-radius: 9px;
-  padding: 9px 18px;
-  font: 600 13.5px/1 "IBM Plex Sans", sans-serif;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.slot-row__book:active { transform: scale(0.97); }
-
-.slot-row form { margin: 0; }
-/* Asking to hear about a taken hour is the side door: muted, dashed, beside
-   a row that is already dimmed, so Book is the only button the eye lands
-   on. */
-.slot-row__watch {
-  border: 1px dashed var(--line);
-  background: transparent;
-  color: var(--muted);
-  border-radius: 9px;
-  padding: 8px 10px;
-  font: 500 12.5px/1 "IBM Plex Sans", sans-serif;
-  cursor: pointer;
-}
-.slot-row__watch:hover, .slot-row__watch:focus-visible { color: var(--fg); background: var(--chip); }
-.slot-row__watch:active { transform: scale(0.97); }
-.slot-row__watch.is-on {
-  border-color: transparent;
-  background: var(--chip);
-  color: var(--muted);
-  cursor: default;
-}
 
 /* --- Sharing a Game. Under the hours, quiet until something is ticked;
        then it follows the thumb down the list, because the hours worth
@@ -739,6 +706,18 @@ button { color: inherit; }
   text-decoration: none;
 }
 .head-action:hover, .head-action:focus-visible { border-color: var(--fg); }
+
+/* Two actions side by side, the way a club's hours have them: Info, and
+   Book — the one thing on that screen that leaves the app. */
+.head-actions { margin-left: auto; display: flex; gap: 8px; flex-shrink: 0; }
+.head-actions .head-action { margin-left: 0; }
+.head-action.is-primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+.head-action.is-primary:active { transform: scale(0.97); }
 
 .share {
   display: flex;

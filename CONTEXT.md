@@ -110,8 +110,9 @@ no end and fires as often as the window keeps producing.
 _Avoid_: recurring watch, rule
 
 **Dated watch**:
-A Watch on one hour of one date, made by tapping a taken Cell. It fires once
-and stops mattering after the hour has passed.
+A Watch on one hour of one date. It fires once and stops mattering after the
+hour has passed. Tapping a taken Cell used to make one; nothing does now, and
+the ones already made run out on their own.
 _Avoid_: one-shot, alarm, reminder
 
 **Freed**:

@@ -101,8 +101,10 @@ The **mini app** shows the week: one row per club, one column per hour, one
 page per date. The home screen is the dates and nothing else, because
 looking, sharing a Rundown and sharing a Game all start from one of them;
 everything else — watches, the clubs directory and, for the owner, the
-Dashboard — sits behind its **Menu**. A free hour links out to that club's booking page; an hour
-outside a club's opening hours is left blank rather than drawn as taken. Clubs
+Dashboard — sits behind its **Menu**. A club's screen for a date says which
+hours are free and carries one **Book ↗** in its header, out to that club's
+booking page — every hour would link to the same page. An hour outside a
+club's opening hours is left blank rather than drawn as taken. Clubs
 whose source names the court say how many of them are free (`2/4`); the rest
 can only say that something is (`✓`).
 
@@ -139,11 +141,6 @@ goes to need not use the bot: Google Calendar's own "add" link, and the
 same URL with `.ics` on the end for Apple's Calendar and everything else.
 Nothing is stored — the URL is the whole Game.
 
-Tapping an hour that is **gone** asks to be told when it comes back: one tap,
-no form, a watch on exactly that club and that hour. Hours that have already
-started, and hours past the booking horizon, are drawn without a button —
-nothing can free them up any more, or nobody has polled them.
-
 **Clubs**, in the home screen's Menu, is every watched club whatever it has
 free: its neighbourhood and how many courts sit indoors, under a roof, or in
 the open. A club opens its **Profile** — each court and its cover, a button
@@ -173,11 +170,12 @@ last good one. Where there is no Forecast — before the first fetch — nothing
 is drawn rather than a guess. Its age is on `/admin`.
 
 **Watches** — the Menu's first entry — is everything you have asked to be
-told about, with pause, resume and delete. A standing watch names the weekdays it keeps
-coming back on; a dated one — the kind a tapped hour makes — names its single
-day and says `Dated`. Pausing
-stops a watch matching without losing it, and a dated watch drops off the list
-once its hour has gone by — nothing reaps it, it simply stops mattering.
+told about, with pause, resume and delete. A standing watch names the weekdays
+it keeps coming back on; a dated one names its single day and says `Dated`.
+Nothing makes dated watches any more — tapping a taken hour used to — but the
+ones already made fire as before and drop off the list once their hour has
+gone by: nothing reaps them, they simply stop mattering. Pausing stops a watch
+matching without losing it.
 
 The same screen creates one: tick the clubs, tick the days, pick both ends of
 an hour range, submit once. A watch that could never fire — no clubs, no days,
