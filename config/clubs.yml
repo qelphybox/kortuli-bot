@@ -94,9 +94,9 @@
     court_aliases: {}
 
 # Padelbade runs on Book & Go. One request returns every club of the tenant, so
-# these two share an adapter and are told apart by location_id — the same shape
-# as the two GymBreeze sites. The tenant also holds Padelbade Rustavi (location
-# 142), deliberately left out: another city, and the app has no notion of one.
+# these share an adapter and are told apart by location_id — the same shape as
+# the GymBreeze sites. The third, Padelbade Rustavi, is with the other Rustavi
+# club further down.
 - slug: padelbade-krtsanisi
   name: Padelbade Krtsanisi
   adapter: bookandgo
@@ -378,4 +378,87 @@
     # every tick and would pick a reopened fourth up by itself; this count,
     # the "of" in a Cell's "2/3", would then want raising to 4.
     courts: 3
+    court_aliases: {}
+
+# Rustavi, half an hour south-east of Tbilisi. Georgia keeps one clock, so
+# nothing about reading these differs from a Tbilisi club.
+#
+# Padelbade's third location, in the same Book & Go response as Krtsanisi and
+# Dighomi and told apart from them by location_id alone.
+- slug: padelbade-rustavi
+  name: Padelbade Rustavi
+  adapter: bookandgo
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Rustavi
+    location_id: 142
+    sapadelo: padelbade-rustavi
+    booking_url: "https://app.padelbade.com/"
+    # The hour-long variant's own price. Its `bookabledays` rules are two
+    # fortnights of August 2025 at 2 GEL, long expired.
+    price: "60 GEL"
+    # Offers a 01:00 start, as Dighomi does.
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
+    # Seen 2026-10-13: starts through D+13, an empty list from D+14 — the
+    # fortnight Dighomi offers, so the same 15 Dighomi declares. A date past
+    # the window costs one request that comes back empty.
+    max_days: 15
+    courts: 2
+    court_aliases: {}
+
+# Higgs books through its own app, open to anyone for reading; the adapter
+# reads the court list from it every tick, so nothing here pins the courts.
+- slug: higgs
+  name: Higgs
+  adapter: higgs
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Rustavi
+    booking_url: "https://higgs.ge/booking"
+    sapadelo: higgs
+    # 30 for starts before 17:00, 60 from then on, every day and every court.
+    # The source adds each court's 0.01 GEL base rate to that, printing 30.01.
+    price: "30–60 GEL"
+    # Every court's own openTime/closeTime: 08:00 to 00:00, last start 23:00.
+    opening_hours:
+      from: "08:00"
+      to: "24:00"
+    # The club's picker: today and six more. The API answers past it with
+    # every hour free.
+    max_days: 7
+    courts: 3
+    court_aliases: {}
+
+# Kutaisi. book.lovepadel.ge is a Book & Go white-label of its own — another
+# tenant on the same API as Padelbade, so the same adapter pointed elsewhere.
+- slug: love-padel
+  name: Love Padel
+  adapter: bookandgo
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Kutaisi
+    base_url: "https://api.bookandgo.app/api/v1/apps/126"
+    location_id: 246
+    sapadelo: love-padel
+    booking_url: "https://book.lovepadel.ge/"
+    # 40 for weekday starts before 16:00; 60 evenings, weekends and the
+    # midnight hour. The variant's own `price` is 0 — the rules are the rate.
+    price: "40–60 GEL"
+    # Last start 00:00, as Krtsanisi's. The location's `timezone` says
+    # Europe/Amsterdam, which the adapter ignores, as it ignores Padelbade's:
+    # read as Tbilisi wall-clock the starts run 08:00 to a last one at 00:00,
+    # exactly the 08:00–01:00 the club lists on sapadelo.
+    opening_hours:
+      from: "08:00"
+      to: "01:00"
+    # Seen 2026-10-13: starts through D+7, an empty list from D+8.
+    max_days: 8
+    # Two padel courts. The location also rents two pickleball courts, which
+    # the adapter leaves out.
+    courts: 2
     court_aliases: {}
