@@ -21,8 +21,9 @@ module Booking
         # Its own Api instance rather than the listening client's, the way the
         # notifier has one: this happens before the long poll starts and must
         # not wait on it.
-        Telegram::Menu.new(api: ::Telegram::Bot::Api.new(Config.telegram_token), logger: @logger)
-                      .install(Config.app_url)
+        api = ::Telegram::Bot::Api.new(Config.telegram_token)
+        Telegram::Menu.new(api:, logger: @logger).install(Config.app_url)
+        Telegram::About.new(api:, logger: @logger).install
 
         Telegram::Runner.new(
           token: Config.telegram_token,

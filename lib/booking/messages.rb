@@ -136,6 +136,28 @@ module Booking
     # end up named differently.
     def open_app = "Open the app"
 
+    # What Telegram shows before anybody has said a word to the bot: the
+    # description in the empty chat ("What can this bot do?", 512 characters
+    # at most), the short one on its profile and wherever it is shared (120),
+    # and the command menu. The bot sets them itself on boot, so they follow
+    # the code rather than whatever was last typed into @BotFather. "Georgia"
+    # rather than a list of cities, which would go stale with config.
+    def bot_description
+      <<~TEXT.strip
+        Free padel courts across Georgia, day by day — every club's open hours in one place, with the weather beside them.
+
+        Pick a day, book it on the club's own page, then send the day's courts or the game you booked to your group in one tap.
+
+        All taken? Watch a slot and get a message the moment somebody cancels. kortuli never books or pays.
+      TEXT
+    end
+
+    def bot_short_description = "Free padel courts across Georgia, day by day, with the weather. Book on the club's page, tell your group."
+
+    # The commands Handlers answers, and nothing else: anything typed that is
+    # not one of them goes to the owner as feedback.
+    def bot_commands = { "start" => "Open kortuli", "feedback" => "Tell us what's broken or missing" }
+
     # A watch outlives a club being switched off, and the slug is a better
     # answer than a blank line.
     def clubs_phrase(watch, club_names) = watch.club_slugs.map { club_names.fetch(_1, _1) }.sort.join(", ")
