@@ -435,6 +435,10 @@ replaced `gpadel.ge`.
 
 ## GAMO — gamo.ge
 
+> **Superseded 2026-10-14.** Gamo is now Next.js on Vercel and
+> `/en/book/availability` is a 404. The live endpoints are in
+> [other-racket-sports.md](other-racket-sports.md#gamo--gamoge).
+
 **Not a club site — a multi-sport marketplace. And its padel inventory is one venue in
 Rustavi, not Free University.**
 
