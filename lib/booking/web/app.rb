@@ -67,7 +67,7 @@ module Booking
       # sends a person back to. Anything else lands on the dates: the path
       # arrives from the page, and a redirect to wherever it says is a
       # redirect anywhere.
-      CITY_SWITCH_BACK = %r{\A/(?:clubs|watches/new)?\z}
+      CITY_SWITCH_BACK = %r{\A/(?:clubs)?\z}
 
       helpers Icons
 
@@ -192,6 +192,11 @@ module Booking
 
         def watch_clubs(watch) = Messages.clubs_phrase(watch, club_names)
 
+        # A Watch is in whichever Cities its clubs are (ADR-0003). One, as the
+        # form makes them now; a watch ticked without JavaScript, or made
+        # before the form kept to one city, can name more.
+        def watch_cities(watch) = Club.cities(enabled_clubs.select { watch.club_slugs.include?(_1.slug) })
+
         # The form renders from the same lists Submission validates against, so
         # the two cannot answer differently about what was on offer.
         def weekday_choices = MONDAY_FIRST.map { [_1, Messages::DAY_NAMES[_1]] }
@@ -230,21 +235,32 @@ module Booking
           end
         end
 
-        # The clubs the dates, a date's list, Share, the directory and the
-        # new-watch form are drawn from.
+        # The clubs the dates, a date's list, Share and the directory are
+        # drawn from.
         def city_clubs = @city_clubs ||= enabled_clubs.select { _1.city == current_city }
 
 
+        # The City the new-watch form opens on. A refused submission comes
+        # back on the city of the clubs it picked, or else the one its segment
+        # was left on; a first visit opens on the city this person is looking at.
+        def form_city
+          @form_city ||= enabled_clubs.find { @submitted&.picked_club?(_1.slug) }&.city ||
+                         [params[:city], current_city].find { cities.include?(_1) } || current_city
+        end
+
         # A first visit has no submission to remember, so it starts from the
-        # clubs this person has starred — the ones they would tick anyway.
-        # Days and hours start blank: nothing to guess them from.
-        def picked_club?(slug) = @submitted ? @submitted.picked_club?(slug) : favourite?(slug)
+        # clubs this person has starred — the ones they would tick anyway —
+        # in the city the form opens on, so a watch does not start out
+        # spanning two. Days and hours start blank: nothing to guess them from.
+        def picked_club?(club)
+          @submitted ? @submitted.picked_club?(club.slug) : favourite?(club.slug) && club.city == form_city
+        end
         def picked_day?(day) = !!@submitted&.picked_day?(day)
         def picked_hour?(hour, which) = @submitted&.public_send(which) == hour
 
         # A Dated watch names its one day; a Standing one names the weekdays it
         # keeps coming back on.
-        def watch_days(watch) = watch.dated? ? day_label(watch.date) : Messages.days_phrase(watch.weekdays)
+        def watch_days(watch, sep: ", ") = watch.dated? ? day_label(watch.date) : Messages.days_phrase(watch.weekdays, sep:)
 
         def day_label(date) = date.strftime("%a %-d %b")
 
@@ -545,9 +561,11 @@ module Booking
           erb :watches, layout: :layout
         end
 
+        # Every city's clubs, grouped: the form's City segment shows one
+        # group at a time, and without JavaScript they are all there to tick.
         def watch_new_screen(refusals = [])
           @refusals = refusals
-          @clubs = city_clubs
+          @club_groups = cities.map { |city| [city, enabled_clubs.select { _1.city == city }] }
           erb :watch_new, layout: :layout
         end
 

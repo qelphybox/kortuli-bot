@@ -1579,16 +1579,13 @@ RSpec.describe Booking::Web::App do
         expect(last_response.body).not_to include('href="/clubs/kus-tba-padel"')
       end
 
-      # A Watch names clubs, so the form offers the ones in the city picked.
-      it "offers only Batumi's clubs to watch" do
+      # The form picks its City inside itself, and opens on the one picked.
+      it "opens the watch form on Batumi" do
         get "/watches/new"
 
+        expect(last_response.body).to include('name="city" value="Batumi" checked')
         expect(last_response.body).to include('name="club_slugs[]" value="padel-port"')
-        expect(last_response.body).not_to include('name="club_slugs[]" value="kus-tba-padel"')
-        # The picker's form sits in the header, outside the watch's, which
-        # HTML would otherwise swallow.
-        expect(last_response.body.index('<form class="city-picker__menu"')).to be < last_response.body.index('<form class="new-watch"')
-        expect(switch).to include('value="Batumi" aria-current="true"')
+        expect(last_response.body).not_to include("city-picker")
       end
 
       it "still lists every watch, whatever city its clubs are in" do

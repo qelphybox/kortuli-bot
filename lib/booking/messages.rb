@@ -106,12 +106,12 @@ module Booking
 
     def clock(minute_of_day) = format("%02d:%02d", minute_of_day / 60, minute_of_day % 60)
 
-    def days_phrase(weekdays)
+    def days_phrase(weekdays, sep: ", ")
       days = weekdays.to_a.sort
       return "every day" if days.size == 7
 
       # Rotate so the list reads Monday-first, as a European calendar would.
-      days.sort_by { (_1 + 6) % 7 }.map { DAY_NAMES[_1] }.join(", ")
+      days.sort_by { (_1 + 6) % 7 }.map { DAY_NAMES[_1] }.join(sep)
     end
 
     # The bot's whole vocabulary now: it says this, and then only speaks again

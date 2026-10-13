@@ -6,20 +6,26 @@
   punishes the person for reading it. The Weekdays and Weekend shortcuts
   only tick boxes, and only exist once JavaScript runs.
 
-  The clubs on offer are the current City's; the City pill in the header
-  picks another, and starts the form again. A Watch names clubs, not a city, so
-  one in each is two watches.
+  The City is picked inside the form rather than from the header's pill:
+  every city's clubs are on the page, grouped, so changing city costs no
+  round trip and loses no ticks in the days and hours. Without JavaScript
+  every group shows under its city's name. With it, the segment shows one
+  group at a time and clears the ticks in the others when it changes, so a
+  watch keeps to one city — a Watch names clubs, not a city, so one in each
+  is two watches. The segment's own value goes up too, only so a refusal
+  comes back on the city it was left on.
 %>
+<% refused_clubs = @refusals.include?(Booking::Messages.pick_at_least_one_club) %>
 <% refused_days = @refusals.include?(Booking::Messages.pick_at_least_one_day) %>
+<% picked = @club_groups.to_h { |city, clubs| [city, clubs.count { picked_club?(_1) }] } %>
 <header class="bar">
   <div class="bar__row">
     <a class="icon-btn" href="/watches" aria-label="Back to watches"><%= icon(:back) %></a>
     <h1 class="bar__h1 bar__h1--caps">Watch a slot</h1>
-    <%= erb :_city_switch, locals: { back: "/watches/new" } %>
   </div>
 </header>
 
-<form class="new-watch" method="post" action="/watches">
+<form class="new-watch" method="post" action="/watches" data-watch-form>
   <main class="page page--wide-gap">
     <% if @refusals.any? %>
       <ul class="alerts refusals">
@@ -29,14 +35,41 @@
       </ul>
     <% end %>
 
-    <fieldset class="group">
-      <legend class="field__label">Clubs</legend>
-      <div class="pick-list">
-        <% @clubs.each do |club| %>
-          <label class="toggle-chip">
-            <input type="checkbox" name="club_slugs[]" value="<%= club.slug %>"<%= " checked" if picked_club?(club.slug) %>>
-            <span><%= club.name %></span>
-          </label>
+    <% if city_switch? %>
+      <fieldset class="group js-only">
+        <legend class="field__label">City</legend>
+        <div class="seg seg--city">
+          <% cities.each do |city| %>
+            <label>
+              <input type="radio" name="city" value="<%= h(city) %>"<%= " checked" if city == form_city %> data-city-pick>
+              <span><%= h(city) %></span>
+            </label>
+          <% end %>
+        </div>
+      </fieldset>
+    <% end %>
+
+    <fieldset class="group<%= " is-refused" if refused_clubs %>">
+      <legend class="field__label">
+        <% if city_switch? %>
+          Clubs<span class="js-only"> in <span data-city-name><%= h(form_city) %></span> · <span data-picked><%= picked[form_city] %></span> picked</span>
+        <% else %>
+          Clubs in <%= h(form_city) %><span class="js-only"> · <span data-picked><%= picked[form_city] %></span> picked</span>
+        <% end %>
+      </legend>
+      <div class="club-groups">
+        <% @club_groups.each do |city, clubs| %>
+          <div class="club-group" data-city="<%= h(city) %>">
+            <% if city_switch? %><h2 class="club-group__city"><%= h(city) %></h2><% end %>
+            <div class="pick-list">
+              <% clubs.each do |club| %>
+                <label class="toggle-chip">
+                  <input type="checkbox" name="club_slugs[]" value="<%= club.slug %>"<%= " checked" if picked_club?(club) %>>
+                  <span><%= h(club.name) %></span>
+                </label>
+              <% end %>
+            </div>
+          </div>
         <% end %>
       </div>
     </fieldset>
@@ -86,6 +119,6 @@
 
   <div class="dock">
     <button class="btn btn--ball cta"><%= icon(:bell, size: 18) %>Start watching</button>
-    <p class="dock__note">kortuli never books or pays. You get a message with a link.</p>
+    <p class="dock__note">Kortuli never books or pays. You get a message with a link.</p>
   </div>
 </form>

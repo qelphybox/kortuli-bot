@@ -1,1 +1,222 @@
 /* watching screens (watches, the watch form, its confirmation, the start page) — see app.css for the tokens and shared parts. */
+
+/* --- Watches ----------------------------------------------------------- */
+.watches { display: flex; flex-direction: column; gap: 12px; }
+.watch {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.watch.is-paused {
+  background: var(--taken);
+  border: 1px dashed var(--line-strong);
+  color: var(--muted);
+}
+.watch__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.watch__badges { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.state-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--slab);
+  color: var(--ball);
+}
+.watch.is-paused .state-pill { background: var(--taken-edge); color: var(--muted); }
+.state-pill--soft { background: var(--ball-tint); color: var(--ink); }
+/* The City its clubs are in: every watch is listed whichever is picked. */
+.watch__city { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.watch__time { flex: none; font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1; }
+.watch__clubs { font-size: 16px; font-weight: 700; line-height: 1.3; }
+.watch__when { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
+.letters { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.letters span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--faint);
+}
+.letters .is-on { background: var(--ball); border-color: transparent; color: var(--on-ball); }
+.watch.is-paused .letters .is-on { background: var(--line-strong); color: var(--ink); }
+.watch__actions { display: flex; gap: 8px; }
+.watch__actions form { margin: 0; }
+.watch__actions form:first-child { flex: 1; }
+.watch__toggle {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1.5px solid var(--ink);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 14px;
+}
+.watch__delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--danger);
+}
+
+/* --- The Watch form ----------------------------------------------------- */
+/* The form wraps its own dock, so it is the form that has to reach the
+   bottom for the dock inside it to get there. */
+.new-watch { flex: 1 0 auto; display: flex; flex-direction: column; }
+.dock__note { text-align: center; font-size: 12px; color: var(--muted); }
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--danger-tint);
+  color: var(--danger-ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+.alerts { display: flex; flex-direction: column; gap: 8px; }
+
+.group { margin: 0; padding: 0; border: 0; min-width: 0; }
+.group legend { padding: 0 0 10px; }
+.group.is-refused legend { color: var(--danger); }
+
+/* The City segment: the share screen's segmented control, a size up. */
+.seg--city { padding: 3px; border-radius: 14px; }
+.seg--city span { height: 42px; border-radius: 11px; font-size: 14px; }
+
+/* Every city's clubs are on the page. Without JavaScript each group sits
+   under its city's name; with it, only the picked city's shows, and the
+   legend names it instead. */
+.club-groups { display: flex; flex-direction: column; gap: 14px; }
+.club-group { display: flex; flex-direction: column; gap: 8px; }
+.club-group[hidden] { display: none; }
+.club-group__city { font-size: 14px; font-weight: 700; }
+.js .club-group__city { display: none; }
+
+.day-picks { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.day-pick { position: relative; }
+.day-pick input { position: absolute; opacity: 0; pointer-events: none; }
+.day-pick span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line-strong);
+  background: var(--card);
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 20px;
+  cursor: pointer;
+}
+.group.is-refused .day-pick span { border-color: var(--danger); }
+.day-pick input:checked + span { border-color: var(--ink); background: var(--ball); color: var(--on-ball); }
+.day-pick input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 2px; }
+.presets { display: flex; gap: 8px; margin-top: 8px; }
+.presets button {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* --- After a Watch is made --------------------------------------------- */
+.done {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+}
+.done__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  padding: 32px 0;
+  text-align: center;
+}
+.done__title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 44px;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.done__lede { max-width: 290px; font-size: 16px; line-height: 1.4; color: var(--muted); }
+.done__card {
+  width: 100%;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--slab);
+  color: var(--on-slab);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.done__card .state-pill { background: var(--ball); color: var(--on-ball); }
+.done__card .watch__when { color: var(--on-slab-muted); }
+.done__actions { display: flex; flex-direction: column; gap: 8px; }
+
+/* --- Outside Telegram: the splash. A slab whatever the theme, so it reads
+       as the app's cover rather than one of its screens. ----------------- */
+.splash {
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 56px 28px calc(40px + env(safe-area-inset-bottom));
+  background: var(--slab);
+  color: var(--on-slab);
+}
+.splash__court { position: absolute; left: 0; top: 160px; opacity: 0.16; }
+.splash > :not(.splash__court) { position: relative; }
+.splash .brand { color: var(--on-slab); }
+.splash .brand__word { font-size: 30px; }
+.splash__copy { display: flex; flex-direction: column; gap: 14px; }
+.splash__title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 64px;
+  line-height: 0.92;
+  text-transform: uppercase;
+}
+.splash__title span { color: var(--ball); }
+.splash__lede { max-width: 300px; font-size: 16px; line-height: 1.45; color: var(--on-slab-muted); }
+.splash__foot { display: flex; flex-direction: column; gap: 12px; }
+.splash__foot .btn { background: var(--ball); color: var(--on-ball); min-height: 56px; font-size: 17px; }
+.splash__note { text-align: center; font-size: 13px; color: var(--on-slab-muted); }
