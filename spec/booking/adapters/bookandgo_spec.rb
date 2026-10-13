@@ -173,4 +173,63 @@ RSpec.describe Booking::Adapters::Bookandgo do
     expect(described_class.new(club, http:).fetch(one_day))
       .to eq(fetch(now: Booking::Clock.now))
   end
+
+  # Love Padel in Kutaisi is another tenant of the same platform, recorded on
+  # 2026-10-14: two padel courts, and two pickleball courts filed under the
+  # same location as variants of their own. Court 1 had 11:00 and 12:00
+  # booked; court 2 stood empty.
+  describe "on another tenant" do
+    let(:http) do
+      FakeBookandgoHttp.new(payload: JSON.parse(File.read("spec/fixtures/bookandgo_lovepadel_court_bookings.json", encoding: "UTF-8")))
+    end
+    let(:club) do
+      Booking::Club.new(
+        slug: "love-padel",
+        name: "Love Padel",
+        adapter: "bookandgo",
+        settings: {
+          "base_url" => "https://api.bookandgo.app/api/v1/apps/126",
+          "location_id" => 246,
+          "booking_url" => "https://book.lovepadel.ge/",
+          "courts" => 2,
+          "max_days" => 8
+        }
+      )
+    end
+    let(:one_day) { Date.new(2026, 10, 14)..Date.new(2026, 10, 14) }
+    let(:before_the_day) { Booking::Clock.local_to_utc("2026-10-13 12:00") }
+
+    it "asks that tenant rather than Padelbade's" do
+      fetch
+
+      expect(http.requests.map { _1[:url] }.uniq)
+        .to eq(["https://api.bookandgo.app/api/v1/apps/126/court-bookings"])
+    end
+
+    # Seventeen hourly starts a court — 00:00, then 08:00 through 23:00 — less
+    # court 1's two booked hours. The pickleball court beside them offers
+    # seventeen more.
+    it "reads only the padel courts, not the pickleball ones beside them" do
+      expect(fetch.map(&:court_ref).uniq).to contain_exactly("938", "939")
+      expect(fetch.size).to eq(15 + 17)
+    end
+
+    it "leaves out the hours nobody can book" do
+      hours = fetch.select { _1.court_ref == "938" }.map { _1.local_starts_at.hour }
+
+      expect(hours).not_to include(11, 12)
+      expect(hours).to include(10, 13)
+    end
+
+    it "labels the court as the club does" do
+      expect(fetch.find { _1.court_ref == "939" }.court_label).to eq("Court 2 (Blue)")
+    end
+
+    # Like Padelbade's, this tenant keeps offering hours that have gone.
+    it "drops hours that have already gone" do
+      late = fetch(now: Booking::Clock.local_to_utc("2026-10-14 21:30"))
+
+      expect(late.select { _1.court_ref == "939" }.map { _1.local_starts_at.hour }).to eq([22, 23])
+    end
+  end
 end

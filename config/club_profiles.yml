@@ -4,7 +4,7 @@
 # Each club's Profile: the cover over every court, where it is, and the
 # hours and prices it lists on sapadelo.com. For people to read; nothing
 # that decides a Cell looks at it.
-checked_on: '2026-10-11'
+checked_on: '2026-10-13'
 clubs:
   kus-tba-padel:
     source: https://sapadelo.com/georgia/clubs/kus-tba-padel
@@ -271,3 +271,70 @@ clubs:
       days:
       - sat
       - sun
+  padelbade-rustavi:
+    source: https://sapadelo.com/georgia/clubs/padelbade-rustavi
+    address: 11 Todria St
+    phone: "+995322500549"
+    lat: 41.557148
+    lng: 44.9874719
+    courts:
+    - name: Crocobet
+      cover: outdoor
+    - name: Crocoshop
+      cover: outdoor
+    hours:
+      mon: '08:00–02:00'
+      tue: '08:00–02:00'
+      wed: '08:00–02:00'
+      thu: '08:00–02:00'
+      fri: '08:00–02:00'
+      sat: '08:00–02:00'
+      sun: '08:00–02:00'
+    prices:
+    - gel: 60
+  higgs:
+    source: https://sapadelo.com/georgia/clubs/higgs
+    address: Giorgi Nikoladze St
+    phone: "+995595070303"
+    lat: 41.5428345
+    lng: 45.0062704
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    hours:
+      mon: '08:00–01:00'
+      tue: '08:00–01:00'
+      wed: '08:00–01:00'
+      thu: '08:00–01:00'
+      fri: '08:00–01:00'
+      sat: '08:00–01:00'
+      sun: '08:00–01:00'
+    prices:
+    - gel: 60
+  love-padel:
+    source: https://sapadelo.com/georgia/clubs/love-padel
+    address: Nikea st. 7, Kutaisi
+    lat: 42.2444259
+    lng: 42.6921443
+    courts:
+    - name: Court 1
+      cover: indoor
+    - name: Court 2
+      cover: indoor
+    hours:
+      mon: '08:00–01:00'
+      tue: '08:00–01:00'
+      wed: '08:00–01:00'
+      thu: '08:00–01:00'
+      fri: '08:00–01:00'
+      sat: '08:00–01:00'
+      sun: '08:00–01:00'
+    prices:
+    - gel: 60
+    - gel: 40
+      from: '08:00'
+      to: '16:00'
