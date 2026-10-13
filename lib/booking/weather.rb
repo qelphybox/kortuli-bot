@@ -1,17 +1,30 @@
 module Booking
-  # The Forecast: what the sky over Tbilisi is expected to do, hour by hour.
-  # Asked for because the first thing anybody checks before booking an open
-  # court is whether it will rain on it — and a court under a roof is only
-  # worth the detour on a day when it will.
+  # The Forecast: what the sky over each City is expected to do, hour by
+  # hour. Asked for because the first thing anybody checks before booking an
+  # open court is whether it will rain on it — and a court under a roof is
+  # only worth the detour on a day when it will.
   #
   # From Open-Meteo: free, keyless, hourly, and sixteen days out, which covers
-  # the Booking horizon twice over. One point for the whole city — the clubs
-  # sit within a few kilometres of each other, which is about the model's own
-  # resolution, so asking per club would buy ten copies of one answer.
+  # the Booking horizon twice over. One point per city — a city's clubs sit
+  # within a few kilometres of each other, which is about the model's own
+  # resolution, so asking per club would buy ten copies of one answer. Across
+  # cities it is a different answer: Batumi's sea weather is nothing like
+  # Tbilisi's on the same evening.
   module Weather
     URL = "https://api.open-meteo.com/v1/forecast".freeze
-    LATITUDE = 41.7151
-    LONGITUDE = 44.8271
+    # Each city's centre, as [latitude, longitude]. Kutaisi's is exactly where
+    # GeoNames (Open-Meteo's own geocoder) puts it, and Tbilisi's and
+    # Rustavi's within two or three kilometres of that; Batumi's is GeoNames'
+    # own, because the point first proposed for it sat at the city's southern
+    # edge, three kilometres from the old town. A city missing here gets no
+    # Forecast, and its clubs are drawn without weather rather than with a
+    # neighbour's.
+    CITIES = {
+      "Tbilisi" => [41.7151, 44.8271],
+      "Rustavi" => [41.5495, 44.9930],
+      "Batumi" => [41.6408, 41.6306],
+      "Kutaisi" => [42.2679, 42.6946]
+    }.freeze
     # Open-Meteo refuses anything further out.
     MAX_DAYS = 16
 
@@ -104,20 +117,31 @@ module Booking
       touched.max_by { [_1.wet? ? 2 : _1.damp? ? 1 : 0, _1.rain_chance.to_i] }
     end
 
+    # Every city's hours, by city, from one request: Open-Meteo takes a list
+    # of points and answers with a list of forecasts in the order asked — or,
+    # for a single point, with the forecast alone. One request rather than
+    # one per city, so the cities come from the same model run, and one
+    # failure leaves every city on its last good Forecast.
+    #
     # Days counted from today in GMT, which is the timezone asked for, plus
-    # two: one because a Tbilisi date starts four hours before GMT's does, and
-    # one for the clubs whose evening runs past midnight.
-    def fetch(http, days:)
-      parse(
-        http.get_json(URL, {
-                        latitude: LATITUDE,
-                        longitude: LONGITUDE,
-                        hourly: "temperature_2m,precipitation_probability,precipitation,weather_code,is_day",
-                        timezone: "GMT",
-                        timeformat: "unixtime",
-                        forecast_days: [days + 2, MAX_DAYS].min
-                      })
-      )
+    # two: one because a Georgian date starts four hours before GMT's does,
+    # and one for the clubs whose evening runs past midnight.
+    def fetch(http, cities:, days:)
+      points = cities.map { CITIES.fetch(_1) }
+      body = http.get_json(URL, {
+                             latitude: points.map(&:first).join(","),
+                             longitude: points.map(&:last).join(","),
+                             hourly: "temperature_2m,precipitation_probability,precipitation,weather_code,is_day",
+                             timezone: "GMT",
+                             timeformat: "unixtime",
+                             forecast_days: [days + 2, MAX_DAYS].min
+                           })
+      answers = body.is_a?(Array) ? body : [body]
+      # Matched up by position, so a list of the wrong length would pin one
+      # city's sky on another.
+      raise Adapters::SourceUnavailable, "asked for #{cities.size} cities, got #{answers.size}" if answers.size != cities.size
+
+      cities.zip(answers).to_h { |city, answer| [city, parse(answer)] }
     end
 
     # Rain and its chance are reported for the hour *before* each timestamp —
@@ -139,23 +163,35 @@ module Booking
       end
     end
 
-    # Fetches the Forecast and keeps it, on the poller's schedule. A failure
-    # keeps the Forecast already there: hours from the last good answer are
-    # a better guess than none.
+    # Fetches the Forecast for every city with an enabled club and keeps it,
+    # on the poller's schedule. A failure keeps the Forecast already there:
+    # hours from the last good answer are a better guess than none.
     class Refresh
-      def initialize(http:, forecast:, days: Config.horizon_days, logger: nil)
+      # `clubs` is asked on every refresh rather than once, so a city's
+      # Forecast comes and goes with its clubs.
+      def initialize(http:, forecast:, clubs:, days: Config.horizon_days, logger: nil)
         @http = http
         @forecast = forecast
+        @clubs = clubs
         @days = days
         @logger = logger || Booking.default_logger
       end
 
       def call(now: Clock.now)
-        hours = Weather.fetch(@http, days: @days)
-        return @logger.call("weather: empty forecast — previous kept") if hours.empty?
+        cities = Club.cities(@clubs.enabled)
+        unknown = cities - CITIES.keys
+        @logger.call("weather: no point for #{unknown.join(", ")} — add it to Weather::CITIES") if unknown.any?
+        cities -= unknown
+        return if cities.empty?
 
-        @forecast.replace(hours, fetched_at: now)
-        @logger.call("weather: #{hours.size} hours, #{hours.count(&:wet?)} wet")
+        Weather.fetch(@http, cities:, days: @days).each do |city, hours|
+          next @logger.call("weather: #{city} empty — previous kept") if hours.empty?
+
+          @forecast.replace(hours, city:, fetched_at: now)
+          @logger.call("weather: #{city} #{hours.size} hours, #{hours.count(&:wet?)} wet")
+        end
+        # Only after an answer: a failed fetch is no reason to forget a city.
+        @forecast.keep_only(cities)
       rescue Adapters::SourceUnavailable, KeyError => e
         @logger.call("weather: failed — #{e.message}")
       end

@@ -22,7 +22,7 @@ module Booking
       VisitorDay = Data.define(:date, :people, :new)
       DAYS_SHOWN = 14
 
-      Forecast = Data.define(:fetched_at, :hours)
+      Forecast = Data.define(:city, :fetched_at, :hours)
 
       # A club and how its last Poll went. `state` is the outcome, unless the
       # poll is old enough that the outcome no longer says anything: then it
@@ -114,13 +114,18 @@ module Booking
         )
       end
 
-      # When the poller last got a Forecast, and how many hours it holds. Old
-      # means Open-Meteo has stopped answering, and every rain mark in the app
-      # is a guess from back then.
-      def forecast
+      # For each City with an enabled club, when the poller last got its
+      # Forecast and how many hours it holds. Old means Open-Meteo has stopped
+      # answering, and every rain mark in the app is a guess from back then;
+      # one city old and the rest fresh means it is not answering for that
+      # point. A city with nothing on file says "never", as a club does.
+      def forecasts
         repo = Repo::Forecast.new(@db)
+        counts = repo.counts
 
-        Forecast.new(fetched_at: repo.fetched_at, hours: @db[:forecast_hours].count)
+        Club.cities(Repo::Clubs.new(@db).enabled).map do |city|
+          Forecast.new(city:, fetched_at: repo.fetched_at(city), hours: counts.fetch(city, 0))
+        end
       end
 
       def logs = LogSearch.new(dir: @log_dir)

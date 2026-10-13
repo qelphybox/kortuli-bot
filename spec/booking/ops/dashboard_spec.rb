@@ -36,6 +36,23 @@ RSpec.describe Booking::Ops::Dashboard do
     end
   end
 
+  describe "#forecasts" do
+    before do
+      repos.clubs.upsert(slug: "kus-tba-padel", name: "Kus Tba Padel", adapter: "kustba")
+      repos.clubs.upsert(slug: "padel-port", name: "Padel Port", adapter: "reservio", settings: { city: "Batumi" })
+      hour = Booking::Weather::Hour.new(starts_at: now, rain_chance: 0, rain_mm: 0.0, code: 1, temperature: 18.0, day: true)
+      repos.forecast.replace([hour], city: "Tbilisi", fetched_at: now - 600)
+    end
+
+    # One city gone quiet while the rest are fresh is Open-Meteo refusing
+    # that point, and it has to be visible as that.
+    it "ages each city's Forecast on its own, and names a city with none yet" do
+      forecasts = dashboard.forecasts.to_h { [_1.city, [_1.fetched_at, _1.hours]] }
+
+      expect(forecasts).to eq("Tbilisi" => [now - 600, 1], "Batumi" => [nil, 0])
+    end
+  end
+
   describe "#storage" do
     it "weighs the database file and the WAL beside it, and counts every table" do
       repos.clubs.upsert(slug: "demo", name: "Demo", adapter: "reservio")

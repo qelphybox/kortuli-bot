@@ -5,6 +5,10 @@
   picked is rendered back, because a refusal that also empties the form
   punishes the person for reading it. The Weekdays and Weekend shortcuts
   only tick boxes, and only exist once JavaScript runs.
+
+  The clubs on offer are the current City's; the switch above them picks
+  another, and starts the form again. A Watch names clubs, not a city, so
+  one in each is two watches.
 %>
 <% refused_days = @refusals.include?(Booking::Messages.pick_at_least_one_day) %>
 <header class="bar">
@@ -14,6 +18,7 @@
   </div>
 </header>
 
+<%= city_form("/watches/new") if city_switch? %>
 <form class="new-watch" method="post" action="/watches">
   <main class="page page--wide-gap">
     <% if @refusals.any? %>
@@ -26,6 +31,7 @@
 
     <fieldset class="group">
       <legend class="field__label">Clubs</legend>
+      <%= erb :_city_switch, locals: { back: "/watches/new", detached: true } %>
       <div class="pick-list">
         <% @clubs.each do |club| %>
           <label class="toggle-chip">

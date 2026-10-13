@@ -58,19 +58,59 @@ RSpec.describe Booking::Weather do
     end
 
     it "asks Open-Meteo for Tbilisi, by the hour, in UTC, past the horizon" do
-      described_class.fetch(http, days: 7)
+      forecast = described_class.fetch(http, cities: ["Tbilisi"], days: 7)
 
       url, params = http.asked
       expect(url).to eq("https://api.open-meteo.com/v1/forecast")
-      expect(params).to include(latitude: 41.7151, longitude: 44.8271, timezone: "GMT", timeformat: "unixtime", forecast_days: 9)
+      expect(params).to include(latitude: "41.7151", longitude: "44.8271", timezone: "GMT", timeformat: "unixtime", forecast_days: 9)
       expect(params[:hourly]).to include("precipitation_probability", "precipitation", "weather_code")
+      expect(forecast.keys).to eq(["Tbilisi"])
     end
 
     it "never asks further out than Open-Meteo answers" do
-      described_class.fetch(http, days: 30)
+      described_class.fetch(http, cities: ["Tbilisi"], days: 30)
 
       expect(http.asked.last[:forecast_days]).to eq(16)
     end
+
+    # Several points go up as one list and come back as one list, in the
+    # order asked; a single point comes back bare, as above.
+    describe "for several cities" do
+      let(:batumi) { answer(times: ["2026-10-12 19:00"], chance: [90]) }
+      let(:http) do
+        Class.new do
+          attr_reader :asked
+
+          def initialize(body) = @body = body
+
+          def get_json(url, params = {})
+            @asked = [url, params]
+            @body
+          end
+        end.new([recorded, batumi])
+      end
+
+      it "asks for every city in one request, and hands each city its own answer" do
+        forecast = described_class.fetch(http, cities: %w[Tbilisi Batumi], days: 7)
+
+        expect(http.asked.last).to include(latitude: "41.7151,41.6408", longitude: "44.8271,41.6306")
+        expect(forecast["Tbilisi"].size).to eq(recorded.dig("hourly", "time").size)
+        expect(forecast["Batumi"].map(&:rain_chance)).to eq([90])
+      end
+
+      # Matched by position, so one answer short would put Batumi's rain on
+      # whichever city came next.
+      it "refuses an answer that does not line up with the cities asked for" do
+        expect { described_class.fetch(http, cities: %w[Tbilisi Batumi Kutaisi], days: 7) }
+          .to raise_error(Booking::Adapters::SourceUnavailable, /asked for 3 cities, got 2/)
+      end
+    end
+  end
+
+  # Each city's point is its centre; the four the clubs are in today.
+  it "knows a point in every city with clubs, all of them in Georgia" do
+    expect(described_class::CITIES.keys).to include("Tbilisi", "Rustavi", "Batumi", "Kutaisi")
+    expect(described_class::CITIES.values).to all(satisfy { |lat, lng| lat.between?(41, 43.6) && lng.between?(40, 46.8) })
   end
 
   describe ".worst" do
@@ -160,36 +200,86 @@ RSpec.describe Booking::Weather do
     let(:said) { [] }
     let(:logger) { ->(line) { said << line } }
     let(:now) { Time.utc(2026, 10, 11, 12) }
+    # Kus Tba says no city, which is Tbilisi.
+    let(:enabled) { [club("kus-tba-padel")] }
+    let(:clubs) { Struct.new(:enabled).new(enabled) }
+
+    def club(slug, city: nil) = Booking::Club.new(slug:, name: slug, adapter: "kustba", settings: city ? { "city" => city } : {})
 
     def http_answering(&block) = Struct.new(:block) { def get_json(*) = block.call }.new(block)
 
+    def refresh(http, now: self.now) = described_class.new(http:, forecast:, clubs:, logger:).call(now:)
+
     it "keeps every hour it was given, and says how many are wet" do
       body = answer(times: ["2026-10-12 19:00", "2026-10-12 20:00"], chance: [80, 0])
-      described_class.new(http: http_answering { body }, forecast:, logger:).call(now:)
+      refresh(http_answering { body })
 
-      expect(forecast.hours.map(&:rain_chance)).to eq([80, 0])
-      expect(forecast.hours.first.starts_at).to eq(Booking::Clock.local_to_utc("2026-10-12 18:00"))
-      expect(forecast.fetched_at).to eq(now)
-      expect(said).to eq(["weather: 2 hours, 1 wet"])
+      expect(forecast.hours("Tbilisi").map(&:rain_chance)).to eq([80, 0])
+      expect(forecast.hours("Tbilisi").first.starts_at).to eq(Booking::Clock.local_to_utc("2026-10-12 18:00"))
+      expect(forecast.fetched_at("Tbilisi")).to eq(now)
+      expect(said).to eq(["weather: Tbilisi 2 hours, 1 wet"])
     end
 
     it "replaces the previous Forecast rather than piling onto it" do
-      described_class.new(http: http_answering { recorded }, forecast:, logger:).call(now:)
+      refresh(http_answering { recorded })
       body = answer(times: ["2026-10-12 19:00"], chance: [10])
-      described_class.new(http: http_answering { body }, forecast:, logger:).call(now: now + 3600)
+      refresh(http_answering { body }, now: now + 3600)
 
-      expect(forecast.hours.size).to eq(1)
+      expect(forecast.hours("Tbilisi").size).to eq(1)
     end
 
     # The last good Forecast is a better guess than none.
     it "keeps the previous Forecast when Open-Meteo cannot be reached" do
-      described_class.new(http: http_answering { recorded }, forecast:, logger:).call(now:)
-      failing = http_answering { raise Booking::Adapters::SourceUnavailable, "timeout" }
-      described_class.new(http: failing, forecast:, logger:).call(now: now + 3600)
+      refresh(http_answering { recorded })
+      refresh(http_answering { raise Booking::Adapters::SourceUnavailable, "timeout" }, now: now + 3600)
 
-      expect(forecast.hours.size).to eq(recorded.dig("hourly", "time").size)
-      expect(forecast.fetched_at).to eq(now)
+      expect(forecast.hours("Tbilisi").size).to eq(recorded.dig("hourly", "time").size)
+      expect(forecast.fetched_at("Tbilisi")).to eq(now)
       expect(said.last).to eq("weather: failed — timeout")
+    end
+
+    describe "with clubs in more than one city" do
+      let(:enabled) { [club("kus-tba-padel"), club("padel-port", city: "Batumi")] }
+      let(:tbilisi) { answer(times: ["2026-10-12 19:00"], chance: [0]) }
+      let(:batumi) { answer(times: ["2026-10-12 19:00"], chance: [90]) }
+
+      it "keeps each city's hours under its own name" do
+        refresh(http_answering { [tbilisi, batumi] })
+
+        expect(forecast.hours("Tbilisi").map(&:rain_chance)).to eq([0])
+        expect(forecast.hours("Batumi").map(&:rain_chance)).to eq([90])
+        expect(said).to eq(["weather: Tbilisi 1 hours, 0 wet", "weather: Batumi 1 hours, 1 wet"])
+      end
+
+      it "keeps a city's last good Forecast when its own answer comes back empty" do
+        refresh(http_answering { [tbilisi, batumi] })
+        refresh(http_answering { [tbilisi, answer(times: [], chance: [])] }, now: now + 3600)
+
+        expect(forecast.hours("Batumi").map(&:rain_chance)).to eq([90])
+        expect(forecast.fetched_at("Batumi")).to eq(now)
+        expect(forecast.fetched_at("Tbilisi")).to eq(now + 3600)
+        expect(said.last).to eq("weather: Batumi empty — previous kept")
+      end
+
+      # Nobody is shown Batumi any more, so nothing should be left to age.
+      it "forgets a city once none of its clubs is enabled" do
+        refresh(http_answering { [tbilisi, batumi] })
+        enabled.pop
+        refresh(http_answering { tbilisi }, now: now + 3600)
+
+        expect(forecast.hours("Batumi")).to be_empty
+        expect(forecast.hours("Tbilisi")).not_to be_empty
+      end
+    end
+
+    # A club added in a city nobody has given a point yet: the rest still get
+    # their weather, and the log says what is missing.
+    it "fetches the cities it knows, and names the one it does not" do
+      enabled << club("gori-padel", city: "Gori")
+      refresh(http_answering { recorded })
+
+      expect(forecast.hours("Tbilisi")).not_to be_empty
+      expect(said.first).to eq("weather: no point for Gori — add it to Weather::CITIES")
     end
   end
 end
