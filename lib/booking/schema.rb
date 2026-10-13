@@ -1,7 +1,7 @@
 module Booking
   # Idempotent schema. Small enough that `create_table?` beats a migration
-  # directory, with one guarded `alter_table` below for the column that arrived
-  # after there was live data. The day there are three of those, this becomes a
+  # directory, with two guarded changes at the bottom for what arrived after
+  # there was live data. The day there are three of those, this becomes a
   # migration directory.
   module Schema
     def self.apply(db)
@@ -86,6 +86,17 @@ module Booking
         unique %i[user_id club_slug]
       end
 
+      # What one person picked once and wants remembered: for now, the City
+      # whose clubs they are shown. A row per person, for the reason
+      # `favourites` gives — there is no user record to put it on. No row
+      # means nothing picked yet, which reads as the default city.
+      db.create_table?(:preferences) do
+        Bignum :user_id, null: false
+        String :city, null: false
+        DateTime :updated_at, null: false
+        primary_key %i[user_id]
+      end
+
       # The last Poll of each club and how it went, overwritten every tick.
       # State rather than history: the log keeps the history.
       db.create_table?(:polls) do
@@ -95,17 +106,7 @@ module Booking
         String :summary, null: false
       end
 
-      # The latest Forecast, an hour per row, replaced whole on every refresh.
-      # Like the Slots, a snapshot rather than history.
-      db.create_table?(:forecast_hours) do
-        DateTime :starts_at, primary_key: true
-        Integer :rain_chance
-        Float :rain_mm
-        Integer :code
-        Float :temperature
-        TrueClass :day
-        DateTime :fetched_at, null: false
-      end
+      create_forecast_hours(db, :forecast_hours) unless db.table_exists?(:forecast_hours)
 
       # Who opened the mini app, one row per person per local date. A person is
       # a Telegram id and nothing else, as in `favourites`; what they looked at
@@ -122,6 +123,44 @@ module Booking
       # time the Dated watch arrived there were watches in the file. Guarded so
       # it is as re-runnable as everything above it.
       db.alter_table(:watches) { add_column :date, Date } unless db[:watches].columns.include?(:date)
+
+      forecast_by_city(db) unless db[:forecast_hours].columns.include?(:city)
     end
+
+    # The latest Forecast for each City, an hour per row, each city's hours
+    # replaced whole on every refresh. Like the Slots, a snapshot rather than
+    # history. The city leads the key because one instant now has as many
+    # rows as there are cities.
+    def self.create_forecast_hours(db, name)
+      db.create_table(name) do
+        String :city, null: false
+        DateTime :starts_at, null: false
+        Integer :rain_chance
+        Float :rain_mm
+        Integer :code
+        Float :temperature
+        TrueClass :day
+        DateTime :fetched_at, null: false
+        primary_key %i[city starts_at]
+      end
+    end
+
+    # The Forecast used to be Tbilisi's alone, keyed by the hour. SQLite cannot
+    # change a primary key in place, so the table is rebuilt beside the old
+    # one and the old rows carried across as Tbilisi's — they are the last
+    # good Forecast, and the app should not go without weather between the
+    # deploy and the poller's next refresh. In one transaction, so a crash
+    # halfway leaves the old table rather than neither.
+    def self.forecast_by_city(db)
+      columns = %i[starts_at rain_chance rain_mm code temperature day fetched_at]
+
+      db.transaction do
+        create_forecast_hours(db, :forecast_hours_by_city)
+        db[:forecast_hours_by_city].import([:city, *columns], db[:forecast_hours].select(Sequel.as(DEFAULT_CITY, :city), *columns))
+        db.drop_table(:forecast_hours)
+        db.rename_table(:forecast_hours_by_city, :forecast_hours)
+      end
+    end
+    private_class_method :create_forecast_hours, :forecast_by_city
   end
 end

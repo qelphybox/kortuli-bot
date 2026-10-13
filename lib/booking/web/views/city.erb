@@ -1,0 +1,9 @@
+<%#
+  The City picker as a page of its own. Two ways here: the pill, on a page
+  without JavaScript — closing goes back to the screen it was tapped on —
+  and the home screen of somebody who has never picked a city while there
+  is more than one, who is asked once, before any week is drawn.
+%>
+<main class="city-page">
+  <%= erb :_city_picker, locals: { back: @back, mode: @first_run ? :first_run : :page } %>
+</main>

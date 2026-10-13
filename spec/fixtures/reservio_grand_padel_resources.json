@@ -1,0 +1,206 @@
+{
+  "meta": {
+    "total": 6
+  },
+  "links": {
+    "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources?page[limit]=50&page[offset]=0",
+    "first": null,
+    "prev": null,
+    "next": null,
+    "last": null
+  },
+  "data": [
+    {
+      "type": "resource",
+      "id": "242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891",
+      "attributes": {
+        "name": "Court A - 65 Gel",
+        "description": "",
+        "hasOpeningHours": true
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891/services",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891/picture",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3",
+      "attributes": {
+        "name": "Court A- 50 Gel",
+        "description": "",
+        "hasOpeningHours": true
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3/services",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3/picture",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335",
+      "attributes": {
+        "name": "Court B-80 Gel",
+        "description": "",
+        "hasOpeningHours": true
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/cd72f9a6-f3ba-4099-a8a3-5aa579197335/services",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/cd72f9a6-f3ba-4099-a8a3-5aa579197335/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/cd72f9a6-f3ba-4099-a8a3-5aa579197335/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/cd72f9a6-f3ba-4099-a8a3-5aa579197335/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/cd72f9a6-f3ba-4099-a8a3-5aa579197335/picture",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/cd72f9a6-f3ba-4099-a8a3-5aa579197335/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "78060f65-7b46-4caf-a15d-f8a9b150f126",
+      "attributes": {
+        "name": "Court B- 50 Gel",
+        "description": "",
+        "hasOpeningHours": true
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/78060f65-7b46-4caf-a15d-f8a9b150f126/services",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/78060f65-7b46-4caf-a15d-f8a9b150f126/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/78060f65-7b46-4caf-a15d-f8a9b150f126/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/78060f65-7b46-4caf-a15d-f8a9b150f126/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/78060f65-7b46-4caf-a15d-f8a9b150f126/picture",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/78060f65-7b46-4caf-a15d-f8a9b150f126/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/78060f65-7b46-4caf-a15d-f8a9b150f126"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "61acffdf-fd07-4a7f-9596-a5721267c1b6",
+      "attributes": {
+        "name": "Court B- 65 Gel",
+        "description": "",
+        "hasOpeningHours": true
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/61acffdf-fd07-4a7f-9596-a5721267c1b6/services",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/61acffdf-fd07-4a7f-9596-a5721267c1b6/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/61acffdf-fd07-4a7f-9596-a5721267c1b6/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/61acffdf-fd07-4a7f-9596-a5721267c1b6/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/61acffdf-fd07-4a7f-9596-a5721267c1b6/picture",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/61acffdf-fd07-4a7f-9596-a5721267c1b6/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/61acffdf-fd07-4a7f-9596-a5721267c1b6"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "687ce25c-523a-462a-bb39-9446689b78a1",
+      "attributes": {
+        "name": "Court A- 80 Gel",
+        "description": "",
+        "hasOpeningHours": true
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/687ce25c-523a-462a-bb39-9446689b78a1/services",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/687ce25c-523a-462a-bb39-9446689b78a1/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/687ce25c-523a-462a-bb39-9446689b78a1/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/687ce25c-523a-462a-bb39-9446689b78a1/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/687ce25c-523a-462a-bb39-9446689b78a1/picture",
+            "related": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/687ce25c-523a-462a-bb39-9446689b78a1/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/resources/687ce25c-523a-462a-bb39-9446689b78a1"
+      }
+    }
+  ]
+}

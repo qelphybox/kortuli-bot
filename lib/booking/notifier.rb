@@ -1,13 +1,16 @@
 module Booking
   # Turns candidates into messages, exactly once each.
   class Notifier
-    # `forecast` is the Forecast repository, read once per batch so every
-    # message in it says the same thing about the same hour. Optional: without
-    # one, messages simply carry no weather.
-    def initialize(notifications:, transport:, clubs: {}, forecast: nil, logger: nil)
+    # `forecast` is the Forecast repository, read once per city per batch so
+    # every message in it says the same thing about the same hour. Optional:
+    # without one, messages simply carry no weather. `cities` names each
+    # club's City by slug, because a freed slot in Batumi is rained on by
+    # Batumi's sky; a club it does not name is in the default one.
+    def initialize(notifications:, transport:, clubs: {}, cities: {}, forecast: nil, logger: nil)
       @notifications = notifications
       @transport = transport
       @clubs = clubs
+      @cities = cities
       @forecast = forecast
       @logger = logger
     end
@@ -16,16 +19,16 @@ module Booking
     def deliver(candidates)
       return 0 if candidates.empty?
 
-      weather = forecast_by_hour
-      candidates.count { send_once(_1, weather) }
+      weather = Hash.new { |by_city, city| by_city[city] = forecast_by_hour(city) }
+      candidates.count { send_once(_1, weather[city(_1.slot.club_slug)]) }
     end
 
     private
 
     # The weather is a courtesy; the message is the job. A Forecast that
     # cannot be read sends the message without it rather than not at all.
-    def forecast_by_hour
-      @forecast ? Weather.by_hour(@forecast.hours) : {}
+    def forecast_by_hour(city)
+      @forecast ? Weather.by_hour(@forecast.hours(city)) : {}
     rescue StandardError => e
       @logger&.call("notify: forecast unreadable — #{e.class}: #{e.message}")
       {}
@@ -59,5 +62,7 @@ module Booking
     end
 
     def club_name(slug) = @clubs.fetch(slug, slug)
+
+    def city(slug) = @cities.fetch(slug, DEFAULT_CITY)
   end
 end

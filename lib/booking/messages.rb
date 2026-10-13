@@ -106,12 +106,12 @@ module Booking
 
     def clock(minute_of_day) = format("%02d:%02d", minute_of_day / 60, minute_of_day % 60)
 
-    def days_phrase(weekdays)
+    def days_phrase(weekdays, sep: ", ")
       days = weekdays.to_a.sort
       return "every day" if days.size == 7
 
       # Rotate so the list reads Monday-first, as a European calendar would.
-      days.sort_by { (_1 + 6) % 7 }.map { DAY_NAMES[_1] }.join(", ")
+      days.sort_by { (_1 + 6) % 7 }.map { DAY_NAMES[_1] }.join(sep)
     end
 
     # The bot's whole vocabulary now: it says this, and then only speaks again
@@ -122,7 +122,7 @@ module Booking
       <<~TEXT.strip
         🎾 <b>kortuli</b>
 
-        Free padel courts across Tbilisi, day by day — every club's open hours in one place, with the weather beside them.
+        Free padel courts across Georgia, day by day — every club's open hours in one place, with the weather beside them.
 
         Pick a day, book it on the club's own page, then send the day's courts or the game you booked to your group in one tap.
 
@@ -201,9 +201,11 @@ module Booking
 
     def feedback_pill_slots = "Times look wrong? Tell us"
 
+    def feedback_pill_city = "Your city isn't here? Tell us"
+
     # The Share screen's own copy. Kept here for the same reason as the rest:
     # the screen and its specs read one string.
-    def share_send = "Send to a chat"
+    def share_send = "Send to chat"
 
     def share_copy = "Copy text"
 
@@ -211,15 +213,32 @@ module Booking
 
     def share_nothing = "Nothing free here — pick a wider span or more clubs."
 
-    def share_all_clubs = "All"
+    # The Share screen's two switches: which clubs, which hours.
+    def share_all_clubs = "All clubs"
 
-    def share_favourites = "Favourites"
+    def share_favourites = "★ Favs"
 
     def share_pick_clubs = "Pick"
+
+    def share_all_day = "All day"
+
+    # Under the hours switch: any span at all, from the two pickers.
+    def share_other_hours = "Other hours"
 
     # Asked for Favourites before starring any. Points at where the stars are
     # rather than apologising: every club is shown in the meantime.
     def share_no_favourites = "No favourites yet — star clubs on the day's list. Showing every club for now."
+
+    # Over the week: how long ago the City's newest good Poll finished, so a
+    # quiet morning reads as quiet rather than as a poller that has stopped.
+    def updated_ago(seconds)
+      minutes = seconds.to_i / 60
+      if minutes < 1 then "Updated just now"
+      elsif minutes < 60 then "Updated #{minutes} min ago"
+      elsif minutes < 1440 then "Updated #{minutes / 60} h ago"
+      else "Updated #{minutes / 1440} d ago"
+      end
+    end
 
     # A screen reader hears the star as the action it takes, not as a glyph.
     def favourite_add = "Add to favourites"

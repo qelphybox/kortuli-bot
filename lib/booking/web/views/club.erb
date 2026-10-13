@@ -5,6 +5,11 @@
   the date screens, which read the booking system instead; the dock leads
   back to them, and out to the club's own booking page.
 
+  Covers are the point of a Profile, so each court's tile names its Cover,
+  and a court under a roof is drawn dark, as a roofed club's initials are in
+  the directory. The drawing over the Google Maps link is only a drawing:
+  the place is wherever the link lands.
+
   The star in the corner makes the club a Favourite, as the one beside its
   name on a date's list does, and turns over here.
 %>
@@ -22,12 +27,12 @@
         <input type="hidden" name="back" value="profile">
         <% if @date %><input type="hidden" name="date" value="<%= @date %>"><% end %>
         <button class="fav__star<%= " is-on" if favourite %>" aria-pressed="<%= favourite %>"
-                aria-label="<%= favourite ? Booking::Messages.favourite_remove : Booking::Messages.favourite_add %>"><%= star(size: 18) %></button>
+                aria-label="<%= favourite ? Booking::Messages.favourite_remove : Booking::Messages.favourite_add %>"><%= star(size: 20) %></button>
       </form>
     </div>
     <h1 class="profile-hero__name"><%= h(@club.name) %></h1>
     <% if @profile&.area %>
-      <div class="profile-hero__area"><%= icon(:pin, size: 16) %><%= h(@profile.area) %></div>
+      <div class="profile-hero__area"><%= icon(:pin, size: 14) %><%= h(@profile.area) %></div>
     <% end %>
     <% if courts || price || daily %>
       <div class="profile-hero__stats">
@@ -44,7 +49,7 @@
     <% end %>
   </section>
 
-  <div class="page page--roomy">
+  <div class="page page--roomy profile">
     <% if @profile.nil? %>
       <p class="note"><%= Booking::Messages.profile_missing %></p>
     <% else %>
@@ -53,7 +58,7 @@
           <h2 class="field__label">Courts · <%= Booking::Messages.cover_summary(@profile.covers) %></h2>
           <ul class="courts">
             <% @profile.courts.each do |court| %>
-              <li class="court">
+              <li class="court<%= " is-roofed" unless court.cover == "outdoor" %>">
                 <%= court_tile %>
                 <span class="court__name"><%= h(court.name) %></span>
                 <span class="cover cover--<%= h(court.cover) %>"><%= Booking::Messages.cover_label(court.cover) %></span>
@@ -63,16 +68,25 @@
         </section>
       <% end %>
 
-      <% if @profile.located? || @profile.address %>
+      <% if @profile.located? %>
+        <%# The area is the name a person knows the place by; the street, when
+            the listing has one that says more, goes under it. %>
+        <% place = @profile.area || @profile.address %>
+        <a class="place" data-external href="<%= h(@profile.maps_url) %>" target="_blank" rel="noopener">
+          <%= place_art %>
+          <span class="place__row">
+            <span class="place__words">
+              <span class="place__name"><%= h([place, "Open in Google Maps"].compact.join(" · ")) %></span>
+              <% if @profile.address && @profile.address != place %>
+                <span class="place__address"><%= h(@profile.address) %></span>
+              <% end %>
+            </span>
+            <span class="place__go"><%= icon(:external, size: 16) %></span>
+          </span>
+        </a>
+      <% elsif @profile.address %>
         <section class="info-card">
-          <% if @profile.located? %>
-            <a class="info-row info-row--link" data-external href="<%= h(@profile.maps_url) %>" target="_blank" rel="noopener">
-              <span><%= h([@profile.address, "Open in Google Maps"].compact.join(" · ")) %></span>
-              <span class="info-row__value is-link"><%= icon(:external, size: 16) %></span>
-            </a>
-          <% else %>
-            <div class="info-row"><span class="info-row__what">Where</span><span class="info-row__value"><%= h(@profile.address) %></span></div>
-          <% end %>
+          <div class="info-row"><span class="info-row__what">Where</span><span class="info-row__value"><%= h(@profile.address) %></span></div>
         </section>
       <% end %>
 
@@ -99,12 +113,12 @@
         </section>
       <% end %>
 
-      <p class="disclaimer">
-        <%= h(Booking::Messages.profile_source(@profile.checked_on)) %>
-        <% if @profile.source %>
-          <a data-external href="<%= h(@profile.source) %>" target="_blank" rel="noopener">Their page ↗</a>
-        <% end %>
-      </p>
+      <%# The directory's name is the link to the club's own page on it. %>
+      <% said = h(Booking::Messages.profile_source(@profile.checked_on)) %>
+      <% if @profile.source %>
+        <% said = said.sub("sapadelo.com", %(<a data-external href="#{h(@profile.source)}" target="_blank" rel="noopener">sapadelo.com</a>)) %>
+      <% end %>
+      <p class="disclaimer"><%= said %></p>
     <% end %>
   </div>
 </main>

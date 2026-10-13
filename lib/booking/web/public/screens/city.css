@@ -1,0 +1,245 @@
+/* city screens — see app.css for the tokens and shared parts.
+
+   The City pill in a header, and the picker it opens: a sheet over the
+   screen with JavaScript, a page of its own without, and the first screen
+   of somebody who has never picked. */
+
+/* --- The pill ----------------------------------------------------------- */
+/* Dark in both themes, like the hero: the one thing in the header that
+   decides everything under it. */
+.city-pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 14px 0 8px;
+  border-radius: 999px;
+  background: var(--slab);
+  color: var(--on-slab);
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+a.city-pill { padding-right: 12px; }
+a.city-pill:active { transform: scale(0.97); }
+.city-pill--count,
+a.city-pill--count { padding: 0 14px; }
+.city-pill__pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ball);
+  color: var(--on-ball);
+}
+.city-pill__chev { color: var(--ball); }
+.city-pill__chev svg { transform: rotate(90deg); stroke-width: 2.6; }
+.bar__row > .city-pill { margin-left: auto; }
+
+/* --- The sheet ---------------------------------------------------------- */
+/* A modal <dialog> pinned to the bottom edge. The picker inside fills it,
+   so a tap that lands on the dialog itself is a tap on the backdrop. */
+.city-sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100% - 16px);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 28px 28px 0 0;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 -12px 40px rgba(13, 22, 17, 0.25);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.city-sheet::backdrop { background: rgba(13, 22, 17, 0.55); }
+.city-sheet[open] { animation: city-sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes city-sheet-up { from { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  .city-sheet[open] { animation: none; }
+}
+
+/* --- The page ------------------------------------------------------------ */
+/* The picker on its own: the card's white to the edges, and everything
+   drawn from the bottom up, where a thumb is. */
+.city-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+}
+
+/* --- The picker ---------------------------------------------------------- */
+.city-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 10px 16px max(28px, env(safe-area-inset-bottom));
+}
+.city-picker--page,
+.city-picker--first-run {
+  flex: 1;
+  justify-content: flex-end;
+  padding-top: 40px;
+}
+.city-picker__handle {
+  align-self: center;
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+.city-picker__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.city-picker__brand { margin-bottom: 18px; }
+.city-picker__title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 32px;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+.city-picker--page .city-picker__title,
+.city-picker--first-run .city-picker__title { font-size: 52px; }
+.city-picker__sub { margin-top: 6px; font-size: 14px; color: var(--muted); }
+.city-picker__close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ground);
+  color: var(--ink);
+}
+.city-picker__go { min-height: 56px; }
+/* Without script nothing can rename the button as the tick moves, so it
+   names no city rather than the wrong one. */
+html:not(.js) .city-picker__in { display: none; }
+
+/* "Use my location": hidden until the script finds a way to ask. */
+.city-locate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 14px;
+  border-radius: 16px;
+  border: 1.5px dashed var(--ball-edge);
+  background: var(--ball-tint);
+  background: color-mix(in srgb, var(--ball-tint) 50%, var(--card));
+  color: var(--ink);
+  text-align: left;
+}
+.city-locate[hidden] { display: none; }
+.city-locate:active { transform: scale(0.99); }
+.city-locate__icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--slab);
+  color: var(--ball);
+}
+.city-locate[aria-busy="true"] .city-locate__icon { animation: city-locate-seek 1s ease-in-out infinite alternate; }
+@keyframes city-locate-seek { to { opacity: 0.45; } }
+.city-locate__text { flex: 1; display: flex; flex-direction: column; }
+.city-locate__text strong { font-size: 15px; }
+.city-locate__text span { font-size: 13px; color: var(--muted); }
+
+/* --- The cards ----------------------------------------------------------- */
+/* Each a radio, hidden, followed by the face it ticks: a sibling rather
+   than a parent, so the ticked one is styled without :has(). */
+.city-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.city-card { position: relative; display: block; cursor: pointer; }
+.city-card__face {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 140px;
+  padding: 12px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+}
+.city-card__art {
+  position: absolute;
+  right: -14px;
+  bottom: -10px;
+  color: var(--ink);
+  opacity: 0.08;
+}
+.city-card__top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 24px;
+}
+.city-card__native {
+  font-family: "Noto Sans Georgian", var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.city-card__tick {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--ball);
+  color: var(--on-ball);
+}
+.city-card__region { position: relative; font-size: 12px; font-weight: 600; color: var(--muted); }
+.city-card__name {
+  position: relative;
+  margin-top: auto;
+  font-family: var(--display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 34px;
+  line-height: 0.95;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.city-card__meta { position: relative; font-size: 13px; font-weight: 600; color: var(--muted); }
+
+.city-card input:checked + .city-card__face {
+  border: 2px solid var(--select);
+  background: var(--slab);
+  color: var(--on-slab);
+}
+.city-card input:checked + .city-card__face .city-card__art { color: var(--ball); opacity: 0.35; }
+.city-card input:checked + .city-card__face .city-card__tick { display: flex; }
+.city-card input:checked + .city-card__face :is(.city-card__native, .city-card__region, .city-card__meta) { color: var(--on-slab-muted); }
+.city-card input:focus-visible + .city-card__face { outline: 2px solid var(--blue); outline-offset: 2px; }
+.city-card:active .city-card__face { transform: scale(0.98); }

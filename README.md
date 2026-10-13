@@ -1,7 +1,8 @@
 # Padel slot watcher
 
-A Telegram bot that watches Tbilisi padel clubs for cancellations and messages you
-when a court in your window frees up.
+A Telegram bot that watches padel clubs across Georgia — Tbilisi, Batumi,
+Rustavi and Kutaisi — for cancellations and messages you when a court in your
+window frees up.
 
 Evening slots go a day or two ahead and only come back when somebody cancels.
 There is no single place that shows the whole grid, so the only way to catch a
@@ -92,10 +93,18 @@ Adding another Reservio club — this prints the ids to paste into
 [config/clubs.yml](config/clubs.yml):
 
 ```bash
-bundle exec rake "discover:reservio[padel-club2]"
+bundle exec rake "discover:reservio[padel-port-batumi2]"
 ```
 
 ## Using it
+
+The app looks at one **City** at a time — the one you last picked, Tbilisi
+until you pick another. Chips at the top of the home screen, the clubs
+directory and the new-watch form switch it, and the choice is kept per person,
+so every screen follows it. Your Watches are listed whatever their City, and a
+club's own pages open from any of them.
+[ADR-0003](docs/adr/0003-city-is-a-club-attribute.md) says why a City lives on
+the Club and nowhere else.
 
 The **mini app** shows the week: one row per club, one column per hour, one
 page per date. The home screen is the dates — today big, with its free slots
@@ -154,8 +163,7 @@ number and the booking page. The same screen is one tap away as **Info** on a
 club's hours for a date, and the day's list of clubs names the covers beside
 each one, which is the first thing anybody asks when it rains. Profiles come
 from the clubs' own listings on sapadelo.com and say so; they are for reading,
-and the Grid still draws from declared Opening hours. Padel Club 2 is not
-listed there and has none.
+and the Grid still draws from declared Opening hours.
 
 The **Forecast** rides along with all of it, because rain is what decides
 between an open court and a roofed one. A date's list of clubs opens with one
@@ -169,10 +177,10 @@ opens with its line. A message about a freed slot carries the same mark for
 its hour — the wettest one it touches, so a ninety-minute game is not
 promised a dry finish. It comes from
 [Open-Meteo](https://open-meteo.com): free, no key, hourly and sixteen days
-out. The poller fetches it every hour (`WEATHER_INTERVAL`) as a job of its
-own, so a club timing out never holds it up, and a failed fetch keeps the
+out, one point per City in a single request. The poller fetches it every hour
+(`WEATHER_INTERVAL`) as a job of its own, so a club timing out never holds it up, and a failed fetch keeps the
 last good one. Where there is no Forecast — before the first fetch — nothing
-is drawn rather than a guess. Its age is on `/admin`.
+is drawn rather than a guess. Each City's age is on `/admin`.
 
 **Watches** — the middle tab — is everything you have asked to be
 told about, with pause, resume and delete. A standing watch names the weekdays
@@ -294,10 +302,10 @@ bundle exec kamal app exec 'bundle exec rake poll'
 The log is the health check. Every tick prints one line per club:
 
 ```
-poll padel-club-2: 388 free, +2 freed, -1 taken, 1 sent
-poll padel-club-2: failed — timeout
-poll padel-club-2: suspect response (empty_response) — snapshot kept
-poll padel-club-2: 388 free, +0 freed, -0 taken, 0 sent (held back 2026-08-03 — arrived as a whole day)
+poll padelbade-krtsanisi: 388 free, +2 freed, -1 taken, 1 sent
+poll padelbade-krtsanisi: failed — timeout
+poll padelbade-krtsanisi: suspect response (empty_response) — snapshot kept
+poll padelbade-krtsanisi: 388 free, +0 freed, -0 taken, 0 sent (held back 2026-08-03 — arrived as a whole day)
 ```
 
 If that line stops appearing, or `free` sits at zero for hours, the adapter has
@@ -373,23 +381,28 @@ own widget offers — and everything out there reads free, because nobody can
 reserve it yet. Those slots would never transition, so both adapters clamp the
 range to a `max_days` from settings rather than trusting `HORIZON_DAYS`.
 
-**Timezones.** Everything is UTC inside. Local time (Asia/Tbilisi) exists at
+**Timezones.** Everything is UTC inside. Local time (Asia/Tbilisi, which is the
+whole of Georgia's clock, Batumi included) exists at
 exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 ## Known limits
 
 This is an MVP, deliberately:
 
-- **Seven sources, ten clubs.** Padel Club 2 (Reservio), Kus Tba Padel
-  (`turtle-booking`), GymBreeze (three locations), Padelbade (Book & Go, two),
-  PadelHub (Supabase), Padel Academy (its own API, behind a member login) and
-  Lemans Padel (its own API, open)
-  — a venue with several locations is several clubs, because they sit in
-  different parts of town. `tbilisipadel.com` runs BookingPress, which needs its
-  own adapter; the reconnaissance is done and lives in `docs/research/`, and
-  the remaining Tbilisi clubs are planned in `docs/coverage-plan.md`.
-  Everything above the adapter is club-agnostic, so that is a new file in
+- **Nine sources, twenty clubs, four Cities.** Kus Tba (`turtle-booking`),
+  GymBreeze (three locations), Book & Go (Padelbade's three and Love Padel),
+  PadelHub (Supabase), Padel Academy (its own API, behind a member login),
+  Lemans, BookingPress (Tbilisi Padel's three), Padel Gldani (tRPC), Reservio
+  (Batumi's three), Higgs and AIA Padel (their own APIs) — a venue with several
+  locations is several clubs, because they sit in different parts of town.
+  What is left in Georgia, and why, is in `docs/coverage-plan.md`. Everything
+  above the adapter is club-agnostic, so a new system is a new file in
   [lib/booking/adapters/](lib/booking/adapters/) and a line in `REGISTRY`.
+- **robots.txt does not keep a club out; a login or a challenge does.**
+  Reservio's API host and Padel Gldani's site disallow the paths we read, and
+  we read them anyway, once every few minutes, as a visitor's browser would.
+  [ADR-0004](docs/adr/0004-robots-txt-is-not-a-refusal-a-login-is.md) draws
+  the line and says what happens the day a club asks us to stop.
 - **Kus Tba and GymBreeze are watched by the hour, not by the court.** Both
   report whether *some* court is free that hour, so a notification says "a
   court" rather than "Court 3", and a cancellation raises an event only when it
@@ -413,9 +426,9 @@ This is an MVP, deliberately:
 - **`poll_interval_seconds` per club is stored but not used.** One global
   interval drives a sequential pass over all clubs — deliberate, so a handful of
   clubs on shared hosting never get hit in parallel.
-- **One Forecast for the whole city.** A single point in the centre of
-  Tbilisi; the clubs sit within the model's own resolution of it, so asking
-  per club would buy ten copies of one answer. The chance of rain decides
+- **One Forecast per City.** A single point in the centre of each; a City's
+  clubs sit within the model's own resolution of it, so asking per club would
+  buy a dozen copies of one answer. The chance of rain decides
   what is wet, and millimetres only where the chance is missing — a single
   model run drizzles a tenth of a millimetre into hours the ensemble gives
   one chance in ten.

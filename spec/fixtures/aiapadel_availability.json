@@ -1,0 +1,924 @@
+{
+ "courts": [
+  {
+   "id": "c0000000-0000-4000-8000-000000000001",
+   "name": "Court 1",
+   "hasRoof": false,
+   "durations": [
+    {
+     "durationMinutes": 60,
+     "label": "1 hour",
+     "price": 6000
+    },
+    {
+     "durationMinutes": 90,
+     "label": "1.5 hours",
+     "price": 9000
+    },
+    {
+     "durationMinutes": 120,
+     "label": "2 hours",
+     "price": 12000
+    }
+   ],
+   "isActive": true,
+   "imageUrl": "https://aia-padel-assets.fra1.cdn.digitaloceanspaces.com/courts/court-1.jpg"
+  },
+  {
+   "id": "c0000000-0000-4000-8000-000000000002",
+   "name": "Court 2",
+   "hasRoof": false,
+   "durations": [
+    {
+     "durationMinutes": 60,
+     "label": "1 hour",
+     "price": 6000
+    },
+    {
+     "durationMinutes": 90,
+     "label": "1.5 hours",
+     "price": 9000
+    },
+    {
+     "durationMinutes": 120,
+     "label": "2 hours",
+     "price": 12000
+    }
+   ],
+   "isActive": true,
+   "imageUrl": "https://aia-padel-assets.fra1.cdn.digitaloceanspaces.com/courts/court-2.jpg"
+  },
+  {
+   "id": "c0000000-0000-4000-8000-000000000003",
+   "name": "Court 3",
+   "hasRoof": true,
+   "durations": [
+    {
+     "durationMinutes": 60,
+     "label": "1 hour",
+     "price": 6000
+    },
+    {
+     "durationMinutes": 90,
+     "label": "1.5 hours",
+     "price": 9000
+    },
+    {
+     "durationMinutes": 120,
+     "label": "2 hours",
+     "price": 12000
+    }
+   ],
+   "isActive": true,
+   "imageUrl": "https://aia-padel-assets.fra1.cdn.digitaloceanspaces.com/courts/court-3.jpg"
+  },
+  {
+   "id": "c0000000-0000-4000-8000-000000000004",
+   "name": "Court 4",
+   "hasRoof": true,
+   "durations": [
+    {
+     "durationMinutes": 60,
+     "label": "1 hour",
+     "price": 6000
+    },
+    {
+     "durationMinutes": 90,
+     "label": "1.5 hours",
+     "price": 9000
+    },
+    {
+     "durationMinutes": 120,
+     "label": "2 hours",
+     "price": 12000
+    }
+   ],
+   "isActive": false,
+   "imageUrl": "https://aia-padel-assets.fra1.cdn.digitaloceanspaces.com/courts/court-4.jpg"
+  }
+ ],
+ "days": [
+  {
+   "date": "2026-10-13",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-14",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-15",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-16",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-17",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-18",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-19",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-20",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-21",
+   "isAvailable": true
+  },
+  {
+   "date": "2026-10-22",
+   "isAvailable": true
+  }
+ ],
+ "slots": {
+  "c0000000-0000-4000-8000-000000000001": {
+   "2026-10-13": {
+    "date": "2026-10-13",
+    "slots": [
+     {
+      "startTime": "09:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "09:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "10:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "10:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "11:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "11:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "12:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "12:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "13:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "13:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "14:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "14:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "15:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "15:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "16:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "16:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "17:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "17:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "18:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "18:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "19:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "19:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "20:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "20:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "21:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "21:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "22:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "22:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "23:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "23:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "00:00",
+      "isAvailable": true
+     }
+    ]
+   },
+   "2026-10-14": {
+    "date": "2026-10-14",
+    "slots": [
+     {
+      "startTime": "09:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "09:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "10:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "10:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "11:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "11:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "12:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "12:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "13:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "13:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "14:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "14:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "15:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "15:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "16:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "16:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "17:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "17:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "18:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "18:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "19:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "19:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "20:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "20:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "21:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "21:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "22:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "22:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "23:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "23:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "00:00",
+      "isAvailable": true
+     }
+    ]
+   }
+  },
+  "c0000000-0000-4000-8000-000000000002": {
+   "2026-10-13": {
+    "date": "2026-10-13",
+    "slots": [
+     {
+      "startTime": "09:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "09:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "10:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "10:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "11:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "11:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "12:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "12:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "13:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "13:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "14:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "14:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "15:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "15:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "16:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "16:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "17:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "17:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "18:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "18:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "19:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "19:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "20:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "20:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "21:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "21:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "22:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "22:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "23:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "23:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "00:00",
+      "isAvailable": true
+     }
+    ]
+   },
+   "2026-10-14": {
+    "date": "2026-10-14",
+    "slots": [
+     {
+      "startTime": "09:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "09:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "10:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "10:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "11:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "11:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "12:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "12:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "13:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "13:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "14:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "14:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "15:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "15:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "16:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "16:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "17:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "17:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "18:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "18:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "19:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "19:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "20:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "20:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "21:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "21:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "22:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "22:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "23:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "23:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "00:00",
+      "isAvailable": true
+     }
+    ]
+   }
+  },
+  "c0000000-0000-4000-8000-000000000003": {
+   "2026-10-13": {
+    "date": "2026-10-13",
+    "slots": [
+     {
+      "startTime": "09:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "09:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "10:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "10:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "11:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "11:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "12:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "12:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "13:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "13:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "14:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "14:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "15:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "15:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "16:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "16:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "17:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "17:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "18:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "18:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "19:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "19:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "20:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "20:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "21:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "21:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "22:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "22:30",
+      "isAvailable": false
+     },
+     {
+      "startTime": "23:00",
+      "isAvailable": false
+     },
+     {
+      "startTime": "23:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "00:00",
+      "isAvailable": true
+     }
+    ]
+   },
+   "2026-10-14": {
+    "date": "2026-10-14",
+    "slots": [
+     {
+      "startTime": "09:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "09:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "10:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "10:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "11:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "11:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "12:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "12:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "13:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "13:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "14:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "14:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "15:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "15:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "16:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "16:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "17:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "17:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "18:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "18:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "19:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "19:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "20:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "20:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "21:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "21:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "22:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "22:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "23:00",
+      "isAvailable": true
+     },
+     {
+      "startTime": "23:30",
+      "isAvailable": true
+     },
+     {
+      "startTime": "00:00",
+      "isAvailable": true
+     }
+    ]
+   }
+  }
+ }
+}

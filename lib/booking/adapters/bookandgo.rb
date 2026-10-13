@@ -15,6 +15,9 @@ module Booking
     # date; the alternative is a cache shared between adapter instances, which
     # is a lot of machinery to save one request every four minutes.
     #
+    # Another operator is another tenant on the same API, so a club outside
+    # Padelbade names its own `base_url` — Love Padel in Kutaisi is apps/126.
+    #
     # Courts are named, with stable integer ids, so this is a court-level club.
     #
     # The source offers each court-hour once per bookable duration — 60, 90 and
@@ -73,9 +76,17 @@ module Booking
         raise SourceUnavailable, "#{url}: no data.bookings in #{payload.inspect[0, 200]}" unless variants.is_a?(Array)
 
         variants.select do |variant|
-          variant.dig("location", "id").to_s == @location_id.to_s && variant["duration"] == DURATION_MINUTES
+          variant.dig("location", "id").to_s == @location_id.to_s &&
+            variant["duration"] == DURATION_MINUTES &&
+            padel?(variant)
         end
       end
+
+      # A location can rent more than padel. Love Padel's lists two pickleball
+      # courts as variants of their own under the same location id and the same
+      # durations, told apart only by `sport` — without this they would count
+      # as two more padel courts, free nearly all day.
+      def padel?(variant) = variant.dig("sport", "sport_name").to_s.casecmp?("padel")
 
       def variant_slots(variant, now)
         variant.dig("location", "courts").to_a.flat_map do |court|

@@ -59,14 +59,25 @@ RSpec.describe Booking::Notifier do
     end
 
     it "says whether it will rain on the hour that freed up" do
-      forecast.replace([forecast_hour("2026-08-01 19:00", chance: 80), forecast_hour("2026-08-01 20:00", chance: 0)])
+      forecast.replace([forecast_hour("2026-08-01 19:00", chance: 80), forecast_hour("2026-08-01 20:00", chance: 0)], city: "Tbilisi")
+      notifier.deliver([candidate])
+
+      expect(transport.sent.first[:text].lines.map(&:chomp)).to include("🌧 Rain 80% · 14°")
+    end
+
+    # A dry evening in Tbilisi says nothing about the court in Batumi.
+    it "reads the sky over the city the club is in" do
+      forecast.replace([forecast_hour("2026-08-01 19:00", chance: 0)], city: "Tbilisi")
+      forecast.replace([forecast_hour("2026-08-01 19:00", chance: 80)], city: "Batumi")
+      notifier = described_class.new(notifications:, transport:, clubs: { "reservio-demo" => "Demo Club" },
+                                     cities: { "reservio-demo" => "Batumi" }, forecast:)
       notifier.deliver([candidate])
 
       expect(transport.sent.first[:text].lines.map(&:chomp)).to include("🌧 Rain 80% · 14°")
     end
 
     it "sends the message without weather where the Forecast does not reach" do
-      forecast.replace([forecast_hour("2026-08-05 19:00", chance: 80)])
+      forecast.replace([forecast_hour("2026-08-05 19:00", chance: 80)], city: "Tbilisi")
       notifier.deliver([candidate])
 
       expect(transport.sent.first[:text]).not_to include("°")
@@ -74,7 +85,7 @@ RSpec.describe Booking::Notifier do
 
     # The weather is a courtesy; the message is the job.
     it "still sends when the Forecast cannot be read" do
-      broken = Object.new.tap { |o| def o.hours = raise(Sequel::DatabaseError, "locked") }
+      broken = Object.new.tap { |o| def o.hours(_city) = raise(Sequel::DatabaseError, "locked") }
       notifier = described_class.new(notifications:, transport:, forecast: broken, logger: said.method(:<<))
 
       expect(notifier.deliver([candidate])).to eq(1)

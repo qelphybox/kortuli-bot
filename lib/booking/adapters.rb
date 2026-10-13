@@ -15,7 +15,11 @@ module Booking
       "bookandgo" => "Bookandgo",
       "padelhub" => "Padelhub",
       "padelacademy" => "Padelacademy",
-      "lemans" => "Lemans"
+      "lemans" => "Lemans",
+      "bookingpress" => "Bookingpress",
+      "aiapadel" => "Aiapadel",
+      "higgs" => "Higgs",
+      "padelgldani" => "Padelgldani"
     }.freeze
 
     def self.build(club, http:)
@@ -33,3 +37,7 @@ require_relative "adapters/bookandgo"
 require_relative "adapters/padelhub"
 require_relative "adapters/padelacademy"
 require_relative "adapters/lemans"
+require_relative "adapters/bookingpress"
+require_relative "adapters/aiapadel"
+require_relative "adapters/higgs"
+require_relative "adapters/padelgldani"

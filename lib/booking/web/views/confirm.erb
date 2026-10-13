@@ -14,8 +14,8 @@
         <span class="state-pill">Watching</span>
         <span class="watch__time"><%= Booking::Messages.time_range(@watch) %></span>
       </div>
-      <div class="watch__clubs"><%= watch_clubs(@watch) %></div>
-      <div class="watch__when"><%= watch_days(@watch) %></div>
+      <div class="watch__clubs"><%= h(watch_clubs(@watch)) %></div>
+      <div class="watch__when"><%= watch_days(@watch, sep: " · ") %></div>
     </div>
   </div>
   <div class="done__actions">

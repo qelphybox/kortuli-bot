@@ -7,14 +7,23 @@
   headline says what went wrong if anything did.
 
   The script is inline rather than in app.js so the exchange costs no extra
-  round trip before anyone is signed in.
+  round trip before anyone is signed in. The line it falls back to names
+  the cities that really have clubs, so it is drawn here and handed over
+  in an attribute rather than written into the script.
+%>
+<%
+  places = case cities.size
+           when 0 then "across Georgia"
+           when 1 then "in #{cities.first}"
+           else "in #{cities[0..-2].join(", ")} and #{cities.last}"
+           end
 %>
 <main class="splash">
   <%= court(:splash, "splash__court") %>
   <span class="brand"><%= ball(size: 34, outline: false) %><span class="brand__word">KORTULI</span></span>
   <div class="splash__copy">
     <h1 class="splash__title">Find a<br><span>free court.</span><br>Play tonight.</h1>
-    <p class="splash__lede" id="status">Opening…</p>
+    <p class="splash__lede" id="status" data-elsewhere="Kortuli lives inside Telegram. Open it from the bot to see free padel courts <%= h(places) %>.">Opening…</p>
     <noscript><p class="splash__lede">This app needs JavaScript to tell Telegram who you are.</p></noscript>
   </div>
   <div class="splash__foot">
@@ -28,7 +37,7 @@
     var status = document.getElementById("status");
     var payload = window.Telegram && Telegram.WebApp && Telegram.WebApp.initData;
     if (!payload) {
-      status.textContent = "Kortuli lives inside Telegram. Open it from the bot to see free padel courts across Tbilisi.";
+      status.textContent = status.getAttribute("data-elsewhere");
       return;
     }
 

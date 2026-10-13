@@ -327,7 +327,7 @@ For `service_id: 6` (Didi Digomi, `max_capacity: 4`), `remaining_capacity` came
 back as `4` or `3` — the number of **free courts** in that hour. For the
 capacity-1 services it is always `1`. [verified]
 
-This is the same shape as Padel Club 2's `courts: 4` in `config/clubs.yml`, so
+This is the same shape as a court-level club's `courts:` in `config/clubs.yml`, so
 Didi Digomi can be a court-level club and the rest hour-level.
 
 ---

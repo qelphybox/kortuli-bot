@@ -50,7 +50,7 @@ module Booking
       def narrow(table) = only ? table.with(rows: table.rows.select { only.include?(_1.club_slug) }) : table
 
       # What a link back to this screen has to carry for the filter to survive
-      # it — the "Whole day" link resets the hours, not the clubs.
+      # it — the "All day" link resets the hours, not the clubs.
       def to_params
         case mode
         when "favourites" then { only: mode }

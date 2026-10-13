@@ -2,8 +2,10 @@
   Everything this person has asked to be told about. Standing and Dated
   are one thing downstream, so they list together — the difference on
   screen is that a Standing watch lights the weekdays it comes back on,
-  and a Dated one names its one day instead, and says so. The form that
-  creates a new one lives at its own URL; the button below points at it.
+  and a Dated one names its one day instead, and says so. Every watch is
+  listed whatever City is picked, so each card names the City its clubs
+  are in. The form that creates a new one lives at its own URL; the button
+  below points at it.
 %>
 <% letters = %w[M T W T F S S] %>
 <header class="topbar">
@@ -20,17 +22,19 @@
   <% else %>
     <ul class="watches">
       <% @watches.each do |watch| %>
+        <% places = watch_cities(watch) %>
         <li class="watch<%= " is-paused" unless watch.active? %>">
           <div class="watch__top">
             <span class="watch__badges">
               <span class="state-pill"><%= watch.active? ? "Watching" : "Paused" %></span>
               <% if watch.dated? %><span class="state-pill state-pill--soft">Dated</span><% end %>
+              <% if places.any? %><span class="watch__city"><%= icon(:pin, size: 12) %><%= h(places.join(", ")) %></span><% end %>
             </span>
             <span class="watch__time"><%= Booking::Messages.time_range(watch) %></span>
           </div>
-          <div class="watch__clubs"><%= watch_clubs(watch) %></div>
+          <div class="watch__clubs"><%= h(watch_clubs(watch)) %></div>
           <% if watch.dated? %>
-            <div class="watch__when"><%= watch_days(watch) %></div>
+            <div class="watch__when"><%= icon(:calendar, size: 16) %><%= watch_days(watch) %> only</div>
           <% else %>
             <div class="letters" role="img" aria-label="Standing: <%= watch_days(watch) %>">
               <% Booking::Web::MONDAY_FIRST.each_with_index do |day, i| %>

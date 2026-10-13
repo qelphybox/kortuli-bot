@@ -1,28 +1,35 @@
-# Covering Tbilisi
+# Covering Georgia
 
-What it takes to watch every Tbilisi padel club we can legitimately read, and
-what a *new city* would cost after that.
+What it takes to watch every Georgian padel club we can legitimately read.
 
-Written 2026-07-31 from the three recon notes in `docs/research/`. Every claim
-about an endpoint traces to one of them; nothing here is taken from a
-directory listing.
+Started 2026-07-31 as a Tbilisi plan from the recon notes in `docs/research/`;
+widened to the whole country on 2026-10-13, after a sweep of every directory
+(`docs/research/georgia-regional-and-samgori.md`) and a live probe of each
+booking system. Every claim about an endpoint traces to a note or to a live
+response; nothing here is taken from a directory listing alone.
 
 ## Where we are
 
-Ten clubs, 44 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
-GymBreeze Ninoshvili, GymBreeze Radio City, GymBreeze Sport Palace,
-Padelbade Krtsanisi and Padelbade Dighomi (since #10), PadelHub, Padel
-Academy and Lemans Padel.
+Twenty clubs, 67 courts, four Cities:
 
-The two adapters still open below take that to **fourteen clubs and 54
-courts** without touching a single club that has asked not to be read.
+- **Tbilisi** — Kus Tba, GymBreeze Ninoshvili, Radio City and Sport Palace,
+  Padelbade Krtsanisi and Dighomi, PadelHub, Padel Academy, Lemans Padel,
+  Tbilisi Padel Didi Dighomi, Mtatsminda and Ilia's Garden, Padel Gldani.
+- **Batumi** — Padel Port, Padel Port New Park, Grand Padel Batumi.
+- **Rustavi** — Padelbade Rustavi, Higgs.
+- **Kutaisi** — Love Padel, AIA Padel.
+
+Every club in Georgia with an online booking page that answers an anonymous
+visitor is in. What is left out is below, with the reason.
 
 ## Decisions this plan assumes
 
-Taken 2026-07-31:
-
-- **Tbilisi first, to completion.** `City` does not become a domain term in
-  this round. Batumi waits, even though it is technically ready.
+- **Tbilisi first, to completion** (2026-07-31) — done, and then superseded
+  on 2026-10-13: City is a domain term ([ADR-0003](adr/0003-city-is-a-club-attribute.md)),
+  and the plan covers the country.
+- **`robots.txt` alone does not exclude a club; a login or a challenge does**
+  ([ADR-0004](adr/0004-robots-txt-is-not-a-refusal-a-login-is.md)). Decided
+  2026-10-13, when the old rule would have emptied Batumi.
 - **The Grid stays the first screen**, with a filter above it rather than a
   club-picker in front of it.
 - **A club with no online booking is not shown at all.** Being in the app means
@@ -30,41 +37,58 @@ Taken 2026-07-31:
 
 ## The inventory
 
-Court counts from sapadelo.ge, which disagrees with every other directory and
-is the only one sourced from the clubs themselves. Neither it nor the market
-survey is complete — sapadelo omits Padel Club 2, which we already watch.
+Court counts from sapadelo.com, which disagrees with every other directory and
+is the only one sourced from the clubs themselves, corrected where a club's own
+system says otherwise. padelspot.ge and mypadelway.com were checked and are
+not to be trusted: three of padelspot's claims and one of mypadelway's failed
+verification.
 
-| Club | Courts | System | State |
-|---|---|---|---|
-| GymBreeze Ninoshvili | 8 | gymbreeze | watched |
-| Kus Tba | 8 | kustba | watched |
-| Padel Club 2 | 4 | reservio | watched |
-| GymBreeze Radio City | 3 | gymbreeze | watched |
-| Padelbade Krtsanisi | 5 | Book & Go | watched |
-| Padelbade Dighomi | 2 | Book & Go | watched |
-| Tbilisi Padel Didi Dighomi | 5 | BookingPress | **wave 2** |
-| Tbilisi Padel Mtatsminda | 1 | BookingPress | **wave 2** |
-| Tbilisi Padel Ilia's Garden | 1 | BookingPress | **wave 2** |
-| Lemans Padel | 4 | own | watched |
-| Padel Gldani | 3 | own (tRPC) | **wave 3** |
-| PadelHub | 3 | own (Supabase) | watched |
-| Sportscape Samgori | 4 | unknown | not researched |
-| Padel Academy | 3 | own (Laravel), member login | watched |
-| Padel Island Lisi / Expo | 4 | TPC MatchPoint | **excluded, see below** |
-| Padelio | ? | own | broken upstream |
-| GPadel Tskneti | 2 | — | dead domain |
-| Vera Park | 1 | — | not open |
-| GymBreeze Sport Palace | 4 | gymbreeze | watched |
+**Padel Club 2 is not a club.** `padel-club2.reservio.com` is GymBreeze
+Ninoshvili's own Reservio page — the same courts under a second name. It was
+watched as a club of its own until 2026-10-13 and dropped then; do not add it
+back when a directory or `discover:reservio` turns it up again.
+
+| City | Club | Courts | System | State |
+|---|---|---|---|---|
+| Tbilisi | GymBreeze Ninoshvili | 8 | gymbreeze | watched |
+| Tbilisi | Kus Tba | 8 | kustba (WordPress, turtle-booking) | watched |
+| Tbilisi | GymBreeze Sport Palace | 4 | gymbreeze | watched |
+| Tbilisi | GymBreeze Radio City | 3 | gymbreeze | watched |
+| Tbilisi | Padelbade Krtsanisi | 5 | Book & Go, tenant 58 | watched |
+| Tbilisi | Padelbade Dighomi | 2 | Book & Go, tenant 58 | watched |
+| Tbilisi | Tbilisi Padel Didi Dighomi | 4 + one 1v1 | BookingPress | watched (the 1v1 court is not) |
+| Tbilisi | Tbilisi Padel Mtatsminda | 1 | BookingPress | watched |
+| Tbilisi | Tbilisi Padel Ilia's Garden | 1 | BookingPress | watched |
+| Tbilisi | Lemans Padel | 4 | own (PHP) | watched |
+| Tbilisi | Padel Gldani | 3 | own (tRPC, Manus) | watched |
+| Tbilisi | PadelHub | 3 | own (Supabase) | watched |
+| Tbilisi | Padel Academy | 3 | own (Laravel), member login | watched |
+| Tbilisi | Sportscape Samgori | 4 | — | no online booking found |
+| Tbilisi | Padel Island Lisi / Expo | 4 | TPC MatchPoint | **excluded, see below** |
+| Tbilisi | Vera Park | 1 | — | not open |
+| Batumi | Padel Port | 4 | Reservio | watched |
+| Batumi | Padel Port New Park | 2 | Reservio (same business) | watched |
+| Batumi | Grand Padel Batumi | 2 | Reservio | watched |
+| Batumi | Dunlop Batumi | 1 | — | WhatsApp only |
+| Rustavi | Padelbade Rustavi | 2 | Book & Go, tenant 58 | watched |
+| Rustavi | Higgs | 3 | own (ASP.NET); also on GAMO | watched |
+| Rustavi | PadelHipp | 3 | — | Instagram only (opened 2026-09-24) |
+| Kutaisi | Love Padel | 2 | Book & Go, tenant 126 | watched |
+| Kutaisi | AIA Padel | 3 active of 4 | own (Next.js) | watched |
+| Gudauri, Kachreti | Padel Island (hotels) | ? | TPC MatchPoint | **excluded, see below** |
+| Borjomi | Borjomi Park Padel | 3 | — | not open |
+| Tskneti | GPadel | 2 | — | dead domain |
+| — | Padelio | ? | own | broken upstream |
 
 ## Excluded on purpose
 
-**Padel Island (4 courts, two Tbilisi locations).** `booking.padelisland.ge`
-runs TPC MatchPoint, not Padel Mates as the survey claimed. Its `robots.txt`
-disallows `/Booking/` and `/Services/`, and the site is behind a login and a
-Turnstile challenge. Reading it means deliberately working around a refusal the
-operator wrote down. We do not do that for four courts. If those courts matter,
-the move is to ask the club for access — MatchPoint serves partners on the same
-backend.
+**Padel Island (four Georgian venues: Lisi and Expo in Tbilisi, Gudauri,
+Kachreti).** `booking.padelisland.ge` runs TPC MatchPoint, and all four venues
+book through its one grid. The grid sits behind a login and a Turnstile
+challenge. Its `robots.txt` also disallows `/Booking/` and `/Services/`, which
+on its own would not keep it out (ADR-0004); the login and the challenge do.
+If those courts matter, the move is to ask the club for access — MatchPoint
+serves partners on the same backend.
 
 **Padel Mates** — the real platform, cracked and unauthenticated, but a nearby
 search centred on Tbilisi returns 309 clubs and none in Georgia. Dead end.
@@ -124,20 +148,27 @@ Independent within a wave; ordered by courts-per-unit-of-work.
 
 ### Wave 2 — needs F1
 
-- **BookingPress** → all three Tbilisi Padel locations, **7 courts**.
+- ~~**BookingPress** → all three Tbilisi Padel locations, **7 courts**.~~
+  **Done, 2026-10-13**, as six: Didi Dighomi's fifth court is a 1v1 court sold
+  as its own service, and is not watched. The site moved to `tbilisipadel.ge`;
+  Didi Dighomi now sells 00:00 and 01:00 under the date before. Nonces are
+  scraped once and shared by the three clubs, re-scraped on a 403/400.
   `POST /wp-json/bookingpress-app/v1/form-v3/month-details` returns a whole
   month per request — cheaper per slot than anything we run today. Free slots
   only. Service ids 1 / 4 / 6, and Didi Dighomi's `remaining_capacity` makes it
-  a **court-level club** like Padel Club 2. Auth is a triple scraped from the
+  a **court-level club** like Padelbade. Auth is a triple scraped from the
   page per tick (`X-WP-Nonce`, `bp_v3_nonce`, and a matched
   `instanceId`/`instanceToken` pair) — no login. Expect to retry once on a
   stale nonce.
 
 ### Wave 3 — needs F1 + F2
 
-- **Padel Gldani** → **3 courts**. Open tRPC, `bookings.getBookedSlots`,
+- ~~**Padel Gldani** → **3 courts**.~~ **Done, 2026-10-13.** Its `robots.txt`
+  gained `Disallow: /api/` on 2026-09-30 (a Manus default, by the look of it);
+  read under ADR-0004. Open tRPC, `bookings.getBookedSlots`,
   batched so three courts arrive in one request. Returns booked intervals →
-  invert. Has a real `?court=<id>` deeplink, the only club here that does.
+  invert. A business day is now D's bookings from 08:00 plus D+1's before
+  08:00, as the site's own client builds it, so each day reads two dates. Has a real `?court=<id>` deeplink, the only club here that does.
 - ~~**PadelHub** → **3 courts**~~ **Done.** A third court opened 2026-10-05. Supabase RPC
   `POST /rest/v1/rpc/get_booking_availability` with the publishable anon key
   from the bundle. Returns booked hours per court → invert. The `bookings`
@@ -147,7 +178,9 @@ Independent within a wave; ordered by courts-per-unit-of-work.
 
 ### Wave 4 — the Grid at twelve clubs
 
-Twelve rows of eighteen hours does not fit a phone. The decision is: keep the
+Still open. The City switch took Batumi, Rustavi and Kutaisi off Tbilisi's
+screen, but Tbilisi alone is thirteen clubs now. Twelve rows of eighteen hours
+does not fit a phone. The decision is: keep the
 Grid as the first screen, put a filter above it. That needs a district on each
 club — `settings.district` is enough, no schema change — and it is the one
 piece of work here that is product design rather than plumbing. Worth its own
@@ -170,44 +203,42 @@ through one config entry.
 
 ## What a new city costs
 
-Nothing in the code knows what a city is. `Club` has slug, name, adapter,
-settings, interval, enabled (`lib/booking/club.rb`) — no location at all. So a
-city is not an adapter problem, it is a domain and UI one:
+**Done, 2026-10-13**, for Batumi, Rustavi and Kutaisi. City is a Club's
+attribute (`settings.city`), never stored on a Watch; each City has its own
+Forecast point; a person looks at one City at a time and the switch appears
+once there are two. [ADR-0003](adr/0003-city-is-a-club-attribute.md) has the
+reasoning. Georgia keeps one clock, so nothing about time changed.
 
-1. **`City` becomes a term in `CONTEXT.md`**, and probably an ADR: does a Watch
-   belong to a city, or only to the clubs a person picked? Today a Watch names
-   clubs, which may mean a city is purely a filter and never a stored thing.
-   That question is the whole design.
-2. **A field on `Club`** — settings is enough to start.
-3. **The Grid filter from Wave 4** grows a city level above district.
-4. Then the clubs themselves, which are mostly cheap:
-   - **Batumi**: Padel Port (4) + Padel Port New Park (2) are one Reservio
-     business, `1e32bd0a-0d5c-4e30-9788-ea488e713c4d`, verified live. But its
-     six courts are six *services*, where Padel Club 2 has one service and four
-     resources — and `Reservio` takes a single `service_id`
-     (`lib/booking/adapters/reservio.rb:18`). **Batumi needs `service_ids` as a
-     list**, and that same change is what splits one business into the two
-     Clubs the domain says it should be. Grand Padel (2) and Dunlop (1) are
-     unresearched.
-   - **Rustavi**: Padelbade Rustavi (2) is already in the Wave 1 API response —
-     one config line. Higgs (3) appears to be reachable through GAMO's open
-     `/en/book/availability?product_id=&date=` marketplace API, which turned out
-     to have exactly one padel venue and it is this one.
-   - **Kutaisi**: Love Padel is phone and Instagram only. Under the "not shown
-     at all" rule, Kutaisi has nothing in it.
+A further City costs a line in `Weather::CITIES` (a spec fails without it),
+`city:` on its clubs, and the clubs themselves. What the first three took:
 
-So the first city after Tbilisi is a domain decision plus one adapter change,
-and it buys Batumi and Rustavi together.
+- **Batumi** — `Reservio` learned `service_ids` as a list, one request per
+  service (the API takes one id per request), which is also what splits Padel
+  Port's one business into its two sites. Grand Padel sells each court as three
+  price bands, each its own service and resource; `court_aliases` folds them
+  back into two courts.
+- **Rustavi** — Padelbade Rustavi was one config entry on the Book & Go tenant
+  already read. Higgs has its own open API and its own adapter; GAMO is not
+  needed.
+- **Kutaisi** — Love Padel is not phone-only after all: `book.lovepadel.ge` is a
+  second Book & Go tenant (126), read by the same adapter pointed elsewhere,
+  which now drops the pickleball courts that share its location. AIA Padel has
+  its own app, read before sign-in.
 
 ## Known gaps in the research
 
-- **Sportscape Samgori (4 courts)** was never researched — the survey had no
-  booking URL for it and it was left out of the recon brief. It is the largest
-  unexamined club in Tbilisi.
+- **Sportscape Samgori (4 courts)** has no booking link, site or phone anywhere
+  public, only an Instagram handle; Instagram needs a login, so it was not
+  looked at. Re-check when it shows up on sapadelo with a link.
+- **Higgs** reads almost entirely free — three booked hours on one court on the
+  day it was checked. Either the club takes most bookings off this system, or
+  it is new. Watch the first week's logs before trusting its notifications.
+- **AIA Padel** read every future hour free on the day it was built, so no
+  taken-to-free transition has been seen live yet.
 - **Padel Academy (3 courts)** is watched since 2026-10-10 through a member
   account the owner holds (`PADEL_ACADEMY_EMAIL`/`_PASSWORD`). If the club
   closes that account, the club goes dark and the log says so.
 - **Nonce lifetime** for BookingPress is inferred from WordPress defaults, not
   measured. Re-scraping per tick makes it moot.
-- No per-club deeplink exists for Book & Go or BookingPress. Both fall back to
+- No per-club deeplink exists for Book & Go, BookingPress or Reservio. Both fall back to
   a static `booking_url`, exactly as `Gymbreeze` already does.

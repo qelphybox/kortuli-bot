@@ -1,0 +1,35 @@
+<%#
+  The City pill in a screen's header. With one city there is nothing to
+  pick, so it is only a label. With more, it is a link to the picker's own
+  page, which is all a page without JavaScript needs. With JavaScript the
+  same picker is already here, in a <dialog>, and the tap opens it as a
+  sheet over the screen: drawn with the page rather than fetched on the tap,
+  so it opens at once and a slow network costs nothing but the page itself.
+  Its counts are one Grid per city for today, which the dates build anyway
+  for their own.
+
+  `back` is where a pick lands. `count`, when a screen passes it, is how
+  many clubs that screen lists, and the pill says "Tbilisi · 10" instead of
+  wearing the pin — the directory's form of it.
+
+  It lives in a header, which sits outside every form on these screens, so
+  the picker can be a form of its own. The new-watch form picks its City
+  inside itself instead, and does not draw this.
+%>
+<% count ||= nil %>
+<% label = count ? "#{current_city} · #{count}" : current_city %>
+<% if city_switch? %>
+  <a class="city-pill<%= " city-pill--count" if count %>" href="/city?back=<%= ERB::Util.url_encode(back) %>" aria-haspopup="dialog" aria-label="City: <%= h(current_city) %><%= ", #{count_label(count, "club")}" if count %>. Change city" data-city-sheet>
+    <% unless count %><span class="city-pill__pin"><%= icon(:pin, size: 15) %></span><% end %>
+    <span><%= h(label) %></span>
+    <span class="city-pill__chev"><%= icon(:chevron, size: 14) %></span>
+  </a>
+  <dialog class="city-sheet" id="city-sheet" aria-labelledby="city-title">
+    <%= erb :_city_picker, locals: { back:, mode: :sheet } %>
+  </dialog>
+<% else %>
+  <span class="city-pill<%= " city-pill--count" if count %>">
+    <% unless count %><span class="city-pill__pin"><%= icon(:pin, size: 15) %></span><% end %>
+    <span><%= h(label) %></span>
+  </span>
+<% end %>

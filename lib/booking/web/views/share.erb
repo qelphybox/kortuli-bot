@@ -1,12 +1,20 @@
 <%#
-  One date's free courts as one message. The switch narrows it to some of the
-  clubs, the two pickers to a span of hours — one GET form, so both live in
-  the URL, a refresh keeps them, and changing one never drops the other.
+  One date's free courts as one message. Two switches in the bar: which
+  clubs (every one, the Favourites, or a handful ticked by hand) and which
+  hours (the whole day, or the evening in a tap). Any other span is under
+  "Other hours", from the same two pickers as ever. One GET form — the bar's
+  switch and the controls under it are joined to it by `form=` — so it all
+  lives in the URL, a refresh keeps it, and changing one never drops the
+  other. The hours switch is two links, because a span is two values and a
+  radio carries one; each keeps the clubs.
 
   The preview draws the Rundown the way the chat will read it, from the same
   Sheet the message is written from; the words that leave, exactly, sit
   beside it for the copy button, and the share sheet sends the same.
 %>
+<% share_path = "/date/#{@date}/share" %>
+<% evening = @span.evening %>
+<% other_hours = !@span.whole_day? && !@span.evening? %>
 <header class="bar">
   <div class="bar__row">
     <a class="icon-btn" href="/date/<%= @date %>" aria-label="Back to clubs"><%= icon(:back) %></a>
@@ -15,37 +23,49 @@
       <h1 class="bar__h1"><%= @weekday %> · <%= @date_label %></h1>
     </div>
   </div>
-</header>
 
-<main class="page page--roomy">
-  <form class="section" method="get" action="/date/<%= @date %>/share" data-autosubmit>
+  <form class="share-switches" id="share" method="get" action="<%= share_path %>" data-autosubmit>
     <fieldset class="seg" aria-label="Clubs">
-      <% [["all", "All clubs"], ["favourites", "★ Favs"], ["picked", "Pick"]].each do |mode, label| %>
+      <% [["all", Booking::Messages.share_all_clubs], ["favourites", Booking::Messages.share_favourites],
+          ["picked", Booking::Messages.share_pick_clubs]].each do |mode, label| %>
         <label><input type="radio" name="only" value="<%= mode %>"<%= " checked" if @filter.mode == mode %>><span><%= label %></span></label>
       <% end %>
     </fieldset>
-
-    <% if @filter.picked? %>
-      <fieldset class="pick-list" aria-label="Which clubs">
-        <% @clubs.each do |club| %>
-          <label class="toggle-chip">
-            <input type="checkbox" name="clubs[]" value="<%= club.slug %>"<%= " checked" if @filter.includes?(club.slug) %>>
-            <span><%= "★ " if favourite?(club.slug) %><%= club.name %></span>
-          </label>
-        <% end %>
-      </fieldset>
-    <% end %>
-
-    <% if @filter.no_favourites? %>
-      <p class="note"><%= Booking::Messages.share_no_favourites %></p>
-    <% end %>
-
     <% if @span.hours.any? %>
+      <div class="seg" role="group" aria-label="Hours">
+        <a href="<%= share_path %><%= h(share_query(@filter)) %>"<%= ' aria-current="true"' if @span.whole_day? %>><%= Booking::Messages.share_all_day %></a>
+        <% if evening %>
+          <a href="<%= share_path %><%= h(share_query(@filter, evening)) %>"<%= ' aria-current="true"' if @span.evening? %>><%= evening.short_label %></a>
+        <% end %>
+      </div>
+    <% end %>
+  </form>
+</header>
+
+<main class="page share-page">
+  <% if @filter.picked? %>
+    <fieldset class="pick-list" aria-label="Which clubs">
+      <% @clubs.each do |club| %>
+        <label class="toggle-chip">
+          <input type="checkbox" form="share" name="clubs[]" value="<%= club.slug %>"<%= " checked" if @filter.includes?(club.slug) %>>
+          <span><%= "★ " if favourite?(club.slug) %><%= club.name %></span>
+        </label>
+      <% end %>
+    </fieldset>
+  <% end %>
+
+  <% if @filter.no_favourites? %>
+    <p class="note"><%= Booking::Messages.share_no_favourites %></p>
+  <% end %>
+
+  <% if @span.hours.any? %>
+    <details class="share-hours"<%= " open" if other_hours %>>
+      <summary><%= Booking::Messages.share_other_hours %><%= icon(:chevron, size: 16) %></summary>
       <div class="field-row">
         <label class="field">
           <span class="field__label">From</span>
           <span class="select select--small">
-            <select name="from">
+            <select form="share" name="from">
               <% @span.from_choices.each do |hour| %>
                 <option value="<%= hour %>"<%= " selected" if hour == @span.from %>><%= @span.label(hour) %></option>
               <% end %>
@@ -55,7 +75,7 @@
         <label class="field">
           <span class="field__label">To</span>
           <span class="select select--small">
-            <select name="to">
+            <select form="share" name="to">
               <% @span.to_choices.each do |hour| %>
                 <option value="<%= hour %>"<%= " selected" if hour == @span.to %>><%= @span.label(hour) %></option>
               <% end %>
@@ -63,12 +83,9 @@
           </span>
         </label>
       </div>
-      <button class="btn btn--quiet apply no-js-only" type="submit">Show</button>
-    <% end %>
-    <% unless @span.whole_day? %>
-      <a class="chip" href="/date/<%= @date %>/share<%= h(share_query(@filter)) %>">Whole day</a>
-    <% end %>
-  </form>
+    </details>
+  <% end %>
+  <button class="btn btn--quiet apply no-js-only" type="submit" form="share">Show</button>
 
   <section class="section" aria-label="Message preview">
     <div class="field__label">Message preview · <%= @sheet.entries.size %> <%= @sheet.entries.size == 1 ? "club" : "clubs" %></div>
@@ -90,12 +107,12 @@
                 <% if entry.price %><span class="bubble__price"><%= h(entry.price) %></span><% end %>
               </div>
               <div class="bubble__runs"><%= entry.runs.map { "#{Booking::Messages.local_clock(_1.starts_at)}–#{Booking::Messages.local_clock(_1.ends_at)}" }.join(" · ") %></div>
-              <% if entry.link %><span class="bubble__link"><%= h(entry.link.sub(%r{\Ahttps?://(www\.)?}, "").chomp("/")) %></span><% end %>
+              <% if entry.link %><span class="bubble__link"><%= h(bare_url(entry.link)) %></span><% end %>
             </li>
           <% end %>
         </ul>
         <div class="bubble__foot">
-          <% if @sheet.booked.any? %>Fully booked: <%= h(@sheet.booked.join(", ")) %><br><% end %>via <%= h(bot_url) %>
+          <% if @sheet.booked.any? %>Fully booked: <%= h(@sheet.booked.join(", ")) %><br><% end %>via <%= h(bare_url(bot_url)) %>
         </div>
       <% end %>
     </div>

@@ -1,0 +1,1157 @@
+{
+  "6dcc4d1f-c73b-4a35-ad3a-3ede2cb321a6": {
+    "meta": {
+      "total": 10
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/availability/booking-slots?page[limit]=200&filter[from]=2026-10-15&filter[to]=2026-10-15&filter[serviceId]=6dcc4d1f-c73b-4a35-ad3a-3ede2cb321a6",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "e204ab2f-c930-5386-b474-8020d422cfb7",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T10:00:00+04:00",
+          "end": "2026-10-15T10:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "08389b3e-6bf9-5305-9a29-40afcd1cd739",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T11:00:00+04:00",
+          "end": "2026-10-15T11:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "6df4a1a7-0f41-5b24-ade4-6d436628bc72",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T13:00:00+04:00",
+          "end": "2026-10-15T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ff41638b-8c94-5ae8-8054-f4fa70d2a898",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T14:00:00+04:00",
+          "end": "2026-10-15T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "603fd07e-eacf-539b-848c-323a19fe6ccf",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T15:00:00+04:00",
+          "end": "2026-10-15T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "e4f9bda3-590e-592c-b1ef-408dfaf6ef68",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T16:00:00+04:00",
+          "end": "2026-10-15T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ce607fce-1815-5913-b82d-5da2c93af1aa",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T17:00:00+04:00",
+          "end": "2026-10-15T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "a8d8346c-d559-51bf-af28-2297e4e3f8d1",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T23:00:00+04:00",
+          "end": "2026-10-15T23:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "3542fb13-2167-576c-ba23-6d488bb0f8dd",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T00:00:00+04:00",
+          "end": "2026-10-15T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "58232123-be1c-513e-bc4b-295fb9d43789",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:41+04:00",
+          "start": "2026-10-15T01:00:00+04:00",
+          "end": "2026-10-15T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "c36479d3-8201-4d80-9822-e9c08014468b": {
+    "meta": {
+      "total": 9
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/availability/booking-slots?page[limit]=200&filter[from]=2026-10-15&filter[to]=2026-10-15&filter[serviceId]=c36479d3-8201-4d80-9822-e9c08014468b",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "69f6e35d-e361-5874-af9a-d58610a1a3b9",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T12:00:00+04:00",
+          "end": "2026-10-15T12:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "7fe67065-f6ec-547d-b2bd-5ba637c17693",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T13:00:00+04:00",
+          "end": "2026-10-15T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "cb3ac579-99dd-51a4-917c-7c54f25c9b1d",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T14:00:00+04:00",
+          "end": "2026-10-15T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "0e20a863-4d1c-5f7e-ad2c-3804ba353347",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T15:00:00+04:00",
+          "end": "2026-10-15T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "1b716cfd-f21b-5ab3-ae22-752015d49509",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T16:00:00+04:00",
+          "end": "2026-10-15T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "37df1eaf-be06-5717-bfa7-280c2b7b2488",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T17:00:00+04:00",
+          "end": "2026-10-15T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "8a7ae798-0f69-5397-ae04-2e6c8b52c339",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T23:00:00+04:00",
+          "end": "2026-10-15T23:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "e52951f7-b941-5aa7-85ee-ea864da48cd5",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T00:00:00+04:00",
+          "end": "2026-10-15T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "4566395f-8bba-57f8-8cd0-d02730e68beb",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T01:00:00+04:00",
+          "end": "2026-10-15T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "303f3adf-8a99-4c1f-89fe-f9a9b56a620b": {
+    "meta": {
+      "total": 10
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/availability/booking-slots?page[limit]=200&filter[from]=2026-10-15&filter[to]=2026-10-15&filter[serviceId]=303f3adf-8a99-4c1f-89fe-f9a9b56a620b",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "c1b7dd01-71b4-5bc7-8d8a-34274dae1be2",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T11:00:00+04:00",
+          "end": "2026-10-15T11:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "4a54c44c-c224-5d08-9146-19bd1a770dbc",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T12:00:00+04:00",
+          "end": "2026-10-15T12:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "d9254043-6858-5fcf-a793-c3461a0b465e",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T13:00:00+04:00",
+          "end": "2026-10-15T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "112fc631-8b75-514d-8376-5d335ad740db",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T14:00:00+04:00",
+          "end": "2026-10-15T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "54658594-5790-5f12-88f8-161a992e1794",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T15:00:00+04:00",
+          "end": "2026-10-15T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "2a1ff54c-d2b6-5718-9e9e-e62a14de6b9d",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T16:00:00+04:00",
+          "end": "2026-10-15T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "fb1e6827-e81b-5997-86f7-4044f0c24152",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T17:00:00+04:00",
+          "end": "2026-10-15T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "10d63f74-9c89-58fc-a64d-4f6593557ce9",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T18:00:00+04:00",
+          "end": "2026-10-15T18:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "1cdfe1c6-dce6-5ed4-bb5e-35a28b82b7c4",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T00:00:00+04:00",
+          "end": "2026-10-15T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "4b21fffb-a290-5c92-b333-36d36424385d",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:42+04:00",
+          "start": "2026-10-15T01:00:00+04:00",
+          "end": "2026-10-15T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "272d64e1-c73e-43c1-af69-8ce588e72454"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "1dfea382-0fe9-42de-a3d0-36d82629b071": {
+    "meta": {
+      "total": 11
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/availability/booking-slots?page[limit]=200&filter[from]=2026-10-15&filter[to]=2026-10-15&filter[serviceId]=1dfea382-0fe9-42de-a3d0-36d82629b071",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "2bf4f92e-6c8b-5f5a-8b11-aa7463618ae5",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T10:00:00+04:00",
+          "end": "2026-10-15T10:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "6a2b95fa-e10e-5336-b9d9-630c0e67e9d6",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T11:00:00+04:00",
+          "end": "2026-10-15T11:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "d20810ee-dad7-524f-a33b-93033587420d",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T12:00:00+04:00",
+          "end": "2026-10-15T12:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "9485230e-a721-5e81-9888-a83d3f7fcc02",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T13:00:00+04:00",
+          "end": "2026-10-15T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "e2168954-d25a-535c-a85a-af0cad9809aa",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T14:00:00+04:00",
+          "end": "2026-10-15T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "7b1dfb66-e948-5f14-9c2f-22f75a724009",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T15:00:00+04:00",
+          "end": "2026-10-15T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ae0ad249-7fc4-5c26-84df-5af31d90c606",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T16:00:00+04:00",
+          "end": "2026-10-15T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "77cbbf13-4ced-5304-ae50-08cb0200d2a1",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T17:00:00+04:00",
+          "end": "2026-10-15T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "30173f22-c400-59fb-9420-b75ae1692883",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T18:00:00+04:00",
+          "end": "2026-10-15T18:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "f379cd9e-545c-5e80-b1dc-5f11c3e6c4b1",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T00:00:00+04:00",
+          "end": "2026-10-15T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "5569728d-9f73-5453-b5b6-d0da3137e843",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:43+04:00",
+          "start": "2026-10-15T01:00:00+04:00",
+          "end": "2026-10-15T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "09922dde-639d-4bdc-8b53-73077a57cca2": {
+    "meta": {
+      "total": 11
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/availability/booking-slots?page[limit]=200&filter[from]=2026-10-15&filter[to]=2026-10-15&filter[serviceId]=09922dde-639d-4bdc-8b53-73077a57cca2",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "bdfec2e2-29e2-5fbe-88a8-5f757b9a5e67",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T10:00:00+04:00",
+          "end": "2026-10-15T10:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "aebfeee0-9255-5c90-8e83-162b9a0fd005",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T11:00:00+04:00",
+          "end": "2026-10-15T11:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ef55197c-50b3-5485-b51f-a98ab26c6efc",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T12:00:00+04:00",
+          "end": "2026-10-15T12:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "9f107bf6-b87b-58d4-a400-e55604cdccd2",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T13:00:00+04:00",
+          "end": "2026-10-15T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "7e331d37-3b43-5454-bac5-d833312739ca",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T14:00:00+04:00",
+          "end": "2026-10-15T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "2e29c0f9-a24d-5167-86aa-2be88d3f0f8b",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T15:00:00+04:00",
+          "end": "2026-10-15T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "5e247072-13f8-5173-8f23-1061f049d111",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T16:00:00+04:00",
+          "end": "2026-10-15T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "19bfdcc8-fc77-5a9f-bfee-cf519a0794e3",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T17:00:00+04:00",
+          "end": "2026-10-15T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "3c2e57b4-ba62-5110-8bbe-e32461ca2b46",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T23:00:00+04:00",
+          "end": "2026-10-15T23:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "fe4877b8-97ef-5eb0-8856-ac4848340634",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T00:00:00+04:00",
+          "end": "2026-10-15T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "c3ecab5c-27a7-579f-9ff1-0eee4a920193",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T01:00:00+04:00",
+          "end": "2026-10-15T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "f947f9f0-b817-4864-9843-5348d3173a44"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "24481fd5-3320-4133-b762-03f13f1b200e": {
+    "meta": {
+      "total": 12
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/availability/booking-slots?page[limit]=200&filter[from]=2026-10-15&filter[to]=2026-10-15&filter[serviceId]=24481fd5-3320-4133-b762-03f13f1b200e",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "ee7aa0ff-3d26-59d3-a326-9ee75538f048",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T10:00:00+04:00",
+          "end": "2026-10-15T10:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ecc4d1d0-6923-5022-88bc-b8653d378d3f",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T11:00:00+04:00",
+          "end": "2026-10-15T11:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "7b5ac520-6494-5be9-81cd-22886c1a706a",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T12:00:00+04:00",
+          "end": "2026-10-15T12:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "14dc4e4c-3048-5674-a766-4cf10e23ff3c",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T13:00:00+04:00",
+          "end": "2026-10-15T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "f406e2f8-6c8d-5421-958e-e5a3467337ed",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T14:00:00+04:00",
+          "end": "2026-10-15T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "294167da-06ad-54fa-a958-13cc193527fd",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T15:00:00+04:00",
+          "end": "2026-10-15T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "e19d5d59-4a5f-568e-9daf-1f60f81c8151",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T16:00:00+04:00",
+          "end": "2026-10-15T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "942ece05-67df-5a64-b477-e956e4419c3d",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T17:00:00+04:00",
+          "end": "2026-10-15T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "141af9cd-0153-599f-a414-a6b5d0c32868",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T18:00:00+04:00",
+          "end": "2026-10-15T18:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "a2451767-12b8-5f58-ac23-fbba7f74a3ee",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T23:00:00+04:00",
+          "end": "2026-10-15T23:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "342a822f-a56e-53f8-b0f5-049324a659e4",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T00:00:00+04:00",
+          "end": "2026-10-15T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "f0a85695-c598-5c7a-bfd2-4184e755666b",
+        "attributes": {
+          "createdAt": "2026-10-13T23:04:44+04:00",
+          "start": "2026-10-15T01:00:00+04:00",
+          "end": "2026-10-15T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,1064 @@
+{
+  "6": {
+    "2026-10": {
+      "ok": true,
+      "data": {
+        "working_details": {
+          "2026-10-14": [
+            {
+              "start_time": "09:00",
+              "end_time": "10:00",
+              "formatted_start_time": "09:00",
+              "formatted_end_time": "10:00",
+              "is_available": 1,
+              "remaining_capacity": 3,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "10:00",
+              "end_time": "11:00",
+              "formatted_start_time": "10:00",
+              "formatted_end_time": "11:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "11:00",
+              "end_time": "12:00",
+              "formatted_start_time": "11:00",
+              "formatted_end_time": "12:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "12:00",
+              "end_time": "13:00",
+              "formatted_start_time": "12:00",
+              "formatted_end_time": "13:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "13:00",
+              "end_time": "14:00",
+              "formatted_start_time": "13:00",
+              "formatted_end_time": "14:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "14:00",
+              "end_time": "15:00",
+              "formatted_start_time": "14:00",
+              "formatted_end_time": "15:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "15:00",
+              "end_time": "16:00",
+              "formatted_start_time": "15:00",
+              "formatted_end_time": "16:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "16:00",
+              "end_time": "17:00",
+              "formatted_start_time": "16:00",
+              "formatted_end_time": "17:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "17:00",
+              "end_time": "18:00",
+              "formatted_start_time": "17:00",
+              "formatted_end_time": "18:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "18:00",
+              "end_time": "19:00",
+              "formatted_start_time": "18:00",
+              "formatted_end_time": "19:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "19:00",
+              "end_time": "20:00",
+              "formatted_start_time": "19:00",
+              "formatted_end_time": "20:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "20:00",
+              "end_time": "21:00",
+              "formatted_start_time": "20:00",
+              "formatted_end_time": "21:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "21:00",
+              "end_time": "22:00",
+              "formatted_start_time": "21:00",
+              "formatted_end_time": "22:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "22:00",
+              "end_time": "23:00",
+              "formatted_start_time": "22:00",
+              "formatted_end_time": "23:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-14",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "23:00",
+              "end_time": "00:00",
+              "formatted_start_time": "23:00",
+              "formatted_end_time": "00:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-10-14",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "00:00",
+              "end_time": "01:00",
+              "formatted_start_time": "00:00",
+              "formatted_end_time": "01:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 1
+            },
+            {
+              "start_time": "01:00",
+              "end_time": "02:00",
+              "formatted_start_time": "01:00",
+              "formatted_end_time": "02:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 1
+            }
+          ],
+          "2026-10-15": [
+            {
+              "start_time": "09:00",
+              "end_time": "10:00",
+              "formatted_start_time": "09:00",
+              "formatted_end_time": "10:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "10:00",
+              "end_time": "11:00",
+              "formatted_start_time": "10:00",
+              "formatted_end_time": "11:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "11:00",
+              "end_time": "12:00",
+              "formatted_start_time": "11:00",
+              "formatted_end_time": "12:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "12:00",
+              "end_time": "13:00",
+              "formatted_start_time": "12:00",
+              "formatted_end_time": "13:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "13:00",
+              "end_time": "14:00",
+              "formatted_start_time": "13:00",
+              "formatted_end_time": "14:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "14:00",
+              "end_time": "15:00",
+              "formatted_start_time": "14:00",
+              "formatted_end_time": "15:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "15:00",
+              "end_time": "16:00",
+              "formatted_start_time": "15:00",
+              "formatted_end_time": "16:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "16:00",
+              "end_time": "17:00",
+              "formatted_start_time": "16:00",
+              "formatted_end_time": "17:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "17:00",
+              "end_time": "18:00",
+              "formatted_start_time": "17:00",
+              "formatted_end_time": "18:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "18:00",
+              "end_time": "19:00",
+              "formatted_start_time": "18:00",
+              "formatted_end_time": "19:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "19:00",
+              "end_time": "20:00",
+              "formatted_start_time": "19:00",
+              "formatted_end_time": "20:00",
+              "is_available": 1,
+              "remaining_capacity": 3,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "20:00",
+              "end_time": "21:00",
+              "formatted_start_time": "20:00",
+              "formatted_end_time": "21:00",
+              "is_available": 1,
+              "remaining_capacity": 3,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "21:00",
+              "end_time": "22:00",
+              "formatted_start_time": "21:00",
+              "formatted_end_time": "22:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "22:00",
+              "end_time": "23:00",
+              "formatted_start_time": "22:00",
+              "formatted_end_time": "23:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-15",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "23:00",
+              "end_time": "00:00",
+              "formatted_start_time": "23:00",
+              "formatted_end_time": "00:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-10-15",
+              "selected_end_date": "2026-10-16",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "00:00",
+              "end_time": "01:00",
+              "formatted_start_time": "00:00",
+              "formatted_end_time": "01:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-10-16",
+              "selected_end_date": "2026-10-16",
+              "is_both_next_day": 1
+            },
+            {
+              "start_time": "01:00",
+              "end_time": "02:00",
+              "formatted_start_time": "01:00",
+              "formatted_end_time": "02:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-10-16",
+              "selected_end_date": "2026-10-16",
+              "is_both_next_day": 1
+            }
+          ],
+          "2026-10-31": [
+            {
+              "start_time": "09:00",
+              "end_time": "10:00",
+              "formatted_start_time": "09:00",
+              "formatted_end_time": "10:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "10:00",
+              "end_time": "11:00",
+              "formatted_start_time": "10:00",
+              "formatted_end_time": "11:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "11:00",
+              "end_time": "12:00",
+              "formatted_start_time": "11:00",
+              "formatted_end_time": "12:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "12:00",
+              "end_time": "13:00",
+              "formatted_start_time": "12:00",
+              "formatted_end_time": "13:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "13:00",
+              "end_time": "14:00",
+              "formatted_start_time": "13:00",
+              "formatted_end_time": "14:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "14:00",
+              "end_time": "15:00",
+              "formatted_start_time": "14:00",
+              "formatted_end_time": "15:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "15:00",
+              "end_time": "16:00",
+              "formatted_start_time": "15:00",
+              "formatted_end_time": "16:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "16:00",
+              "end_time": "17:00",
+              "formatted_start_time": "16:00",
+              "formatted_end_time": "17:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "17:00",
+              "end_time": "18:00",
+              "formatted_start_time": "17:00",
+              "formatted_end_time": "18:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "18:00",
+              "end_time": "19:00",
+              "formatted_start_time": "18:00",
+              "formatted_end_time": "19:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-10-31",
+              "selected_end_date": "2026-10-31",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "01:00",
+              "end_time": "02:00",
+              "formatted_start_time": "01:00",
+              "formatted_end_time": "02:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 1
+            }
+          ]
+        },
+        "vcal_attributes": [],
+        "vcal_capacity_attrs": [],
+        "is_daysoff": [],
+        "v_calendar_blocked_dates": [
+          "2026-10-01",
+          "2026-10-02",
+          "2026-10-03",
+          "2026-10-04",
+          "2026-10-05",
+          "2026-10-06",
+          "2026-10-07",
+          "2026-10-08",
+          "2026-10-09",
+          "2026-10-10",
+          "2026-10-11",
+          "2026-10-12"
+        ],
+        "timing_token_data": "",
+        "consider_overnight_booking": 0
+      }
+    },
+    "2026-11": {
+      "ok": true,
+      "data": {
+        "working_details": {
+          "2026-11-01": [
+            {
+              "start_time": "09:00",
+              "end_time": "10:00",
+              "formatted_start_time": "09:00",
+              "formatted_end_time": "10:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "10:00",
+              "end_time": "11:00",
+              "formatted_start_time": "10:00",
+              "formatted_end_time": "11:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "11:00",
+              "end_time": "12:00",
+              "formatted_start_time": "11:00",
+              "formatted_end_time": "12:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "12:00",
+              "end_time": "13:00",
+              "formatted_start_time": "12:00",
+              "formatted_end_time": "13:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "13:00",
+              "end_time": "14:00",
+              "formatted_start_time": "13:00",
+              "formatted_end_time": "14:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "14:00",
+              "end_time": "15:00",
+              "formatted_start_time": "14:00",
+              "formatted_end_time": "15:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "15:00",
+              "end_time": "16:00",
+              "formatted_start_time": "15:00",
+              "formatted_end_time": "16:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "16:00",
+              "end_time": "17:00",
+              "formatted_start_time": "16:00",
+              "formatted_end_time": "17:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "17:00",
+              "end_time": "18:00",
+              "formatted_start_time": "17:00",
+              "formatted_end_time": "18:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "18:00",
+              "end_time": "19:00",
+              "formatted_start_time": "18:00",
+              "formatted_end_time": "19:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 0,
+              "store_service_date": "2026-11-01",
+              "selected_end_date": "2026-11-01",
+              "is_both_next_day": 0
+            },
+            {
+              "start_time": "01:00",
+              "end_time": "02:00",
+              "formatted_start_time": "01:00",
+              "formatted_end_time": "02:00",
+              "is_available": 1,
+              "remaining_capacity": 4,
+              "is_overnight": 1,
+              "store_service_date": "2026-11-02",
+              "selected_end_date": "2026-11-02",
+              "is_both_next_day": 1
+            }
+          ]
+        },
+        "vcal_attributes": [],
+        "vcal_capacity_attrs": [],
+        "is_daysoff": [],
+        "v_calendar_blocked_dates": [],
+        "timing_token_data": "",
+        "consider_overnight_booking": 0
+      }
+    }
+  },
+  "1": {
+    "2026-10": {
+      "ok": true,
+      "data": {
+        "working_details": {
+          "2026-10-14": [
+            {
+              "start_time": "09:00",
+              "end_time": "10:00",
+              "formatted_start_time": "09:00",
+              "formatted_end_time": "10:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "10:00",
+              "end_time": "11:00",
+              "formatted_start_time": "10:00",
+              "formatted_end_time": "11:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "11:00",
+              "end_time": "12:00",
+              "formatted_start_time": "11:00",
+              "formatted_end_time": "12:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "12:00",
+              "end_time": "13:00",
+              "formatted_start_time": "12:00",
+              "formatted_end_time": "13:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "13:00",
+              "end_time": "14:00",
+              "formatted_start_time": "13:00",
+              "formatted_end_time": "14:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "14:00",
+              "end_time": "15:00",
+              "formatted_start_time": "14:00",
+              "formatted_end_time": "15:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "15:00",
+              "end_time": "16:00",
+              "formatted_start_time": "15:00",
+              "formatted_end_time": "16:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "16:00",
+              "end_time": "17:00",
+              "formatted_start_time": "16:00",
+              "formatted_end_time": "17:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "17:00",
+              "end_time": "18:00",
+              "formatted_start_time": "17:00",
+              "formatted_end_time": "18:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "23:00",
+              "end_time": "00:00",
+              "formatted_start_time": "23:00",
+              "formatted_end_time": "00:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            }
+          ],
+          "2026-10-15": [
+            {
+              "start_time": "09:00",
+              "end_time": "10:00",
+              "formatted_start_time": "09:00",
+              "formatted_end_time": "10:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "10:00",
+              "end_time": "11:00",
+              "formatted_start_time": "10:00",
+              "formatted_end_time": "11:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "11:00",
+              "end_time": "12:00",
+              "formatted_start_time": "11:00",
+              "formatted_end_time": "12:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "12:00",
+              "end_time": "13:00",
+              "formatted_start_time": "12:00",
+              "formatted_end_time": "13:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "13:00",
+              "end_time": "14:00",
+              "formatted_start_time": "13:00",
+              "formatted_end_time": "14:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "14:00",
+              "end_time": "15:00",
+              "formatted_start_time": "14:00",
+              "formatted_end_time": "15:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "15:00",
+              "end_time": "16:00",
+              "formatted_start_time": "15:00",
+              "formatted_end_time": "16:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "16:00",
+              "end_time": "17:00",
+              "formatted_start_time": "16:00",
+              "formatted_end_time": "17:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "23:00",
+              "end_time": "00:00",
+              "formatted_start_time": "23:00",
+              "formatted_end_time": "00:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            }
+          ]
+        },
+        "vcal_attributes": [],
+        "vcal_capacity_attrs": [],
+        "is_daysoff": [],
+        "v_calendar_blocked_dates": [
+          "2026-10-01",
+          "2026-10-02",
+          "2026-10-03",
+          "2026-10-04",
+          "2026-10-05",
+          "2026-10-06",
+          "2026-10-07",
+          "2026-10-08",
+          "2026-10-09",
+          "2026-10-10",
+          "2026-10-11",
+          "2026-10-12"
+        ],
+        "timing_token_data": "",
+        "consider_overnight_booking": 0
+      }
+    }
+  },
+  "4": {
+    "2026-10": {
+      "ok": true,
+      "data": {
+        "working_details": {
+          "2026-10-14": [
+            {
+              "start_time": "09:00",
+              "end_time": "10:00",
+              "formatted_start_time": "09:00",
+              "formatted_end_time": "10:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "11:00",
+              "end_time": "12:00",
+              "formatted_start_time": "11:00",
+              "formatted_end_time": "12:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "12:00",
+              "end_time": "13:00",
+              "formatted_start_time": "12:00",
+              "formatted_end_time": "13:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "13:00",
+              "end_time": "14:00",
+              "formatted_start_time": "13:00",
+              "formatted_end_time": "14:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "14:00",
+              "end_time": "15:00",
+              "formatted_start_time": "14:00",
+              "formatted_end_time": "15:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "15:00",
+              "end_time": "16:00",
+              "formatted_start_time": "15:00",
+              "formatted_end_time": "16:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "16:00",
+              "end_time": "17:00",
+              "formatted_start_time": "16:00",
+              "formatted_end_time": "17:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "17:00",
+              "end_time": "18:00",
+              "formatted_start_time": "17:00",
+              "formatted_end_time": "18:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "18:00",
+              "end_time": "19:00",
+              "formatted_start_time": "18:00",
+              "formatted_end_time": "19:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "19:00",
+              "end_time": "20:00",
+              "formatted_start_time": "19:00",
+              "formatted_end_time": "20:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "22:00",
+              "end_time": "23:00",
+              "formatted_start_time": "22:00",
+              "formatted_end_time": "23:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            },
+            {
+              "start_time": "23:00",
+              "end_time": "00:00",
+              "formatted_start_time": "23:00",
+              "formatted_end_time": "00:00",
+              "is_available": 1,
+              "remaining_capacity": 1,
+              "is_overnight": 0
+            }
+          ]
+        },
+        "vcal_attributes": [],
+        "vcal_capacity_attrs": [],
+        "is_daysoff": [],
+        "v_calendar_blocked_dates": [
+          "2026-10-01",
+          "2026-10-02",
+          "2026-10-03",
+          "2026-10-04",
+          "2026-10-05",
+          "2026-10-06",
+          "2026-10-07",
+          "2026-10-08",
+          "2026-10-09",
+          "2026-10-10",
+          "2026-10-11",
+          "2026-10-12"
+        ],
+        "timing_token_data": "",
+        "consider_overnight_booking": 0
+      }
+    }
+  }
+}

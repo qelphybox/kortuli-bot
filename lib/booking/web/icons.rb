@@ -26,6 +26,8 @@ module Booking
         trash: [2, %(<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>)],
         search: [2, %(<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>)],
         check: [3, %(<path d="M5 12l5 5 9-10"/>)],
+        close: [2.4, %(<path d="M6 6l12 12M18 6L6 18"/>)],
+        locate: [2.2, %(<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>)],
         gauge: [2, %(<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/>)]
       }.freeze
 
@@ -79,6 +81,18 @@ module Booking
         %(<svg class="court__icon" width="34" height="22" viewBox="0 0 34 22" aria-hidden="true">) +
           %(<rect x="1" y="1" width="32" height="20" rx="2" stroke-width="1.5"/>) +
           %(<line x1="17" y1="1" x2="17" y2="21" stroke-width="1.5"/><line x1="7" y1="11" x2="27" y2="11" stroke-width="1"/></svg>)
+      end
+
+      # Two roads, a pond and a pin: the drawing over a Profile's link to Google
+      # Maps. Not a map of anywhere — there is no map service behind it — only
+      # a picture that says "this opens a map". Coloured by the stylesheet.
+      def place_art
+        %(<svg class="place__art" viewBox="0 0 358 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">) +
+          %(<path class="place__road" d="M0 80 C80 60 120 100 200 70 S320 40 358 60" stroke-width="10"/>) +
+          %(<path class="place__road" d="M140 0 L170 120" stroke-width="6"/>) +
+          %(<ellipse class="place__pond" cx="250" cy="34" rx="44" ry="18"/>) +
+          %(<path class="place__pin" d="M181 76 L169.5 59.6 A15 15 0 1 1 192.5 59.6 Z"/>) +
+          %(<circle class="place__dot" cx="181" cy="50" r="5"/></svg>)
       end
 
       # The ball with a tick through it: a Watch has been made.
