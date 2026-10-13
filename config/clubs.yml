@@ -284,4 +284,70 @@
       to: "02:00"
     max_days: 8
     courts: 2
+
+# Tbilisi Padel runs BookingPress on WordPress, one booking form for all of its
+# locations, each a BookingPress service told apart by service_id. Ids, prices
+# and hours read off tbilisipadel.ge (where tbilisipadel.com now redirects) on
+# 2026-10-13. The site publishes no hours, so these are the span of starts its
+# own feed offers, as for Padelbade.
+- slug: tbilisi-padel-didi-dighomi
+  name: Tbilisi Padel Didi Dighomi
+  adapter: bookingpress
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Tbilisi
+    service_id: 6
+    sapadelo: tbilisi-padel-didi-dighomi
+    booking_url: "https://tbilisipadel.ge/en/"
+    price: "60 GEL"
+    # Last start 01:00, sold under the date before — unlike the other two
+    # locations, which shut at midnight.
+    opening_hours:
+      from: "09:00"
+      to: "02:00"
+    # The form offers a year ahead and the server answers for all of it with
+    # empty courts. Bookings reached five days out; two weeks, as for Lemans.
+    max_days: 14
+    # The doubles service's `max_capacity`. The source says how many are free
+    # each hour, never which, so a cell can say "3 of 4" and a notification
+    # says "a court". The site's fifth court here is a 1-vs-1 court, sold as
+    # its own service (5) at 50 GEL — a different game, not watched.
+    courts: 4
+    court_aliases: {}
+
+- slug: tbilisi-padel-mtatsminda
+  name: Tbilisi Padel Mtatsminda
+  adapter: bookingpress
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Tbilisi
+    service_id: 4
+    sapadelo: tbilisi-padel-mtatsminda
+    booking_url: "https://tbilisipadel.ge/en/"
+    price: "60 GEL"
+    # Starts 09:00 to a last one at 23:00.
+    opening_hours:
+      from: "09:00"
+      to: "24:00"
+    max_days: 14
+    # One court: whether it is free is all there is to say.
+    court_aliases: {}
+
+- slug: tbilisi-padel-ilias-garden
+  name: Tbilisi Padel Ilia's Garden
+  adapter: bookingpress
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Tbilisi
+    service_id: 1
+    sapadelo: tbilisi-padel-ilias-garden
+    booking_url: "https://tbilisipadel.ge/en/"
+    price: "60 GEL"
+    opening_hours:
+      from: "09:00"
+      to: "24:00"
+    max_days: 14
     court_aliases: {}

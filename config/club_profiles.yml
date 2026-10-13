@@ -276,6 +276,14 @@ clubs:
     address: 3 Tengiz Abuladze
     lat: 41.6552375
     lng: 41.6410712
+
+  tbilisi-padel-didi-dighomi:
+    source: https://sapadelo.com/georgia/clubs/tbilisi-padel-didi-dighomi
+    area: Didi Dighomi
+    address: 47 Giorgi Brtskinvali
+    phone: "+995577952424"
+    lat: 41.788585
+    lng: 44.7521132
     courts:
     - name: Court 1
       cover: outdoor
@@ -315,3 +323,57 @@ clubs:
       sun: 10:00–02:00
     prices:
     - gel: 80
+
+    - name: Court 5
+      cover: outdoor
+    hours:
+      mon: '09:00–00:00'
+      tue: '09:00–00:00'
+      wed: '09:00–00:00'
+      thu: '09:00–00:00'
+      fri: '09:00–00:00'
+      sat: '09:00–00:00'
+      sun: '09:00–00:00'
+    prices:
+    - gel: 50
+      from_price: true
+    - gel: 60
+  tbilisi-padel-mtatsminda:
+    source: https://sapadelo.com/georgia/clubs/tbilisi-padel-mtatsminda
+    area: Mtatsminda
+    phone: "+995577952424"
+    lat: 41.6930797
+    lng: 44.7842639
+    courts:
+    - name: Court 1
+      cover: outdoor
+    hours:
+      mon: '09:00–00:00'
+      tue: '09:00–00:00'
+      wed: '09:00–00:00'
+      thu: '09:00–00:00'
+      fri: '09:00–00:00'
+      sat: '09:00–00:00'
+      sun: '09:00–00:00'
+    prices:
+    - gel: 60
+  tbilisi-padel-ilias-garden:
+    source: https://sapadelo.com/georgia/clubs/tbilisi-padel-ilias-garden
+    area: Chugureti
+    address: 73 Davit Aghmashenebeli Ave
+    phone: "+995577952424"
+    lat: 41.7088727
+    lng: 44.7994821
+    courts:
+    - name: Court 1
+      cover: outdoor
+    hours:
+      mon: '09:00–00:00'
+      tue: '09:00–00:00'
+      wed: '09:00–00:00'
+      thu: '09:00–00:00'
+      fri: '09:00–00:00'
+      sat: '09:00–00:00'
+      sun: '09:00–00:00'
+    prices:
+    - gel: 60
