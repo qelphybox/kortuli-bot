@@ -195,6 +195,8 @@ module Booking
 
     def feedback_pill_slots = "Times look wrong? Tell us"
 
+    def feedback_pill_city = "Your city isn't here? Tell us"
+
     # The Share screen's own copy. Kept here for the same reason as the rest:
     # the screen and its specs read one string.
     def share_send = "Send to a chat"

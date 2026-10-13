@@ -10,7 +10,7 @@
   <h1 class="topbar__title">Clubs</h1>
   <div class="topbar__end">
     <span class="topbar__aside"><%= @clubs.size %> watched</span>
-    <%= erb :_city_switch, locals: { back: "/clubs" } %>
+    <%= erb :_city_switch, locals: { back: "/clubs", count: @clubs.size } %>
   </div>
 </header>
 

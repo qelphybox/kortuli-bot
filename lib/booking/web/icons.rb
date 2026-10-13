@@ -26,6 +26,8 @@ module Booking
         trash: [2, %(<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>)],
         search: [2, %(<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>)],
         check: [3, %(<path d="M5 12l5 5 9-10"/>)],
+        close: [2.4, %(<path d="M6 6l12 12M18 6L6 18"/>)],
+        locate: [2.2, %(<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>)],
         gauge: [2, %(<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/>)]
       }.freeze
 

@@ -1425,7 +1425,9 @@ RSpec.describe Booking::Web::App do
 
     def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
 
-    def switch = last_response.body[%r{<details class="city-picker".*?</details>}m].to_s
+    def switch = last_response.body[%r{<dialog class="city-sheet".*?</dialog>}m].to_s
+
+    def pill = last_response.body[%r{<a class="city-pill.*?</a>}m].to_s
 
     def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="copy-source"[^>]*>(.*?)</pre>}m, 1].to_s)
 
@@ -1444,15 +1446,17 @@ RSpec.describe Booking::Web::App do
       end
     end
 
+    # The home screen asks first (see city_spec); every other screen starts
+    # in Tbilisi until somebody picks.
     it "starts in Tbilisi, with a switch to every city that has a club" do
       sign_in
-      get "/"
+      get "/clubs"
 
-      expect(switch).to include('value="Tbilisi" aria-current="true"').and include('value="Batumi"')
-      # The pill in the header is the picker: it names the city, and its menu
-      # posts back to the screen it was opened on.
-      expect(switch[%r{<summary.*?</summary>}m]).to include("Tbilisi")
-      expect(switch).to include('action="/city"').and include('name="back" value="/"')
+      expect(switch).to include('value="Tbilisi" checked').and include('value="Batumi"')
+      # The pill in the header opens the picker: it names the city, and the
+      # picker posts back to the screen it was opened on.
+      expect(pill).to include("Tbilisi")
+      expect(switch).to include('action="/city"').and include('name="back" value="/clubs"')
       get "/date/#{day}"
       expect(club_names_in_order).to contain_exactly("Padel Club 2", "Kus Tba Padel")
     end
@@ -1498,7 +1502,7 @@ RSpec.describe Booking::Web::App do
         get "/"
 
         expect(last_response.body).to include("Free padel courts across Batumi.")
-        expect(switch).to include('value="Batumi" aria-current="true"')
+        expect(switch).to include('value="Batumi" checked')
         row = last_response.body[%r{href="/date/#{day}".*?</a>}m].to_s
         expect(row).to include('<span class="day-row__slots">1</span>')
       end
@@ -1521,7 +1525,7 @@ RSpec.describe Booking::Web::App do
         get "/clubs"
 
         expect(last_response.body).to include("1 watched")
-        expect(switch).to include('value="Batumi" aria-current="true"')
+        expect(switch).to include('value="Batumi" checked')
         expect(last_response.body).to include('href="/clubs/padel-port"')
         expect(last_response.body).not_to include('href="/clubs/kus-tba-padel"')
       end
@@ -1534,8 +1538,8 @@ RSpec.describe Booking::Web::App do
         expect(last_response.body).not_to include('name="club_slugs[]" value="kus-tba-padel"')
         # The picker's form sits in the header, outside the watch's, which
         # HTML would otherwise swallow.
-        expect(last_response.body.index('<form class="city-picker__menu"')).to be < last_response.body.index('<form class="new-watch"')
-        expect(switch).to include('value="Batumi" aria-current="true"')
+        expect(last_response.body.index('<form class="city-picker')).to be < last_response.body.index('<form class="new-watch"')
+        expect(switch).to include('value="Batumi" checked')
       end
 
       it "still lists every watch, whatever city its clubs are in" do
@@ -1576,8 +1580,9 @@ RSpec.describe Booking::Web::App do
         expect(last_response.body).to include("across Batumi")
 
         sign_in(user_id: 99)
-        get "/"
-        expect(last_response.body).to include("across Tbilisi")
+        get "/clubs"
+        expect(last_response.body).to include('href="/clubs/kus-tba-padel"')
+        expect(last_response.body).not_to include('href="/clubs/padel-port"')
       end
     end
 
@@ -1605,7 +1610,9 @@ RSpec.describe Booking::Web::App do
       end
 
       it "marks the rainy date on the picked city's home screen alone" do
+        pick("Tbilisi")
         get "/"
+        expect(last_response.body).to include('class="dates')
         expect(last_response.body).not_to include('class="rain-chip"')
 
         pick("Batumi")
