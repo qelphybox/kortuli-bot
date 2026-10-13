@@ -1,3 +1,4 @@
+require "uri"
 require "yaml"
 
 module Booking
@@ -36,7 +37,18 @@ module Booking
 
     # Google's documented, keyless way to open a pin — it lands in the Maps
     # app where there is one, and on the website where there is not.
-    def maps_url = ("https://www.google.com/maps/search/?api=1&query=#{lat},#{lng}" if located?)
+    def maps_url = ("#{ClubProfile::MAPS_SEARCH}#{lat},#{lng}" if located?)
+
+    # The way there for somebody who has never been: the pin when there is
+    # one, else Google searching the street — with the club's name and city
+    # in front, so "Turtle Lake" lands on the club rather than the lake. Nil
+    # with neither, for a button that has nothing to point at.
+    def directions_url(name:, city:)
+      return maps_url if located?
+
+      street = address || area
+      "#{ClubProfile::MAPS_SEARCH}#{URI.encode_www_form_component([name, street, city].uniq.join(", "))}" if street
+    end
 
     # [["indoor", 2], ["covered", 3]]: how many courts sit under each cover.
     def covers = courts.map(&:cover).tally.sort_by { |cover, _| ClubProfile::COVERS.index(cover) || ClubProfile::COVERS.size }
@@ -58,6 +70,8 @@ module Booking
   class ClubProfile
     # Roofed first: on a wet evening that is the question being asked.
     COVERS = %w[indoor covered outdoor].freeze
+    # Google's documented, keyless way into Maps: a pin or words after it.
+    MAPS_SEARCH = "https://www.google.com/maps/search/?api=1&query=".freeze
     WEEK = %w[mon tue wed thu fri sat sun].freeze
 
     Court = Data.define(:name, :cover)

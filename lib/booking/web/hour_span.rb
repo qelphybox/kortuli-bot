@@ -1,5 +1,9 @@
 module Booking
   module Web
+    # 18:00 to 23:00, counted from the date's midnight. Module-level for the
+    # reason ClubFilter's modes are.
+    EVENING_HOURS = [18, 23].freeze
+
     # The hours the Share screen narrows a Rundown to, as picked from its two
     # lists — and, through `pick`, the hours a Game takes.
     #
@@ -61,6 +65,23 @@ module Booking
       def to_choices = hours.map { _1 + 1 }
 
       def whole_day? = from.nil? || (from == hours.first && to == hours.last + 1)
+
+      # After work: the one span the Share screen offers in a tap, beside the
+      # whole day, so the commonest narrowing does not take two pickers. Cut
+      # to the hours on offer; nil when that leaves nothing, or nothing the
+      # whole day does not already say.
+      def evening
+        return if hours.empty?
+
+        first, last = [EVENING_HOURS.first, hours.first].max, [EVENING_HOURS.last, hours.last + 1].min
+        evening = with(from: first, to: last)
+        evening if first < last && !evening.whole_day?
+      end
+
+      def evening? = !whole_day? && self == evening
+
+      # "18–23": a span short enough for a segment.
+      def short_label = format("%d–%d", from % 24, to % 24)
 
       # Nil for the whole day, so the Rundown's heading only names a span
       # somebody actually picked.

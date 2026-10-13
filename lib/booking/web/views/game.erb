@@ -17,7 +17,7 @@
   </div>
 </header>
 
-<main class="page page--roomy">
+<main class="page game-page">
   <form class="field-row" method="get" action="/date/<%= @date %>/club/<%= h(@club.slug) %>/game" data-autosubmit>
     <label class="field">
       <span class="field__label">From</span>
@@ -50,9 +50,9 @@
         <div class="bubble__title"><%= h(Booking::Messages.game_when(@game).sub(", ", " · ")) %></div>
         <div class="bubble__place"><%= h(@game.club_name) %></div>
       </div>
-      <%= erb :_game_facts, locals: { game: @game, weather: @weather } %>
+      <%= erb :_game_facts, locals: { game: @game, weather: @weather, city: nil } %>
       <div class="bubble__foot">
-        Add to calendar: <%= h(@game.card_url) %><br>via <%= h(bot_url) %>
+        Add to calendar: <%= h(bare_url(@game.card_url)) %><br>via <%= h(bare_url(bot_url)) %>
       </div>
     </div>
     <pre class="copy-source" id="game"><%= h(copy_text(@text)) %></pre>
