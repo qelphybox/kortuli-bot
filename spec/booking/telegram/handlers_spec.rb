@@ -12,7 +12,7 @@ RSpec.describe Booking::Telegram::Handlers do
       reply = call("/start")
 
       expect(reply).to be_a(Booking::Telegram::Handlers::Welcome)
-      expect(reply.text).to include("Padel")
+      expect(reply.text).to include("Free padel courts across Georgia")
       expect(reply.app_url).to eq("https://app.test")
     end
 

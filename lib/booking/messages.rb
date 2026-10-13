@@ -115,14 +115,20 @@ module Booking
     end
 
     # The bot's whole vocabulary now: it says this, and then only speaks again
-    # when something is Freed.
+    # when something is Freed. It leads with what the app is for — the day's
+    # free courts and sending them, or the Game, to the group — and leaves
+    # watching for last, as the app does.
     def welcome
       <<~TEXT.strip
-        🎾 <b>Padel slot watcher</b>
+        🎾 <b>kortuli</b>
 
-        Evening padel courts in Georgia get taken a day or two ahead and only come back when somebody cancels. This watches for those cancellations and pings you the moment one happens.
+        Free padel courts across Georgia, day by day — every club's open hours in one place, with the weather beside them.
 
-        Open the app to see the week and to say which hours you want watching. It does not book or pay for anything — you get a link and take it from there.
+        Pick a day, book it on the club's own page, then send the day's courts or the game you booked to your group in one tap.
+
+        All taken? Watch a slot and I'll ping you the moment somebody cancels.
+
+        kortuli never books or pays — you get a link and take it from there.
       TEXT
     end
 
