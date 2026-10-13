@@ -8,11 +8,13 @@
 %>
 <header class="topbar">
   <h1 class="topbar__title">Clubs</h1>
-  <span class="topbar__aside"><%= @clubs.size %> watched · <%= h(current_city) %></span>
+  <div class="topbar__end">
+    <span class="topbar__aside"><%= @clubs.size %> watched</span>
+    <%= erb :_city_switch, locals: { back: "/clubs" } %>
+  </div>
 </header>
 
 <main class="page page--flush">
-  <%= erb :_city_switch, locals: { back: "/clubs", detached: false } %>
   <label class="search js-only">
     <%= icon(:search, size: 18) %>
     <span class="visually-hidden">Search clubs</span>

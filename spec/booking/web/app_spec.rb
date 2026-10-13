@@ -1425,7 +1425,7 @@ RSpec.describe Booking::Web::App do
 
     def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
 
-    def switch = last_response.body[%r{<div class="filters city-switch".*?</div>}m].to_s
+    def switch = last_response.body[%r{<details class="city-picker".*?</details>}m].to_s
 
     def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="copy-source"[^>]*>(.*?)</pre>}m, 1].to_s)
 
@@ -1439,7 +1439,7 @@ RSpec.describe Booking::Web::App do
         sign_in
         get "/"
 
-        expect(last_response.body).not_to include("city-switch")
+        expect(last_response.body).not_to include("city-picker")
         expect(last_response.body).to include("Free padel courts across Tbilisi.")
       end
     end
@@ -1449,6 +1449,10 @@ RSpec.describe Booking::Web::App do
       get "/"
 
       expect(switch).to include('value="Tbilisi" aria-current="true"').and include('value="Batumi"')
+      # The pill in the header is the picker: it names the city, and its menu
+      # posts back to the screen it was opened on.
+      expect(switch[%r{<summary.*?</summary>}m]).to include("Tbilisi")
+      expect(switch).to include('action="/city"').and include('name="back" value="/"')
       get "/date/#{day}"
       expect(club_names_in_order).to contain_exactly("Padel Club 2", "Kus Tba Padel")
     end
@@ -1516,7 +1520,8 @@ RSpec.describe Booking::Web::App do
       it "lists only Batumi's clubs in the directory" do
         get "/clubs"
 
-        expect(last_response.body).to include("1 watched · Batumi")
+        expect(last_response.body).to include("1 watched")
+        expect(switch).to include('value="Batumi" aria-current="true"')
         expect(last_response.body).to include('href="/clubs/padel-port"')
         expect(last_response.body).not_to include('href="/clubs/kus-tba-padel"')
       end
@@ -1527,10 +1532,10 @@ RSpec.describe Booking::Web::App do
 
         expect(last_response.body).to include('name="club_slugs[]" value="padel-port"')
         expect(last_response.body).not_to include('name="club_slugs[]" value="kus-tba-padel"')
-        # The switch's form sits outside the watch's, which HTML would
-        # otherwise swallow.
-        expect(last_response.body.index('<form id="city-switch"')).to be < last_response.body.index('<form class="new-watch"')
-        expect(switch).to include('form="city-switch"')
+        # The picker's form sits in the header, outside the watch's, which
+        # HTML would otherwise swallow.
+        expect(last_response.body.index('<form class="city-picker__menu"')).to be < last_response.body.index('<form class="new-watch"')
+        expect(switch).to include('value="Batumi" aria-current="true"')
       end
 
       it "still lists every watch, whatever city its clubs are in" do

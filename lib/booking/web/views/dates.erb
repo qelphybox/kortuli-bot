@@ -7,8 +7,8 @@
 
   Watches and the clubs directory are the other two tabs; the owner's
   Dashboard is a chip beside the city, because nobody else has one. Every
-  count here is the current City's; where there is more than one, the switch
-  under the lede picks another.
+  count here is the current City's; where there is more than one, the City
+  pill opens a picker for another.
 %>
 <% today, *week = @dates %>
 <header class="brand-row">
@@ -17,13 +17,12 @@
     <% if @owner %>
       <a class="pill pill--small" href="/admin"><%= icon(:gauge, size: 14) %>Dashboard</a>
     <% end %>
-    <span class="pill pill--small"><%= icon(:pin, size: 14) %><%= h(current_city) %></span>
+    <%= erb :_city_switch, locals: { back: "/" } %>
   </span>
 </header>
 
 <main class="page page--roomy">
   <p class="lede">Free padel courts across <%= h(current_city) %>. Pick a day, book it, tell your group.</p>
-  <%= erb :_city_switch, locals: { back: "/", detached: false } %>
 
   <a class="hero" href="/date/<%= today[:date] %>">
     <%= court(:hero, "hero__court") %>

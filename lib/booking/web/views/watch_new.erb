@@ -6,8 +6,8 @@
   punishes the person for reading it. The Weekdays and Weekend shortcuts
   only tick boxes, and only exist once JavaScript runs.
 
-  The clubs on offer are the current City's; the switch above them picks
-  another, and starts the form again. A Watch names clubs, not a city, so
+  The clubs on offer are the current City's; the City pill in the header
+  picks another, and starts the form again. A Watch names clubs, not a city, so
   one in each is two watches.
 %>
 <% refused_days = @refusals.include?(Booking::Messages.pick_at_least_one_day) %>
@@ -15,10 +15,10 @@
   <div class="bar__row">
     <a class="icon-btn" href="/watches" aria-label="Back to watches"><%= icon(:back) %></a>
     <h1 class="bar__h1 bar__h1--caps">Watch a slot</h1>
+    <%= erb :_city_switch, locals: { back: "/watches/new" } %>
   </div>
 </header>
 
-<%= city_form("/watches/new") if city_switch? %>
 <form class="new-watch" method="post" action="/watches">
   <main class="page page--wide-gap">
     <% if @refusals.any? %>
@@ -31,7 +31,6 @@
 
     <fieldset class="group">
       <legend class="field__label">Clubs</legend>
-      <%= erb :_city_switch, locals: { back: "/watches/new", detached: true } %>
       <div class="pick-list">
         <% @clubs.each do |club| %>
           <label class="toggle-chip">

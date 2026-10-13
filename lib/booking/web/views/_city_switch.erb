@@ -1,17 +1,23 @@
 <%#
-  Which City's clubs the screens show, one chip per city with a club in it.
-  Drawn only once there is more than one. Buttons rather than links: the
-  choice is kept per person, so picking is a post that lands back on `back`.
+  The City pill in a screen's header, and the picker it opens. With one city
+  there is nothing to pick, so it is only a label. With more, it is a
+  <details>: the pill is its summary, and the cities drop below it as
+  buttons. The choice is kept per person, so picking is a post that lands
+  back on `back`.
 
-  The buttons submit a form by its id. On a screen that is itself one form —
-  the new watch — that form cannot open inside it, so the screen draws it
-  outside with `city_form` and passes `detached`.
+  It lives in a header, which sits outside every form on these screens —
+  the new watch's included — so the menu can be a form of its own.
 %>
 <% if city_switch? %>
-  <%= city_form(back) unless detached %>
-  <div class="filters city-switch" role="group" aria-label="City">
-    <% cities.each do |city| %>
-      <button class="chip" form="city-switch" name="city" value="<%= h(city) %>"<%= ' aria-current="true"' if city == current_city %>><%= h(city) %></button>
-    <% end %>
-  </div>
+  <details class="city-picker">
+    <summary class="pill pill--small city-picker__pill" aria-label="City: <%= h(current_city) %>. Change"><%= icon(:pin, size: 14) %><%= h(current_city) %><%= icon(:chevron, size: 14) %></summary>
+    <form class="city-picker__menu" method="post" action="/city" aria-label="City">
+      <input type="hidden" name="back" value="<%= h(back) %>">
+      <% cities.each do |city| %>
+        <button class="city-picker__option" name="city" value="<%= h(city) %>"<%= ' aria-current="true"' if city == current_city %>><span><%= h(city) %></span><%= icon(:check, size: 16) if city == current_city %></button>
+      <% end %>
+    </form>
+  </details>
+<% else %>
+  <span class="pill pill--small"><%= icon(:pin, size: 14) %><%= h(current_city) %></span>
 <% end %>

@@ -234,12 +234,6 @@ module Booking
         # new-watch form are drawn from.
         def city_clubs = @city_clubs ||= enabled_clubs.select { _1.city == current_city }
 
-        # The form the city switch's buttons submit, by id. Apart from the
-        # buttons so they can sit inside another form — the new-watch one —
-        # which HTML will not let a second form open inside.
-        def city_form(back)
-          %(<form id="city-switch" method="post" action="/city"><input type="hidden" name="back" value="#{h(back)}"></form>)
-        end
 
         # A first visit has no submission to remember, so it starts from the
         # clubs this person has starred — the ones they would tick anyway.
