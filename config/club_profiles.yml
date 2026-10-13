@@ -289,6 +289,18 @@ clubs:
       cover: outdoor
     - name: Court 2
       cover: outdoor
+
+  aia-padel:
+    source: https://sapadelo.com/georgia/clubs/aia-padel-club
+    address: Konstantine Gamsakhurdia St 65
+    phone: "+995551494009"
+    lat: 42.2409611
+    lng: 42.6851697
+    courts:
+    - name: Court 1
+      cover: covered
+    - name: Court 2
+      cover: covered
     - name: Court 3
       cover: outdoor
     - name: Court 4
@@ -377,3 +389,12 @@ clubs:
       sun: '09:00–00:00'
     prices:
     - gel: 60
+
+      mon: '08:00–01:00'
+      tue: '08:00–01:00'
+      wed: '08:00–01:00'
+      thu: '08:00–01:00'
+      fri: '08:00–01:00'
+      sat: '08:00–01:00'
+      sun: '08:00–01:00'
+    prices: []
