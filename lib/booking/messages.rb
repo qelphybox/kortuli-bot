@@ -197,7 +197,7 @@ module Booking
 
     # The Share screen's own copy. Kept here for the same reason as the rest:
     # the screen and its specs read one string.
-    def share_send = "Send to a chat"
+    def share_send = "Send to chat"
 
     def share_copy = "Copy text"
 
@@ -205,11 +205,17 @@ module Booking
 
     def share_nothing = "Nothing free here — pick a wider span or more clubs."
 
-    def share_all_clubs = "All"
+    # The Share screen's two switches: which clubs, which hours.
+    def share_all_clubs = "All clubs"
 
-    def share_favourites = "Favourites"
+    def share_favourites = "★ Favs"
 
     def share_pick_clubs = "Pick"
+
+    def share_all_day = "All day"
+
+    # Under the hours switch: any span at all, from the two pickers.
+    def share_other_hours = "Other hours"
 
     # Asked for Favourites before starring any. Points at where the stars are
     # rather than apologising: every club is shown in the meantime.

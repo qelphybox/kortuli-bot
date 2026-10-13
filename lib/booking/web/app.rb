@@ -99,6 +99,10 @@ module Booking
         # the sheet adds on its own — it is headed for WhatsApp as often as not.
         def copy_text(text) = "#{text}\n\nvia #{bot_url}"
 
+        # A link as a preview prints it: "t.me/kortuli_bot", "kustbapadel.ge/book".
+        # Only on the screen — the words that leave keep the whole URL.
+        def bare_url(url) = url.sub(%r{\Ahttps?://(www\.)?}, "").chomp("/")
+
         def h(text) = Rack::Utils.escape_html(text)
 
         def require_visitor!
@@ -540,9 +544,11 @@ module Booking
         # over the club's own city, which need not be the one picked.
         def game_weather(game, club) = Weather.worst(forecast(club.city), game.starts_at, game.ends_at)
 
-        # The query a link back to Share needs to keep its clubs narrowed.
-        def share_query(filter)
+        # The query a link back to Share needs to keep its clubs narrowed —
+        # and, given a span, to narrow the hours to it.
+        def share_query(filter, span = nil)
           query = filter.to_params
+          query = query.merge(from: span.from, to: span.to) if span
 
           query.empty? ? "" : "?#{Rack::Utils.build_nested_query(query)}"
         end
@@ -724,6 +730,8 @@ module Booking
           Calendar.ics(@event)
         else
           @weather = game_weather(@game, club)
+          @city = club.city
+          @directions = profile(club.slug)&.directions_url(name: club.name, city: club.city)
           erb :game_card, layout: :layout
         end
       end

@@ -571,7 +571,67 @@ RSpec.describe Booking::Web::App do
         sign_in
         get "/date/#{day}/share", only: "picked", clubs: ["kus-tba-padel"], from: 18, to: 22
 
-        expect(last_response.body).to include(%(href="/date/#{day}/share?only=picked&amp;clubs%5B%5D=kus-tba-padel">Whole day))
+        expect(last_response.body).to include(%(href="/date/#{day}/share?only=picked&amp;clubs%5B%5D=kus-tba-padel">All day))
+      end
+
+      it "keeps the clubs on the way to the evening" do
+        sign_in
+        get "/date/#{day}/share", only: "favourites"
+
+        expect(last_response.body).to include(%(href="/date/#{day}/share?only=favourites&amp;from=18&amp;to=23">18–23))
+      end
+    end
+
+    # The hours switch: the whole day or the evening in a tap, and any other
+    # span from the pickers folded under it.
+    describe "narrowed to some hours" do
+      def current = last_response.body.scan(/<a href="[^"]*" aria-current="true">([^<]+)</).flatten
+
+      it "starts on the whole day, with the other hours folded away" do
+        sign_in
+        get "/date/#{day}/share"
+
+        expect(current).to eq(["All day"])
+        expect(last_response.body).to include('<details class="share-hours">')
+      end
+
+      it "marks the evening when that is the span" do
+        sign_in
+        get "/date/#{day}/share", from: 18, to: 23
+
+        expect(current).to eq(["18–23"])
+        expect(preview).to include(", 18:00–23:00")
+      end
+
+      # Neither switch says it, so the pickers that do are open.
+      it "opens the pickers on any other span" do
+        sign_in
+        get "/date/#{day}/share", from: 10, to: 14
+
+        expect(current).to be_empty
+        expect(last_response.body).to include('<details class="share-hours" open>')
+        expect(last_response.body).to include('<option value="10" selected>10:00</option>')
+      end
+
+      # The switch sits in the bar, the pickers under it; one form all the same.
+      it "sends the clubs and the hours as one form" do
+        sign_in
+        get "/date/#{day}/share", only: "picked"
+
+        form_id = last_response.body[/<form class="share-switches" id="([^"]+)"/, 1]
+        expect(last_response.body).to include(%(<select form="#{form_id}" name="from">))
+        expect(last_response.body).to include(%(<input type="checkbox" form="#{form_id}" name="clubs[]"))
+      end
+    end
+
+    describe "its preview" do
+      it "prints links without their scheme, and sends them whole" do
+        sign_in
+        get "/date/#{day}/share"
+
+        expect(last_response.body).to include('<span class="bubble__link">example.test/book</span>')
+        expect(last_response.body).to include("via t.me/kortuli_test_bot")
+        expect(preview).to include("https://example.test/book")
       end
     end
   end
@@ -1340,12 +1400,32 @@ RSpec.describe Booking::Web::App do
         expect(last_response.body).to include("https://www.google.com/maps/search/?api=1&amp;query=41.700688,44.7570599")
       end
 
-      # Padel Club 2 has no Profile, so there is no pin to drop.
-      it "offers no map for a club without a pin" do
+      # Padel Club 2 has no Profile, so there is nothing to point at.
+      it "offers no directions for a club with no Profile" do
         get "/game/padel-club-2/#{day}/19-20"
 
         expect(last_response.status).to eq(200)
-        expect(last_response.body).not_to include("Google Maps")
+        expect(last_response.body).not_to include("google.com/maps")
+        expect(last_response.body).not_to include("Directions")
+      end
+
+      context "when the club's Profile has a street but no pin" do
+        let(:club_profiles) do
+          { "kus-tba-padel" => Booking::ClubProfile.from({ "area" => "Turtle Lake", "address" => "Turtle Lake" }) }
+        end
+
+        it "searches the street for directions" do
+          get "/game/kus-tba-padel/#{day}/19-21"
+
+          expect(last_response.body).to include("https://www.google.com/maps/search/?api=1&amp;query=Kus+Tba+Padel%2C+Turtle+Lake%2C+Tbilisi")
+        end
+      end
+
+      # Opened by people who may not know which city the club is in.
+      it "names the city after the place" do
+        get "/game/kus-tba-padel/#{day}/19-21"
+
+        expect(last_response.body).to include("<dd>Turtle Lake, Tbilisi</dd>")
       end
 
       # A link in a chat outlives the week it was sent in.

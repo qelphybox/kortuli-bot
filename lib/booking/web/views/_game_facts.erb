@@ -1,8 +1,11 @@
 <%#
   A Game's three facts — the rain, the price, the place — as the Share
   screen's preview and the group's card both lay them out. `weather` is the
-  Forecast's worst hour over the game, or nil.
+  Forecast's worst hour over the game, or nil. `city` goes after the place
+  on the card, which is opened by people who may not know which city the
+  club is in; the sender's own preview passes nil.
 %>
+<% where = [game.place, city].compact.uniq.join(", ") %>
 <dl class="facts-grid">
   <% if weather %>
     <div><dt>Forecast</dt><dd class="<%= "is-wet" if weather.wet? %><%= "is-damp" if weather.damp? %>"><%= hour_weather(weather) %></dd></div>
@@ -10,7 +13,7 @@
   <% if game.price %>
     <div><dt>Price</dt><dd><%= h(game.price) %>/h</dd></div>
   <% end %>
-  <% if game.place %>
-    <div><dt>Where</dt><dd><%= h(game.place) %></dd></div>
+  <% unless where.empty? %>
+    <div><dt>Where</dt><dd><%= h(where) %></dd></div>
   <% end %>
 </dl>

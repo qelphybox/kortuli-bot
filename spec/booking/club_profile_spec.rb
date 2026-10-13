@@ -43,6 +43,31 @@ RSpec.describe Booking::ClubProfile do
     expect(described_class.from(entry.except("lat", "lng")).maps_url).to be_nil
   end
 
+  describe "the way there" do
+    it "is the pin when there is one" do
+      expect(profile.directions_url(name: "Padelbade Krtsanisi", city: "Tbilisi")).to eq(profile.maps_url)
+    end
+
+    # The street alone could be anywhere called that; the club's name and
+    # city in front make it the club.
+    it "searches for the club's street without one" do
+      unpinned = described_class.from(entry.except("lat", "lng").merge("address" => "7 Giorgi Guramishvili St"))
+
+      expect(unpinned.directions_url(name: "Padelbade Krtsanisi", city: "Tbilisi"))
+        .to eq("https://www.google.com/maps/search/?api=1&query=Padelbade+Krtsanisi%2C+7+Giorgi+Guramishvili+St%2C+Tbilisi")
+    end
+
+    it "falls back from the street to the area" do
+      unpinned = described_class.from(entry.except("lat", "lng"))
+
+      expect(unpinned.directions_url(name: "Padelbade Krtsanisi", city: "Tbilisi")).to end_with("query=Padelbade+Krtsanisi%2C+Ortachala%2C+Tbilisi")
+    end
+
+    it "has nothing to point at with neither" do
+      expect(described_class.from(entry.except("lat", "lng", "area")).directions_url(name: "X", city: "Tbilisi")).to be_nil
+    end
+  end
+
   it "knows the day its listing was read" do
     expect(profile.checked_on).to eq(Date.new(2026, 10, 11))
   end

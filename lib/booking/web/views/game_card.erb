@@ -2,8 +2,9 @@
   A Game as the group sees it — the page behind the link in the message, open
   without a session, because the people it was sent to need not use the bot.
   A ticket: when, where, and whether it will rain on it; then the way there
-  and the two calendar buttons. Plain links throughout: this is a browser
-  tab, not the mini app.
+  (the club's pin, else its street; no button with neither) and the two
+  calendar buttons. Plain links throughout: this is a browser tab, not the
+  mini app.
 %>
 <% starts = Booking::Clock.to_local(@game.starts_at) %>
 <main class="invite">
@@ -22,12 +23,12 @@
       <div class="ticket__club"><%= h(@game.club_name) %></div>
     </div>
     <div class="ticket__tear" aria-hidden="true"><span></span></div>
-    <%= erb :_game_facts, locals: { game: @game, weather: @weather } %>
+    <%= erb :_game_facts, locals: { game: @game, weather: @weather, city: @city } %>
   </article>
 
   <div class="section">
-    <% if @game.maps_url %>
-      <a class="btn btn--ball" href="<%= h(@game.maps_url) %>" target="_blank" rel="noopener"><%= icon(:pin) %>Directions</a>
+    <% if @directions %>
+      <a class="btn btn--ball" href="<%= h(@directions) %>" target="_blank" rel="noopener"><%= icon(:pin) %>Directions</a>
     <% end %>
     <div class="btn-row">
       <a class="btn btn--quiet" href="<%= h(Booking::Calendar.google_url(@event)) %>" target="_blank" rel="noopener"><%= icon(:calendar, size: 16) %>Google Calendar</a>
