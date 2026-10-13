@@ -74,6 +74,39 @@ RSpec.describe Booking::Ops::Dashboard do
     end
   end
 
+  describe "#visitors" do
+    # 12:00 UTC is 16:00 in Tbilisi, so the local date is the same.
+    let(:today) { Date.new(2026, 10, 11) }
+
+    before do
+      repos.visits.record(1, on: today - 10)
+      repos.visits.record(1, on: today)
+      repos.visits.record(2, on: today)
+      repos.visits.record(3, on: today - 40)
+    end
+
+    it "counts people, not visits, over the day, the week and the month" do
+      visitors = dashboard.visitors(now:)
+
+      expect(visitors.to_h.except(:days)).to eq(total: 3, today: 2, week: 2, month: 2, new_week: 1, returning: 1)
+    end
+
+    it "lays out the last two weeks newest first, with who came for the first time" do
+      days = dashboard.visitors(now:).days
+
+      expect(days.size).to eq(14)
+      expect(days.first.to_h).to eq(date: today, people: 2, new: 1)
+      expect(days[1].to_h).to eq(date: today - 1, people: 0, new: 0)
+      expect(days[10].to_h).to eq(date: today - 10, people: 1, new: 1)
+    end
+
+    it "is all zeroes before anybody has come" do
+      db[:visits].delete
+
+      expect(dashboard.visitors(now:).to_h.except(:days).values).to all(eq(0))
+    end
+  end
+
   it "reads every process's heartbeat, the missing ones included" do
     Booking::Ops::Heartbeat.new(dir: @dir, process: "poller").beat
 

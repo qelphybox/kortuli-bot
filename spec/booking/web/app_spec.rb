@@ -8,12 +8,12 @@ RSpec.describe Booking::Web::App do
   let(:sessions) { Booking::Web::Session.new(secret: "a-secret-that-only-the-server-knows") }
 
   # Clubs and Slots are stood in for: the web only reads them, and the routes
-  # are what is under test, not Sequel. Watches and Favourites are the real
-  # repositories over an in-memory database, because here the web *writes* —
-  # and a faked repository would prove only that the route called the method
-  # it was written to call. The Forecast is real too, because filling it is
+  # are what is under test, not Sequel. Watches, Favourites and Visits are the
+  # real repositories over an in-memory database, because here the web
+  # *writes* — and a faked repository would prove only that the route called
+  # the method it was written to call. The Forecast is real too, because filling it is
   # simpler than faking it.
-  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast)
+  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits)
   FakeClubs = Struct.new(:enabled)
   FakeSlots = Struct.new(:all)
 
@@ -21,6 +21,7 @@ RSpec.describe Booking::Web::App do
   let(:watches) { Booking::Repo::Watches.new(db) }
   let(:favourites) { Booking::Repo::Favourites.new(db) }
   let(:forecast) { Booking::Repo::Forecast.new(db) }
+  let(:visits) { Booking::Repo::Visits.new(db) }
   let(:today) { Booking::Clock.local_date(Booking::Clock.now) }
   let(:clubs) do
     [
@@ -55,7 +56,7 @@ RSpec.describe Booking::Web::App do
       )
     }
   end
-  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast) }
+  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits) }
 
   let(:owner_id) { 7 }
   let(:log_dir) { Dir.mktmpdir }
@@ -1403,6 +1404,31 @@ RSpec.describe Booking::Web::App do
     end
   end
 
+  describe "counting visits" do
+    def visitors = db[:visits].select_map(%i[user_id date])
+
+    it "counts a signed-in person once a day, however many screens they open" do
+      sign_in(user_id: 42)
+      get "/"
+      get "/clubs"
+
+      expect(visitors).to eq([[42, today]])
+    end
+
+    it "counts nobody who has not signed in" do
+      get "/"
+
+      expect(visitors).to be_empty
+    end
+
+    it "leaves the owner out of their own count" do
+      sign_in(user_id: owner_id)
+      get "/"
+
+      expect(visitors).to be_empty
+    end
+  end
+
   describe "the dashboard" do
     def log(process, *lines)
       File.write(Booking::Ops::LogFile.path(log_dir, process), lines.map { "#{_1}\n" }.join, encoding: Encoding::UTF_8)
@@ -1458,6 +1484,14 @@ RSpec.describe Booking::Web::App do
         get "/admin"
 
         expect(last_response.body).to include("Database", "Disk", "Active watches", "rows", "Forecast")
+      end
+
+      it "says how many people open the app, and how many are new" do
+        visits.record(42, on: today)
+
+        get "/admin"
+
+        expect(last_response.body).to include("Visitors", "1 opened the app", "1 new")
       end
 
       it "lists the latest lines that report trouble" do

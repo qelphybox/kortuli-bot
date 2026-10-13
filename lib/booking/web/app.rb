@@ -97,6 +97,11 @@ module Booking
 
         def require_visitor!
           redirect(to("/start")) unless visitor_id
+
+          # Every signed-in screen is a Visit, unless it is the owner's: the
+          # person who runs the bot opens it more than anybody, and would
+          # drown the very count they are reading.
+          settings.repos.visits.record(visitor_id, on: Clock.local_date(Clock.now)) unless owner?
         end
 
         def owner? = !settings.owner_id.nil? && visitor_id == settings.owner_id

@@ -139,8 +139,14 @@ its own. Proves the process is up, not that it is working — a stale Poll is
 what says the poll loop has stopped.
 _Avoid_: ping, health check, liveness
 
+**Visit**:
+One person opening the mini app on one local date — counted once however
+many screens they open, and only once they are signed in. What they looked at
+is not kept. The owner's own are not counted.
+_Avoid_: session, hit, page view
+
 **Dashboard**:
 The owner's screen in the mini app: Heartbeats, every Club's last Poll, the
-database and the disk under it, and the logs to search. Exists for
+Visits, the database and the disk under it, and the logs to search. Exists for
 `OWNER_TELEGRAM_ID` alone; to anybody else it is not there.
 _Avoid_: admin panel, monitoring, status page

@@ -15,6 +15,13 @@ module Booking
 
       Activity = Data.define(:people, :active_watches, :notified_24h, :freed_24h)
 
+      # Who opens the app. `today`, `week` and `month` count people seen in the
+      # last one, seven and thirty local dates; `returning` those seen on more
+      # than one; `days` is the last DAYS_SHOWN dates, newest first.
+      Visitors = Data.define(:total, :today, :week, :month, :new_week, :returning, :days)
+      VisitorDay = Data.define(:date, :people, :new)
+      DAYS_SHOWN = 14
+
       Forecast = Data.define(:fetched_at, :hours)
 
       # A club and how its last Poll went. `state` is the outcome, unless the
@@ -76,6 +83,34 @@ module Booking
           active_watches: @db[:watches].where(active: true).count,
           notified_24h: @db[:notifications].where { sent_at >= since }.count,
           freed_24h: @db[:events].where(kind: "became_available").where { occurred_at >= since }.count
+        )
+      end
+
+      # Read from Visits alone. A person who pressed /start and never opened
+      # the app is not here: the bot does not touch the database.
+      def visitors(now: Clock.now)
+        today = Clock.local_date(now)
+        visits = @db[:visits]
+        seen_since = ->(days) { visits.where { date > today - days }.select(:user_id).distinct.count }
+
+        # SQLite hands an aggregate back as text, whatever the column was.
+        firsts = visits.group(:user_id).select_hash(:user_id, Sequel.function(:min, :date).as(:first))
+                       .transform_values { Date.iso8601(_1.to_s) }
+        new_by_date = firsts.values.tally
+        people_by_date = visits.where { date > today - DAYS_SHOWN }.group_and_count(:date)
+                               .to_h { [Date.iso8601(_1[:date].to_s), _1[:count]] }
+
+        Visitors.new(
+          total: firsts.size,
+          today: seen_since.(1),
+          week: seen_since.(7),
+          month: seen_since.(30),
+          new_week: firsts.count { |_, first| first > today - 7 },
+          returning: visits.group(:user_id).having { count.function.* > 1 }.count,
+          days: Array.new(DAYS_SHOWN) do |back|
+            date = today - back
+            VisitorDay.new(date:, people: people_by_date.fetch(date, 0), new: new_by_date.fetch(date, 0))
+          end
         )
       end
 

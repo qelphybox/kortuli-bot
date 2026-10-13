@@ -312,8 +312,14 @@ from the Dashboard chip on the owner's home screen. It shows:
   seconds old, or `unknown`;
 - every club's **last Poll** — `ok`, `suspect`, `failed`, `stale` once it is
   three ticks old, or `never`;
-- people, active watches, and the last 24 hours' freed slots and
-  notifications;
+- people with a watch or a star, active watches, and the last 24 hours'
+  freed slots and notifications;
+- **Visitors** — how many people have opened the app at all, how many today,
+  this week and this month, how many are new and how many came back another
+  day, and the last two weeks day by day. A person counts once a day, from
+  the first signed-in screen; the owner's own visits are left out, and so is
+  anybody who pressed /start without opening the app, because the bot does
+  not touch the database;
 - free space on the disk the database lives on, the size of `booking.db` and
   its WAL, rows per table, and the host's load and memory;
 - the latest lines that report trouble, and a search across all three logs
