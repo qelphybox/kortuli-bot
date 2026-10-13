@@ -62,7 +62,7 @@ _Avoid_: region, area, location
 **Court-level club**:
 A Club whose source names the individual court, so its Cells can say how many
 of them are free. Most Clubs are: every Padelbade location, PadelHub, Padel
-Academy, Lemans, Tbilisi Padel Didi Dighomi, the three in Batumi,
+Academy, Lemans, Padel Gldani, Tbilisi Padel Didi Dighomi, the three in Batumi,
 Higgs, Love Padel and AIA. `courts:` in its config is what marks one.
 _Avoid_: per-court, granular
 

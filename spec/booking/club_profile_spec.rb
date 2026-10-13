@@ -69,6 +69,16 @@ RSpec.describe Booking::ClubProfile do
 
       expect(described_class.load("config/club_profiles.yml").keys).to match_array(linked)
     end
+
+    # The import writes the file as one YAML.dump, so anything else in it was
+    # typed or merged by hand — which is how a merge once moved one club's
+    # hours and prices under another's with every key still present.
+    it "ships the file exactly as the import writes it" do
+      text = File.read("config/club_profiles.yml", encoding: "UTF-8")
+      body = text.sub(/\A(#[^\n]*\n)+/, "")
+
+      expect(body).to eq(YAML.dump(YAML.safe_load(body)).delete_prefix("---\n"))
+    end
   end
 
   describe "in words" do

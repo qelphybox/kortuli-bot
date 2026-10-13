@@ -4,7 +4,7 @@
 # Each club's Profile: the cover over every court, where it is, and the
 # hours and prices it lists on sapadelo.com. For people to read; nothing
 # that decides a Cell looks at it.
-checked_on: '2026-10-11'
+checked_on: '2026-10-13'
 clubs:
   kus-tba-padel:
     source: https://sapadelo.com/georgia/clubs/kus-tba-padel
@@ -271,36 +271,51 @@ clubs:
       days:
       - sat
       - sun
+  padel-gldani:
+    source: https://sapadelo.com/georgia/clubs/padel-gldani
+    area: Gldani
+    address: 56 Ilia Vekua St
+    phone: "+995555503303"
+    lat: 41.8042129
+    lng: 44.8308884
+    courts:
+    - name: Court 1
+      cover: covered
+    - name: Court 2
+      cover: covered
+    - name: Court 3
+      cover: outdoor
+    hours:
+      mon: '08:00–02:00'
+      tue: '08:00–02:00'
+      wed: '08:00–02:00'
+      thu: '08:00–02:00'
+      fri: '08:00–02:00'
+      sat: '08:00–02:00'
+      sun: '08:00–02:00'
+    prices:
+    - gel: 60
+      from_price: true
+    - gel: 50
+      from_price: true
+    - gel: 60
+      days:
+      - sat
+      - sun
+    - gel: 70
+      days:
+      - sat
+      - sun
   padel-port:
     source: https://sapadelo.com/georgia/clubs/padel-port
     address: 3 Tengiz Abuladze
     lat: 41.6552375
     lng: 41.6410712
-
-  tbilisi-padel-didi-dighomi:
-    source: https://sapadelo.com/georgia/clubs/tbilisi-padel-didi-dighomi
-    area: Didi Dighomi
-    address: 47 Giorgi Brtskinvali
-    phone: "+995577952424"
-    lat: 41.788585
-    lng: 44.7521132
     courts:
     - name: Court 1
       cover: outdoor
     - name: Court 2
       cover: outdoor
-
-  aia-padel:
-    source: https://sapadelo.com/georgia/clubs/aia-padel-club
-    address: Konstantine Gamsakhurdia St 65
-    phone: "+995551494009"
-    lat: 42.2409611
-    lng: 42.6851697
-    courts:
-    - name: Court 1
-      cover: covered
-    - name: Court 2
-      cover: covered
     - name: Court 3
       cover: outdoor
     - name: Court 4
@@ -335,7 +350,49 @@ clubs:
       sun: 10:00–02:00
     prices:
     - gel: 80
-
+  grand-padel-batumi:
+    source: https://sapadelo.com/georgia/clubs/grand-padel-batumi
+    address: Sherif Khimshiashvili Street 18
+    phone: "+995599672672"
+    lat: 41.6371022
+    lng: 41.6085884
+    courts:
+    - name: Court A
+      cover: outdoor
+    - name: Court B
+      cover: outdoor
+    hours:
+      mon: '09:00–02:00'
+      tue: '09:00–02:00'
+      wed: '09:00–02:00'
+      thu: '09:00–02:00'
+      fri: '09:00–02:00'
+      sat: '09:00–02:00'
+      sun: '09:00–02:00'
+    prices:
+    - gel: 65
+    - gel: 50
+      from: '09:00'
+      to: '13:00'
+    - gel: 80
+      from: '17:00'
+      to: '02:00'
+  tbilisi-padel-didi-dighomi:
+    source: https://sapadelo.com/georgia/clubs/tbilisi-padel-didi-dighomi
+    area: Didi Dighomi
+    address: 47 Giorgi Brtskinvali
+    phone: "+995577952424"
+    lat: 41.788585
+    lng: 44.7521132
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    - name: Court 4
+      cover: outdoor
     - name: Court 5
       cover: outdoor
     hours:
@@ -389,7 +446,22 @@ clubs:
       sun: '09:00–00:00'
     prices:
     - gel: 60
-
+  aia-padel:
+    source: https://sapadelo.com/georgia/clubs/aia-padel-club
+    address: Konstantine Gamsakhurdia St 65
+    phone: "+995551494009"
+    lat: 42.2409611
+    lng: 42.6851697
+    courts:
+    - name: Court 1
+      cover: covered
+    - name: Court 2
+      cover: covered
+    - name: Court 3
+      cover: outdoor
+    - name: Court 4
+      cover: outdoor
+    hours:
       mon: '08:00–01:00'
       tue: '08:00–01:00'
       wed: '08:00–01:00'
@@ -398,7 +470,6 @@ clubs:
       sat: '08:00–01:00'
       sun: '08:00–01:00'
     prices: []
-
   padelbade-rustavi:
     source: https://sapadelo.com/georgia/clubs/padelbade-rustavi
     address: 11 Todria St
@@ -466,31 +537,3 @@ clubs:
     - gel: 40
       from: '08:00'
       to: '16:00'
-
-  grand-padel-batumi:
-    source: https://sapadelo.com/georgia/clubs/grand-padel-batumi
-    address: Sherif Khimshiashvili Street 18
-    phone: "+995599672672"
-    lat: 41.6371022
-    lng: 41.6085884
-    courts:
-    - name: Court A
-      cover: outdoor
-    - name: Court B
-      cover: outdoor
-    hours:
-      mon: '09:00–02:00'
-      tue: '09:00–02:00'
-      wed: '09:00–02:00'
-      thu: '09:00–02:00'
-      fri: '09:00–02:00'
-      sat: '09:00–02:00'
-      sun: '09:00–02:00'
-    prices:
-    - gel: 65
-    - gel: 50
-      from: '09:00'
-      to: '13:00'
-    - gel: 80
-      from: '17:00'
-      to: '02:00'

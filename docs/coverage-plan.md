@@ -10,11 +10,11 @@ response; nothing here is taken from a directory listing alone.
 
 ## Where we are
 
-Nineteen clubs, 64 courts, four Cities, and Padel Gldani (3) on its way in:
+Twenty clubs, 67 courts, four Cities:
 
 - **Tbilisi** — Kus Tba, GymBreeze Ninoshvili, Radio City and Sport Palace,
   Padelbade Krtsanisi and Dighomi, PadelHub, Padel Academy, Lemans Padel,
-  Tbilisi Padel Didi Dighomi, Mtatsminda and Ilia's Garden.
+  Tbilisi Padel Didi Dighomi, Mtatsminda and Ilia's Garden, Padel Gldani.
 - **Batumi** — Padel Port, Padel Port New Park, Grand Padel Batumi.
 - **Rustavi** — Padelbade Rustavi, Higgs.
 - **Kutaisi** — Love Padel, AIA Padel.
@@ -60,7 +60,7 @@ back when a directory or `discover:reservio` turns it up again.
 | Tbilisi | Tbilisi Padel Mtatsminda | 1 | BookingPress | watched |
 | Tbilisi | Tbilisi Padel Ilia's Garden | 1 | BookingPress | watched |
 | Tbilisi | Lemans Padel | 4 | own (PHP) | watched |
-| Tbilisi | Padel Gldani | 3 | own (tRPC, Manus) | adapter in progress |
+| Tbilisi | Padel Gldani | 3 | own (tRPC, Manus) | watched |
 | Tbilisi | PadelHub | 3 | own (Supabase) | watched |
 | Tbilisi | Padel Academy | 3 | own (Laravel), member login | watched |
 | Tbilisi | Sportscape Samgori | 4 | — | no online booking found |
@@ -163,11 +163,12 @@ Independent within a wave; ordered by courts-per-unit-of-work.
 
 ### Wave 3 — needs F1 + F2
 
-- **Padel Gldani** → **3 courts**. **In progress, 2026-10-13.** Its `robots.txt`
+- ~~**Padel Gldani** → **3 courts**.~~ **Done, 2026-10-13.** Its `robots.txt`
   gained `Disallow: /api/` on 2026-09-30 (a Manus default, by the look of it);
   read under ADR-0004. Open tRPC, `bookings.getBookedSlots`,
   batched so three courts arrive in one request. Returns booked intervals →
-  invert. Has a real `?court=<id>` deeplink, the only club here that does.
+  invert. A business day is now D's bookings from 08:00 plus D+1's before
+  08:00, as the site's own client builds it, so each day reads two dates. Has a real `?court=<id>` deeplink, the only club here that does.
 - ~~**PadelHub** → **3 courts**~~ **Done.** A third court opened 2026-10-05. Supabase RPC
   `POST /rest/v1/rpc/get_booking_availability` with the publishable anon key
   from the bundle. Returns booked hours per court → invert. The `bookings`

@@ -389,17 +389,18 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **Eight sources, nineteen clubs, four Cities.** Kus Tba (`turtle-booking`),
+- **Nine sources, twenty clubs, four Cities.** Kus Tba (`turtle-booking`),
   GymBreeze (three locations), Book & Go (Padelbade's three and Love Padel),
   PadelHub (Supabase), Padel Academy (its own API, behind a member login),
-  Lemans, BookingPress (Tbilisi Padel's three), Reservio
+  Lemans, BookingPress (Tbilisi Padel's three), Padel Gldani (tRPC), Reservio
   (Batumi's three), Higgs and AIA Padel (their own APIs) — a venue with several
   locations is several clubs, because they sit in different parts of town.
   What is left in Georgia, and why, is in `docs/coverage-plan.md`. Everything
   above the adapter is club-agnostic, so a new system is a new file in
   [lib/booking/adapters/](lib/booking/adapters/) and a line in `REGISTRY`.
 - **robots.txt does not keep a club out; a login or a challenge does.**
-  Reservio's API host disallows the paths we read, and we read them anyway, once every few minutes, as a visitor's browser would.
+  Reservio's API host and Padel Gldani's site disallow the paths we read, and
+  we read them anyway, once every few minutes, as a visitor's browser would.
   [ADR-0004](docs/adr/0004-robots-txt-is-not-a-refusal-a-login-is.md) draws
   the line and says what happens the day a club asks us to stop.
 - **Kus Tba and GymBreeze are watched by the hour, not by the court.** Both
