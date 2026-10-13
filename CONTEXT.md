@@ -18,8 +18,8 @@ where the club says.
 _Avoid_: square, box, slot
 
 **Grid**:
-The Cells for every watched club over the booking horizon — what the viewer
-shows. One row per club, one column per hour.
+The Cells for every watched club in one City over the booking horizon — what
+the viewer shows. One row per club, one column per hour.
 _Avoid_: schedule, table, calendar
 
 **Rundown**:
@@ -49,6 +49,15 @@ _Avoid_: working hours, business hours
 One watchable source of Slots. A venue with two locations is two Clubs, because
 a person choosing between them is choosing between neighbourhoods.
 _Avoid_: venue, location, site
+
+**City**:
+The town a Club is in — Tbilisi, Rustavi, Batumi, Kutaisi — named in its
+settings, and Tbilisi where they say nothing. An attribute of the Club and
+nothing else: a Watch names Clubs, so it is in whichever Cities they are.
+A person looks at one City at a time, the one they last picked, and the
+Grid, Rundowns, the clubs directory and the new-watch form show only its
+Clubs. Each City has its own Forecast.
+_Avoid_: region, area, location
 
 **Court-level club**:
 A Club whose source names the individual court, so its Cells can say how many
@@ -80,10 +89,10 @@ that is Opening hours' job, and the two can disagree.
 _Avoid_: working hours, schedule
 
 **Forecast**:
-The weather over Tbilisi by the hour — the chance of rain, how much, how warm
+The weather over a City by the hour — the chance of rain, how much, how warm
 — from Open-Meteo, fetched by the poller every hour and replaced whole. One
-point for the whole city. For a person choosing between an open court and a
-roofed one; read by nothing that decides a Cell.
+point per City, and a Club reads its own City's. For a person choosing
+between an open court and a roofed one; read by nothing that decides a Cell.
 _Avoid_: weather data, meteo
 
 **Wet hour**:

@@ -5,6 +5,11 @@
 #
 # Removing an entry disables that club on the next boot; its row stays.
 #
+# `settings.city` is the City the club is in, and Tbilisi when it is left out.
+# The app shows one city's clubs at a time, and fetches the Forecast once per
+# city — at the point named in Weather::CITIES, so a city new to this file
+# needs its line there too, or its clubs go without weather.
+#
 # Not here on purpose: padel-club2.reservio.com ("Padel Club 2") is GymBreeze
 # Ninoshvili's own Reservio page — the same courts, read twice. Dropped
 # 2026-10-13; gymbreeze-ninoshvili is the one we watch.
@@ -15,6 +20,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     booking_url: "https://kustbapadel.ge/book/"
     # The club's page on sapadelo.com, where its Profile comes from — see
     # config/club_profiles.yml and `rake sapadelo:import`.
@@ -41,6 +47,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     location_id: "63f663fa-1852-5bde-bf94-dee5b176de1d"
     sapadelo: gymbreeze-ninoshvili
     booking_url: "https://gymbreeze.ge/eng"
@@ -64,6 +71,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     location_id: "752155d7-39aa-53d9-bc18-682695f85244"
     sapadelo: gymbreeze-radio-city
     booking_url: "https://gymbreeze.ge/eng"
@@ -83,6 +91,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     location_id: "7a896411-0c3a-5336-a522-a6da08b6132c"
     sapadelo: gymbreeze-sports-palace
     booking_url: "https://gymbreeze.ge/eng"
@@ -103,6 +112,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     location_id: 163
     sapadelo: padelbade-krtsanisi
     booking_url: "https://app.padelbade.com/"
@@ -134,6 +144,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     location_id: 141
     sapadelo: padelbade-dighomi
     booking_url: "https://app.padelbade.com/"
@@ -158,6 +169,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     booking_url: "https://www.padelhub.ge/booking"
     sapadelo: padelhub
     # 40 for starts up to 14:00, then the court's own evening price: 60
@@ -186,6 +198,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     booking_url: "https://booking.padelacademy.ge/"
     sapadelo: padel-academy
     price: "80 GEL"
@@ -208,6 +221,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    city: Tbilisi
     booking_url: "https://lemanspadel.ge/book-padel/"
     sapadelo: lemans-padel
     # 50 for weekday starts before 17:00, 70 evenings and weekends; the same

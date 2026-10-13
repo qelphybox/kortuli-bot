@@ -46,7 +46,7 @@ module Booking
 
         # Its own job rather than a step of the tick: a different source on a
         # different clock, and a club timing out must not hold the sky up.
-        refresh = Weather::Refresh.new(http: Http.new, forecast: @repos.forecast, logger: @logger)
+        refresh = Weather::Refresh.new(http: Http.new, forecast: @repos.forecast, clubs: @repos.clubs, logger: @logger)
         scheduler.every(Config.weather_interval, first: :now, overlap: false) do
           refresh.call
         rescue StandardError => e
@@ -55,10 +55,13 @@ module Booking
       end
 
       def build_notifier
+        clubs = @repos.clubs.all
+
         Notifier.new(
           notifications: @repos.notifications,
           transport: Telegram::Transport.new(::Telegram::Bot::Api.new(Config.telegram_token)),
-          clubs: @repos.clubs.all.to_h { [_1.slug, _1.name] },
+          clubs: clubs.to_h { [_1.slug, _1.name] },
+          cities: clubs.to_h { [_1.slug, _1.city] },
           forecast: @repos.forecast,
           logger: @logger
         )

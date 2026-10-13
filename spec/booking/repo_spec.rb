@@ -143,6 +143,63 @@ RSpec.describe "repositories" do
     end
   end
 
+  describe Booking::Repo::Preferences do
+    subject(:repo) { described_class.new(db) }
+
+    it "has no city for somebody who never picked one" do
+      expect(repo.city(42)).to be_nil
+    end
+
+    it "keeps the latest city each person picked, and only theirs" do
+      repo.choose_city(42, "Batumi")
+      repo.choose_city(42, "Kutaisi")
+      repo.choose_city(7, "Rustavi")
+
+      expect(repo.city(42)).to eq("Kutaisi")
+      expect(db[:preferences].where(user_id: 42).count).to eq(1)
+    end
+  end
+
+  describe Booking::Repo::Forecast do
+    subject(:repo) { described_class.new(db) }
+
+    let(:now) { Time.utc(2026, 10, 13, 9) }
+
+    def hour(at, chance:)
+      Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc(at), rain_chance: chance, rain_mm: 0.0,
+                                 code: 3, temperature: 15.0, day: true)
+    end
+
+    it "keeps each city's hours apart, the same hour included" do
+      repo.replace([hour("2026-10-13 19:00", chance: 0)], city: "Tbilisi", fetched_at: now)
+      repo.replace([hour("2026-10-13 19:00", chance: 90)], city: "Batumi", fetched_at: now + 60)
+
+      expect(repo.hours("Tbilisi").map(&:rain_chance)).to eq([0])
+      expect(repo.hours("Batumi").map(&:rain_chance)).to eq([90])
+      expect(repo.fetched_at("Batumi")).to eq(now + 60)
+      expect(repo.counts).to eq("Tbilisi" => 1, "Batumi" => 1)
+    end
+
+    # A refresh that only reached one city must not wipe another's.
+    it "replaces one city's hours without touching another's" do
+      repo.replace([hour("2026-10-13 19:00", chance: 0)], city: "Tbilisi", fetched_at: now)
+      repo.replace([hour("2026-10-13 19:00", chance: 90)], city: "Batumi", fetched_at: now)
+      repo.replace([hour("2026-10-13 20:00", chance: 40), hour("2026-10-13 21:00", chance: 10)], city: "Tbilisi", fetched_at: now + 3600)
+
+      expect(repo.hours("Tbilisi").map(&:rain_chance)).to eq([40, 10])
+      expect(repo.hours("Batumi").map(&:rain_chance)).to eq([90])
+    end
+
+    it "forgets the cities it is no longer asked to keep" do
+      repo.replace([hour("2026-10-13 19:00", chance: 0)], city: "Tbilisi", fetched_at: now)
+      repo.replace([hour("2026-10-13 19:00", chance: 90)], city: "Batumi", fetched_at: now)
+      repo.keep_only(["Tbilisi"])
+
+      expect(repo.counts).to eq("Tbilisi" => 1)
+      expect(repo.fetched_at("Batumi")).to be_nil
+    end
+  end
+
   describe Booking::Repo::Clubs do
     subject(:repo) { described_class.new(db) }
 

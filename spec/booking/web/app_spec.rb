@@ -8,12 +8,12 @@ RSpec.describe Booking::Web::App do
   let(:sessions) { Booking::Web::Session.new(secret: "a-secret-that-only-the-server-knows") }
 
   # Clubs and Slots are stood in for: the web only reads them, and the routes
-  # are what is under test, not Sequel. Watches, Favourites and Visits are the
-  # real repositories over an in-memory database, because here the web
+  # are what is under test, not Sequel. Watches, Favourites, Visits and
+  # Preferences are the real repositories over an in-memory database, because here the web
   # *writes* — and a faked repository would prove only that the route called
   # the method it was written to call. The Forecast is real too, because filling it is
   # simpler than faking it.
-  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits)
+  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences)
   FakeClubs = Struct.new(:enabled)
   FakeSlots = Struct.new(:all)
 
@@ -22,6 +22,7 @@ RSpec.describe Booking::Web::App do
   let(:favourites) { Booking::Repo::Favourites.new(db) }
   let(:forecast) { Booking::Repo::Forecast.new(db) }
   let(:visits) { Booking::Repo::Visits.new(db) }
+  let(:preferences) { Booking::Repo::Preferences.new(db) }
   let(:today) { Booking::Clock.local_date(Booking::Clock.now) }
   let(:clubs) do
     [
@@ -56,7 +57,7 @@ RSpec.describe Booking::Web::App do
       )
     }
   end
-  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits) }
+  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences) }
 
   let(:owner_id) { 7 }
   let(:log_dir) { Dir.mktmpdir }
@@ -422,7 +423,7 @@ RSpec.describe Booking::Web::App do
         Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc(format("%s %02d:00", day, hour)),
                                    rain_chance: hour == 19 ? 80 : 0, rain_mm: 0.0, code: 3,
                                    temperature: 12.0 + (hour / 4), day: false)
-      end)
+      end, city: "Tbilisi")
       sign_in
       get "/date/#{day}/share"
 
@@ -1197,7 +1198,7 @@ RSpec.describe Booking::Web::App do
     end
 
     describe "the message" do
-      before { forecast.replace([Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc("#{day} 20:00"), rain_chance: 80, rain_mm: 2.0, code: 61, temperature: 13.6, day: false)]) }
+      before { forecast.replace([Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc("#{day} 20:00"), rain_chance: 80, rain_mm: 2.0, code: 61, temperature: 13.6, day: false)], city: "Tbilisi") }
 
       it "is not served to somebody without a session" do
         get "/date/#{day}/club/kus-tba-padel/game", hours: %w[19 20]
@@ -1342,7 +1343,7 @@ RSpec.describe Booking::Web::App do
 
     describe "with rain likely in the evening" do
       before do
-        forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: [19, 20].include?(_1) ? 80 : 0) })
+        forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: [19, 20].include?(_1) ? 80 : 0) }, city: "Tbilisi")
       end
 
       it "says when it will rain above the date's clubs" do
@@ -1381,7 +1382,7 @@ RSpec.describe Booking::Web::App do
     end
 
     describe "with a dry day" do
-      before { forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: 0) }) }
+      before { forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: 0) }, city: "Tbilisi") }
 
       it "says it will stay dry, and leaves the favourites leading" do
         sign_in(user_id: 42)
@@ -1401,6 +1402,232 @@ RSpec.describe Booking::Web::App do
 
       get "/date/#{tomorrow}/club/kus-tba-padel"
       expect(last_response.body).not_to include("hour__weather")
+    end
+  end
+
+  describe "picking a city" do
+    let(:day) { today + 1 }
+    # Padel Club 2 and Kus Tba say no city, so they are Tbilisi's, as every
+    # entry was before there was a second.
+    let(:padel_port) do
+      Booking::Club.new(
+        slug: "padel-port", name: "Padel Port", adapter: "reservio",
+        settings: { "city" => "Batumi", "opening_hours" => { "from" => "08:00", "to" => "24:00" },
+                    "courts" => 4, "booking_url" => "https://padel-port.example/" }
+      )
+    end
+    let(:batumi_clubs) { [*clubs, padel_port] }
+    let(:repos) { FakeRepos.new(FakeClubs.new(batumi_clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences) }
+    let(:free_slots) do
+      [slot(club: "padel-club-2", at: "#{day} 18:00"), slot(club: "kus-tba-padel", court: "any", at: "#{day} 18:00"),
+       slot(club: "padel-port", at: "#{day} 19:00")]
+    end
+
+    def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+
+    def switch = last_response.body[%r{<div class="filters city-switch".*?</div>}m].to_s
+
+    def preview = CGI.unescapeHTML(last_response.body[%r{<pre class="copy-source"[^>]*>(.*?)</pre>}m, 1].to_s)
+
+    def pick(city, back: "/") = post("/city", city:, back:)
+
+    describe "with one city" do
+      let(:batumi_clubs) { clubs }
+
+      # Nowhere else to go, so nothing to pick between.
+      it "draws no switch, and names the city the clubs are in" do
+        sign_in
+        get "/"
+
+        expect(last_response.body).not_to include("city-switch")
+        expect(last_response.body).to include("Free padel courts across Tbilisi.")
+      end
+    end
+
+    it "starts in Tbilisi, with a switch to every city that has a club" do
+      sign_in
+      get "/"
+
+      expect(switch).to include('value="Tbilisi" aria-current="true"').and include('value="Batumi"')
+      get "/date/#{day}"
+      expect(club_names_in_order).to contain_exactly("Padel Club 2", "Kus Tba Padel")
+    end
+
+    it "lands back on the screen the switch was pressed on" do
+      sign_in
+      pick("Batumi", back: "/clubs")
+
+      expect(last_response).to be_redirect
+      expect(last_response.location).to end_with("/clubs")
+    end
+
+    # The path comes from the page; only the screens the switch is drawn on
+    # are somewhere to go back to.
+    it "sends anything else back to the dates" do
+      sign_in
+      pick("Batumi", back: "https://example.com/elsewhere")
+
+      expect(URI(last_response.location).path).to eq("/")
+    end
+
+    it "refuses a city no club is in" do
+      sign_in
+      pick("Gori")
+
+      expect(last_response.status).to eq(404)
+      expect(preferences.city(42)).to be_nil
+    end
+
+    it "is not served to somebody without a session" do
+      pick("Batumi")
+
+      expect(last_response.location).to end_with("/start")
+    end
+
+    describe "once Batumi is picked" do
+      before do
+        sign_in(user_id: 42)
+        pick("Batumi")
+      end
+
+      it "counts only Batumi's free hours on the dates" do
+        get "/"
+
+        expect(last_response.body).to include("Free padel courts across Batumi.")
+        expect(switch).to include('value="Batumi" aria-current="true"')
+        row = last_response.body[%r{href="/date/#{day}".*?</a>}m].to_s
+        expect(row).to include('<span class="day-row__slots">1</span>')
+      end
+
+      it "lists only Batumi's clubs on a date" do
+        get "/date/#{day}"
+
+        expect(club_names_in_order).to eq(["Padel Port"])
+      end
+
+      it "shares only Batumi's clubs" do
+        get "/date/#{day}/share"
+
+        expect(preview).to include("Padel Port")
+        expect(preview).not_to include("Kus Tba Padel")
+        expect(preview).not_to include("Padel Club 2")
+      end
+
+      it "lists only Batumi's clubs in the directory" do
+        get "/clubs"
+
+        expect(last_response.body).to include("1 watched · Batumi")
+        expect(last_response.body).to include('href="/clubs/padel-port"')
+        expect(last_response.body).not_to include('href="/clubs/kus-tba-padel"')
+      end
+
+      # A Watch names clubs, so the form offers the ones in the city picked.
+      it "offers only Batumi's clubs to watch" do
+        get "/watches/new"
+
+        expect(last_response.body).to include('name="club_slugs[]" value="padel-port"')
+        expect(last_response.body).not_to include('name="club_slugs[]" value="kus-tba-padel"')
+        # The switch's form sits outside the watch's, which HTML would
+        # otherwise swallow.
+        expect(last_response.body.index('<form id="city-switch"')).to be < last_response.body.index('<form class="new-watch"')
+        expect(switch).to include('form="city-switch"')
+      end
+
+      it "still lists every watch, whatever city its clubs are in" do
+        watches.create(user_id: 42, club_slugs: ["kus-tba-padel"], weekdays: [1], from_minute: 18 * 60, to_minute: 22 * 60)
+        get "/watches"
+
+        expect(last_response.body).to include("Kus Tba Padel")
+      end
+
+      # A club's own screens are reached by its slug, from a link that may
+      # have been made while the other city was picked.
+      it "still opens a Tbilisi club's hours and Profile" do
+        get "/date/#{day}/club/kus-tba-padel"
+        expect(last_response.status).to eq(200)
+
+        get "/clubs/kus-tba-padel"
+        expect(last_response.status).to eq(200)
+      end
+
+      it "keeps the favourites chip to Batumi's favourites" do
+        favourites.add(42, "kus-tba-padel")
+        favourites.add(42, "padel-port")
+        get "/date/#{day}?only=favourites"
+
+        expect(club_names_in_order).to eq(["Padel Port"])
+      end
+
+      # Padel Port has no Profile, so it is not known to have a roof.
+      it "keeps the roof chip working inside the city" do
+        get "/date/#{day}?only=covered"
+
+        expect(club_names_in_order).to be_empty
+        expect(last_response.body).to include("No club with a roof has anything on this day.")
+      end
+
+      it "is remembered for the next visit, and for nobody else" do
+        get "/"
+        expect(last_response.body).to include("across Batumi")
+
+        sign_in(user_id: 99)
+        get "/"
+        expect(last_response.body).to include("across Tbilisi")
+      end
+    end
+
+    # Each club reads the sky over its own city: a wet evening in Batumi
+    # says nothing about Tbilisi's open courts, and the other way round.
+    describe "the forecast" do
+      def hour(at, chance:, temperature:)
+        Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc(at), rain_chance: chance, rain_mm: 0.0,
+                                   code: 3, temperature:, day: false)
+      end
+
+      before do
+        forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: 0, temperature: 15.0) }, city: "Tbilisi")
+        forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: _1 == 20 ? 80 : 0, temperature: 22.0) }, city: "Batumi")
+        sign_in(user_id: 42)
+      end
+
+      it "heads a date with the picked city's weather" do
+        get "/date/#{day}"
+        expect(last_response.body).to include("No rain expected")
+
+        pick("Batumi")
+        get "/date/#{day}"
+        expect(last_response.body).to include("Rain likely 20:00–21:00")
+      end
+
+      it "marks the rainy date on the picked city's home screen alone" do
+        get "/"
+        expect(last_response.body).not_to include('class="rain-chip"')
+
+        pick("Batumi")
+        get "/"
+        expect(last_response.body.scan('class="rain-chip"').size).to eq(1)
+      end
+
+      it "puts the picked city's weather into the Rundown" do
+        pick("Batumi")
+        get "/date/#{day}/share"
+
+        expect(preview).to include("Rain likely 20:00–21:00")
+      end
+
+      it "marks a club's hours with its own city's weather, whichever is picked" do
+        pick("Batumi")
+        get "/date/#{day}/club/kus-tba-padel"
+
+        expect(last_response.body).to include("15°")
+        expect(last_response.body).not_to include("22°")
+      end
+
+      it "gives a Game the weather of the club's city" do
+        get "/game/padel-port/#{day}/20-21"
+
+        expect(last_response.body).to include("80% · 22°")
+      end
     end
   end
 
@@ -1484,6 +1711,17 @@ RSpec.describe Booking::Web::App do
         get "/admin"
 
         expect(last_response.body).to include("Database", "Disk", "Active watches", "rows", "Forecast")
+      end
+
+      it "ages the Forecast city by city" do
+        Booking::Repo::Clubs.new(db).upsert(slug: "padel-port", name: "Padel Port", adapter: "reservio", settings: { city: "Batumi" })
+        hour = Booking::Weather::Hour.new(starts_at: Time.now.utc, rain_chance: 0, rain_mm: 0.0, code: 1, temperature: 18.0, day: true)
+        forecast.replace([hour], city: "Tbilisi", fetched_at: Time.now.utc - 600)
+
+        get "/admin"
+
+        expect(last_response.body).to include("<dt>Tbilisi</dt>", "fetched 10m ago · 1 hours")
+        expect(last_response.body).to include("<dt>Batumi</dt>", "never fetched · 0 hours")
       end
 
       it "says how many people open the app, and how many are new" do

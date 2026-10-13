@@ -88,10 +88,11 @@
 
   <div class="profile__section">
     <h2 class="profile__label">Forecast</h2>
-    <% forecast = @dashboard.forecast %>
     <dl class="facts">
-      <dt>Fetched</dt><dd><%= ago(forecast.fetched_at, now: @now) %></dd>
-      <dt>Hours ahead</dt><dd><%= forecast.hours %></dd>
+      <% @dashboard.forecasts.each do |forecast| %>
+        <dt><%= h(forecast.city) %></dt>
+        <dd><%= forecast.fetched_at ? "fetched #{ago(forecast.fetched_at, now: @now)}" : "never fetched" %> · <%= forecast.hours %> hours</dd>
+      <% end %>
     </dl>
   </div>
 

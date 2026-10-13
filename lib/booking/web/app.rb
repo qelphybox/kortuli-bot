@@ -63,6 +63,12 @@ module Booking
       # The ways a date's clubs can be narrowed, beside "all of them".
       CLUB_FILTERS = %w[covered favourites].freeze
 
+      # The screens the city switch is drawn on, and so the only places it
+      # sends a person back to. Anything else lands on the dates: the path
+      # arrives from the page, and a redirect to wherever it says is a
+      # redirect anywhere.
+      CITY_SWITCH_BACK = %r{\A/(?:clubs|watches/new)?\z}
+
       helpers Icons
 
       helpers do
@@ -179,8 +185,10 @@ module Booking
           redirect(to("/watches"))
         end
 
-        # Memoised per request: every watch on the screen asks for it.
-        def club_names = @club_names ||= settings.repos.clubs.enabled.to_h { [_1.slug, _1.name] }
+        # Memoised per request: every watch on the screen asks for it. Every
+        # city's, because a person's Watches are listed whatever city they
+        # are looking at.
+        def club_names = @club_names ||= enabled_clubs.to_h { [_1.slug, _1.name] }
 
         def watch_clubs(watch) = Messages.clubs_phrase(watch, club_names)
 
@@ -200,7 +208,38 @@ module Booking
 
         def favourite?(slug) = favourites.include?(slug)
 
-        def enabled_slugs = settings.repos.clubs.enabled.map(&:slug)
+        # Every city's: a star, a watch or a club's own page names its club by
+        # slug, and the slug already says which city it is in.
+        def enabled_slugs = enabled_clubs.map(&:slug)
+
+        # Every City with an enabled club, the default first.
+        def cities = @cities ||= Club.cities(enabled_clubs)
+
+        # Only worth drawing when there is somewhere else to go.
+        def city_switch? = cities.size > 1
+
+        # The City whose clubs this person is shown: the one they last picked,
+        # while it still has a club to show; otherwise the default, or
+        # whichever city does have clubs. Memoised per request, like the
+        # tables it decides.
+        def current_city
+          @current_city ||= begin
+            picked = settings.repos.preferences.city(visitor_id)
+
+            [picked, DEFAULT_CITY].find { cities.include?(_1) } || cities.first || DEFAULT_CITY
+          end
+        end
+
+        # The clubs the dates, a date's list, Share, the directory and the
+        # new-watch form are drawn from.
+        def city_clubs = @city_clubs ||= enabled_clubs.select { _1.city == current_city }
+
+        # The form the city switch's buttons submit, by id. Apart from the
+        # buttons so they can sit inside another form — the new-watch one —
+        # which HTML will not let a second form open inside.
+        def city_form(back)
+          %(<form id="city-switch" method="post" action="/city"><input type="hidden" name="back" value="#{h(back)}"></form>)
+        end
 
         # A first visit has no submission to remember, so it starts from the
         # clubs this person has starred — the ones they would tick anyway.
@@ -223,25 +262,35 @@ module Booking
         # request rather than per screen so the Dates counts, the Clubs sub-
         # lines and the Slots rows all read the same snapshot — a poll that
         # finishes mid-render cannot change what the person sees on one page.
+        #
+        # The current city's clubs only: one city's rows are what every screen
+        # drawn from these shows.
         def horizon_tables
-          @horizon_tables ||= begin
-            clubs = settings.repos.clubs.enabled
-            slots = settings.repos.slots.all
-            horizon.to_h { [_1, Grid.build(clubs:, slots:, date: _1)] }
-          end
+          @horizon_tables ||= horizon.to_h { [_1, Grid.build(clubs: city_clubs, slots: free_slots, date: _1)] }
         end
 
-        # The Forecast by the instant each hour starts, read once per request
-        # for the same reason the tables are.
-        def forecast = @forecast ||= Weather.by_hour(settings.repos.forecast.hours)
+        def free_slots = @free_slots ||= settings.repos.slots.all
 
-        def weather_at(starts_at) = forecast[starts_at.to_i]
+        # One club's own table for a date, whatever city it is in — its hours
+        # and its Game are reached by slug, from a link that may have been
+        # made while another city was picked.
+        def club_table(date, club) = Grid.build(clubs: [club], slots: free_slots, date:)
+
+        # A City's Forecast by the instant each hour starts, read once per
+        # request for the same reason the tables are. The current city's
+        # unless a club's own screen says otherwise.
+        def forecast(city = current_city)
+          @forecasts ||= {}
+          @forecasts[city] ||= Weather.by_hour(settings.repos.forecast.hours(city))
+        end
+
+        def weather_at(starts_at, city = current_city) = forecast(city)[starts_at.to_i]
 
         # The Forecast over the hours a date's page draws that are still to
         # come — this morning's rain is no reason to book a roof tonight. Nil
         # where the Forecast has nothing to say, so nothing is drawn.
-        def outlook(table, now: Clock.now)
-          hours = table.columns.select { _1 + 3600 > now }.filter_map { weather_at(_1) }
+        def outlook(table, city: current_city, now: Clock.now)
+          hours = table.columns.select { _1 + 3600 > now }.filter_map { weather_at(_1, city) }
 
           Weather::Outlook.new(hours:) if hours.any?
         end
@@ -391,8 +440,9 @@ module Booking
           rows.each_with_index.sort_by { |c, i| [c[:any_free] ? 0 : 1, c[:rained_off] ? 1 : 0, c[:favourite] ? 0 : 1, i] }.map(&:first)
         end
 
-        # One dict per hour on the selected club-and-date.
-        def slots_view(date, row)
+        # One dict per hour on the selected club-and-date, under the sky of the
+        # city the club is in.
+        def slots_view(date, row, city)
           row.cells.map do |cell|
             starts_at = cell.starts_at
             hour = hour_label(starts_at).to_i
@@ -406,7 +456,7 @@ module Booking
               hour: HourSpan.offset(date, starts_at),
               pickable: starts_at + 3600 > Clock.now,
               free: cell.free?,
-              weather: weather_at(starts_at),
+              weather: weather_at(starts_at, city),
               state: cell.free? ? "free" : "taken"
             }
           end
@@ -434,11 +484,11 @@ module Booking
           redirect(to(date ? "/date/#{date}" : "/"))
         end
 
-        # One dict per watched Club for the directory: Favourites first, then
-        # by name — nothing here is free or taken, so there is no other order
-        # worth keeping.
+        # One dict per watched Club in the current city for the directory:
+        # Favourites first, then by name — nothing here is free or taken, so
+        # there is no other order worth keeping.
         def directory_view
-          clubs = settings.repos.clubs.enabled.sort_by { [favourite?(_1.slug) ? 0 : 1, _1.name] }
+          clubs = city_clubs.sort_by { [favourite?(_1.slug) ? 0 : 1, _1.name] }
 
           clubs.map do |club|
             found = profile(club.slug)
@@ -476,8 +526,9 @@ module Booking
         # game from 23:00 to 01:00 is `23-25` under the evening it belongs to.
         def game_path(slug, span) = "/game/#{slug}/#{span.date}/#{span.from}-#{span.to}"
 
-        # The wettest hour the game touches, as a freed slot's message says.
-        def game_weather(game) = Weather.worst(forecast, game.starts_at, game.ends_at)
+        # The wettest hour the game touches, as a freed slot's message says —
+        # over the club's own city, which need not be the one picked.
+        def game_weather(game, club) = Weather.worst(forecast(club.city), game.starts_at, game.ends_at)
 
         # The query a link back to Share needs to keep its clubs narrowed.
         def share_query(filter)
@@ -502,7 +553,7 @@ module Booking
 
         def watch_new_screen(refusals = [])
           @refusals = refusals
-          @clubs = settings.repos.clubs.enabled
+          @clubs = city_clubs
           erb :watch_new, layout: :layout
         end
 
@@ -580,9 +631,11 @@ module Booking
         date = parse_date(params[:date])
         redirect(to("/")) if date.nil?
 
-        table = horizon_tables.fetch(date)
-        row = table.rows.find { _1.club_slug == params[:slug] }
-        halt(404) unless row
+        club = enabled_club(params[:slug])
+        halt(404) unless club
+
+        table = club_table(date, club)
+        row = table.rows.first
 
         @date = date.to_s
         @weekday = weekday_short(date)
@@ -590,12 +643,12 @@ module Booking
         @club_slug = row.club_slug
         @club_name = row.club_name
         @area = profile(row.club_slug)&.area
-        @booking_url = enabled_club(row.club_slug)&.settings&.fetch("booking_url", nil)
-        @slots = slots_view(date, row)
+        @booking_url = club.settings["booking_url"]
+        @slots = slots_view(date, row, club.city)
         @free_hours = row.cells.count { _1.free? && _1.starts_at + 3600 > Clock.now }
         @price = price_parts(row.club_slug)
         @courts = courts_stat(row.club_slug)
-        @outlook = outlook(table)
+        @outlook = outlook(table, city: club.city)
         erb :slots, layout: :layout
       end
 
@@ -613,7 +666,7 @@ module Booking
         club = enabled_club(params[:slug])
         halt(404) unless club
 
-        row = horizon_tables.fetch(date).rows.find { _1.club_slug == club.slug }
+        row = club_table(date, club).rows.first
         @span = HourSpan.pick(params, date:, columns: row.cells.map(&:starts_at))
         redirect(to("/date/#{date}/club/#{club.slug}")) unless @span
 
@@ -622,7 +675,7 @@ module Booking
         @date_label = date_label(date)
         @club = club
         @game = game_at(club, @span)
-        @weather = game_weather(@game)
+        @weather = game_weather(@game, club)
         @text = Messages.game(@game, weather: @weather)
         @event = @game.to_event
         erb :game, layout: :layout
@@ -658,7 +711,7 @@ module Booking
           headers "Content-Disposition" => %(inline; filename="padel-#{slug}-#{span.date}.ics")
           Calendar.ics(@event)
         else
-          @weather = game_weather(@game)
+          @weather = game_weather(@game, club)
           erb :game_card, layout: :layout
         end
       end
@@ -675,7 +728,7 @@ module Booking
         redirect(to("/")) if date.nil?
 
         table = horizon_tables.fetch(date)
-        clubs = settings.repos.clubs.enabled
+        clubs = city_clubs
         @date = date.to_s
         @weekday = weekday_short(date)
         @date_label = date_label(date)
@@ -704,7 +757,7 @@ module Booking
       get "/clubs/:slug" do
         require_visitor!
 
-        @club = settings.repos.clubs.enabled.find { _1.slug == params[:slug] }
+        @club = enabled_club(params[:slug])
         halt(404) unless @club
 
         @profile = profile(@club.slug)
@@ -723,6 +776,23 @@ module Booking
       post "/favourites/:slug/delete" do
         settings.repos.favourites.remove(visitor_id, own_club!(params[:slug]))
         back_to_clubs
+      end
+
+      # The city switch. Kept per person rather than carried in the URL,
+      # because it decides every screen's clubs and every link between them
+      # would have to remember to pass it on — see ADR-0003.
+      # Post-redirect-get back to the screen it was pressed on, which now
+      # draws the new city.
+      post "/city" do
+        require_visitor!
+        # Checked against the cities that have clubs, for the reason
+        # own_club! checks a slug: a city nothing is in would be a row that
+        # only ever reads as the default.
+        halt(404) unless cities.include?(params[:city].to_s)
+
+        settings.repos.preferences.choose_city(visitor_id, params[:city].to_s)
+        back = params[:back].to_s
+        redirect(to(back.match?(CITY_SWITCH_BACK) ? back : "/"))
       end
 
       get "/watches" do

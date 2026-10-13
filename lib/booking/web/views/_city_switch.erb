@@ -1,0 +1,17 @@
+<%#
+  Which City's clubs the screens show, one chip per city with a club in it.
+  Drawn only once there is more than one. Buttons rather than links: the
+  choice is kept per person, so picking is a post that lands back on `back`.
+
+  The buttons submit a form by its id. On a screen that is itself one form —
+  the new watch — that form cannot open inside it, so the screen draws it
+  outside with `city_form` and passes `detached`.
+%>
+<% if city_switch? %>
+  <%= city_form(back) unless detached %>
+  <div class="filters city-switch" role="group" aria-label="City">
+    <% cities.each do |city| %>
+      <button class="chip" form="city-switch" name="city" value="<%= h(city) %>"<%= ' aria-current="true"' if city == current_city %>><%= h(city) %></button>
+    <% end %>
+  </div>
+<% end %>
