@@ -223,6 +223,17 @@ module Booking
     # rather than apologising: every club is shown in the meantime.
     def share_no_favourites = "No favourites yet — star clubs on the day's list. Showing every club for now."
 
+    # Over the week: how long ago the City's newest good Poll finished, so a
+    # quiet morning reads as quiet rather than as a poller that has stopped.
+    def updated_ago(seconds)
+      minutes = seconds.to_i / 60
+      if minutes < 1 then "Updated just now"
+      elsif minutes < 60 then "Updated #{minutes} min ago"
+      elsif minutes < 1440 then "Updated #{minutes / 60} h ago"
+      else "Updated #{minutes / 1440} d ago"
+      end
+    end
+
     # A screen reader hears the star as the action it takes, not as a glyph.
     def favourite_add = "Add to favourites"
 

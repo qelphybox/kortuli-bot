@@ -1,9 +1,10 @@
 <%#
   Every hour a single club sells on one date, as a tile: free or taken, and
   the Forecast for it — the rain is what decides between this club and one
-  with a roof. The club's booking page is a single button in the header
-  rather than one on every free tile, because every tile would point at the
-  same page.
+  with a roof. On a day with any, a strip over the tiles says when, and
+  whether this club has open courts for it to fall on. The club's booking
+  page is a single button in the header rather than one on every free tile,
+  because every tile would point at the same page.
 
   Every hour not yet over can be ticked, free or taken — the Grid may not
   have seen a booking yet — and the ticked ones become a Game to share. Each
@@ -50,7 +51,7 @@
   </div>
 
   <% if @outlook && (@outlook.wet? || @outlook.damp?) %>
-    <div class="notice notice--slim"><%= icon(:rain, size: 16) %><%= Booking::Messages.weather_headline(@outlook) %></div>
+    <div class="notice notice--slim"><%= icon(:rain, size: 16) %><%= Booking::Messages.weather_headline(@outlook) %><%= " · outdoor courts" if @open_courts %></div>
   <% end %>
 
   <div class="hours slots">
