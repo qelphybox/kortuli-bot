@@ -24,6 +24,7 @@ module Booking
         api = ::Telegram::Bot::Api.new(Config.telegram_token)
         Telegram::Menu.new(api:, logger: @logger).install(Config.app_url)
         Telegram::About.new(api:, logger: @logger).install
+        Telegram::Avatar.new(api:, path: Config.avatar_file, stamp: Config.avatar_stamp, logger: @logger).install
 
         Telegram::Runner.new(
           token: Config.telegram_token,
