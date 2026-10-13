@@ -1,0 +1,71 @@
+<%#
+  The City picker itself, drawn three ways by `mode`: :sheet inside the
+  pill's <dialog>, :page as GET /city, and :first_run in place of the week
+  for somebody who has never picked — with the logo, and no way to close,
+  because there is no screen behind it yet to close onto.
+
+  One form. The cards are radios, so a tap only moves the tick and the
+  button underneath confirms; without JavaScript the button says "Show
+  courts" and posts whichever is ticked, with it the button names the city.
+  The counts on each card are real: the clubs watched there and what is
+  free today.
+
+  "Use my location" exists only once JavaScript finds a way to ask — Telegram's
+  LocationManager, else the browser's — and only asks when tapped. The nearest
+  city is worked out here in the page, from the centres the cards carry; the
+  coordinates never leave the phone, and the person still confirms.
+%>
+<% title_tag = mode == :sheet ? "h2" : "h1" %>
+<form class="city-picker city-picker--<%= mode.to_s.tr("_", "-") %>" method="post" action="/city" data-city-picker>
+  <input type="hidden" name="back" value="<%= h(back) %>">
+  <% if mode == :sheet %><span class="city-picker__handle" aria-hidden="true"></span><% end %>
+
+  <div class="city-picker__head">
+    <div>
+      <% if mode == :first_run %>
+        <span class="brand city-picker__brand"><%= ball %><span class="brand__word">KORTULI</span></span>
+      <% end %>
+      <<%= title_tag %> class="city-picker__title" id="city-title">Where do you play?</<%= title_tag %>>
+      <p class="city-picker__sub">Courts, weather and watches follow the city.</p>
+    </div>
+    <% unless mode == :first_run %>
+      <a class="city-picker__close" href="<%= h(back) %>" aria-label="Close" data-city-close><%= icon(:close, size: 18) %></a>
+    <% end %>
+  </div>
+
+  <button class="city-locate" type="button" hidden data-city-locate>
+    <span class="city-locate__icon"><%= icon(:locate, size: 18) %></span>
+    <span class="city-locate__text">
+      <strong>Use my location</strong>
+      <span data-city-hint>Picks the nearest city with courts</span>
+    </span>
+  </button>
+
+  <fieldset class="city-cards">
+    <legend class="visually-hidden">City</legend>
+    <% city_cards.each do |c| %>
+      <label class="city-card" data-city="<%= h(c[:name]) %>"<% if c[:lat] %> data-lat="<%= c[:lat] %>" data-lng="<%= c[:lng] %>"<% end %>>
+        <input class="visually-hidden" type="radio" name="city" value="<%= h(c[:name]) %>"<%= " checked" if c[:picked] %>>
+        <span class="city-card__face">
+          <% if c[:art] %>
+            <svg class="city-card__art" width="150" height="120" viewBox="0 0 150 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="<%= c[:art] %>"/></svg>
+          <% end %>
+          <span class="city-card__top">
+            <% if c[:native] %><span class="city-card__native" lang="ka"><%= c[:native] %></span><% end %>
+            <span class="city-card__tick"><%= icon(:check, size: 14) %></span>
+          </span>
+          <% if c[:region] %><span class="city-card__region"><%= h(c[:region]) %></span><% end %>
+          <span class="city-card__name"><%= h(c[:name]) %></span>
+          <span class="city-card__meta"><%= h(c[:meta]) %></span>
+        </span>
+      </label>
+    <% end %>
+  </fieldset>
+
+  <button class="btn btn--ball city-picker__go" type="submit">
+    <span>Show courts<span class="city-picker__in"> in <span data-city-go><%= h(current_city) %></span></span></span>
+    <%= icon(:arrow, size: 16) %>
+  </button>
+
+  <%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_city } %>
+</form>

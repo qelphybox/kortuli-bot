@@ -283,50 +283,6 @@ html:not(.js) .js-only { display: none; }
 .pill--ball { background: var(--ball); color: var(--on-ball); border-color: transparent; font-weight: 800; font-size: 15px; }
 .pill:active { transform: scale(0.97); }
 
-/* The City pill, and the cities it drops when there is more than one. A
-   <details>, so it opens and closes without script; app.js only adds closing
-   it from outside. */
-.city-picker { position: relative; flex: none; }
-.bar__row > .city-picker { margin-left: auto; }
-.city-picker__pill { cursor: pointer; list-style: none; }
-.city-picker__pill::-webkit-details-marker { display: none; }
-.city-picker__pill svg:last-child { transform: rotate(90deg); color: var(--muted); }
-.city-picker[open] .city-picker__pill { border-color: var(--line-strong); }
-.city-picker[open] .city-picker__pill svg:last-child { transform: rotate(-90deg); }
-.city-picker__menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  min-width: 180px;
-  padding: 6px;
-  border-radius: 16px;
-  border: 1px solid var(--line);
-  background: var(--card);
-  box-shadow: 0 12px 32px rgba(13, 22, 17, 0.16);
-}
-.city-picker__option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  height: 44px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 10px;
-  background: none;
-  color: var(--ink);
-  font: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  text-align: left;
-  cursor: pointer;
-}
-.city-picker__option:active { background: var(--line); }
-.city-picker__option[aria-current="true"] { font-weight: 800; }
-.topbar__end { display: flex; align-items: center; gap: 10px; }
 
 .btn {
   display: flex;

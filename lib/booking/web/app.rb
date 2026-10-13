@@ -227,16 +227,64 @@ module Booking
         # Only worth drawing when there is somewhere else to go.
         def city_switch? = cities.size > 1
 
+        # The City this person last picked, nil until they ever have.
+        # Memoised per request, nil and all.
+        def picked_city
+          return @picked_city if defined?(@picked_city)
+
+          @picked_city = settings.repos.preferences.city(visitor_id)
+        end
+
         # The City whose clubs this person is shown: the one they last picked,
         # while it still has a club to show; otherwise the default, or
         # whichever city does have clubs. Memoised per request, like the
         # tables it decides.
         def current_city
-          @current_city ||= begin
-            picked = settings.repos.preferences.city(visitor_id)
+          @current_city ||= [picked_city, DEFAULT_CITY].find { cities.include?(_1) } || cities.first || DEFAULT_CITY
+        end
 
-            [picked, DEFAULT_CITY].find { cities.include?(_1) } || cities.first || DEFAULT_CITY
+        # Somebody who has never picked, while there is something to pick
+        # between: the home screen asks before it shows anybody a week. Once
+        # they have picked — anything, ever — it never asks again unasked.
+        def first_run? = city_switch? && picked_city.nil?
+
+        # Where a pick lands, and where the picker's page closes to. The path
+        # arrives from the page, so only the screens the switch is drawn on
+        # count; anything else is the dates.
+        def city_back(raw) = raw.to_s.match?(CITY_SWITCH_BACK) ? raw.to_s : "/"
+
+        # One card per City for the picker: the clubs watched there and what
+        # is free today — the same Grid the dates' hero counts, one per city
+        # — plus how it is drawn and where its centre is, for "Use my
+        # location" to measure against in the page. A city without a Look or
+        # a point is drawn plain and is never anybody's nearest.
+        def city_cards
+          @city_cards ||= cities.map do |city|
+            clubs = enabled_clubs.select { _1.city == city }
+            today = Grid.build(clubs:, slots: free_slots, date: horizon.first)
+            free = today.rows.sum { |row| row.cells.count(&:free?) }
+            look = CityLooks[city]
+            lat, lng = Weather::CITIES[city]
+
+            {
+              name: city,
+              native: look&.native,
+              region: look&.region,
+              art: look&.art,
+              lat:,
+              lng:,
+              picked: city == current_city,
+              meta: "#{count_label(clubs.size, "club")} · #{free.positive? ? "#{free} free" : "fully booked"} today"
+            }
           end
+        end
+
+        # The picker as a page of its own: where the pill goes without
+        # JavaScript, and the first screen of somebody who has never picked.
+        def city_screen(back, first_run: false)
+          @back = back
+          @first_run = first_run
+          erb :city, layout: :layout
         end
 
         # The clubs the dates, a date's list, Share and the directory are
@@ -612,6 +660,9 @@ module Booking
       # count of clubs and hours that are open.
       get "/" do
         require_visitor!
+        # Asked once, full screen, before the first week: which city's courts
+        # it should be. Picking lands back here, on that city's week.
+        halt(city_screen("/", first_run: true)) if first_run?
 
         @dates = dates_view
         @watches_count = visible_watches.size
@@ -798,6 +849,15 @@ module Booking
         back_to_clubs
       end
 
+      # The City picker as a page: what the pill opens without JavaScript —
+      # with it, the same picker is already on the screen as a sheet. `back`
+      # is the screen it was opened from.
+      get "/city" do
+        require_visitor!
+
+        city_screen(city_back(params[:back]))
+      end
+
       # The city switch. Kept per person rather than carried in the URL,
       # because it decides every screen's clubs and every link between them
       # would have to remember to pass it on — see ADR-0003.
@@ -811,8 +871,7 @@ module Booking
         halt(404) unless cities.include?(params[:city].to_s)
 
         settings.repos.preferences.choose_city(visitor_id, params[:city].to_s)
-        back = params[:back].to_s
-        redirect(to(back.match?(CITY_SWITCH_BACK) ? back : "/"))
+        redirect(to(city_back(params[:back])))
       end
 
       get "/watches" do
