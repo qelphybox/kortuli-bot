@@ -271,3 +271,47 @@ clubs:
       days:
       - sat
       - sun
+  padel-port:
+    source: https://sapadelo.com/georgia/clubs/padel-port
+    address: 3 Tengiz Abuladze
+    lat: 41.6552375
+    lng: 41.6410712
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    - name: Court 3
+      cover: outdoor
+    - name: Court 4
+      cover: outdoor
+    hours:
+      mon: 10:00–02:00
+      tue: 10:00–02:00
+      wed: 10:00–02:00
+      thu: 10:00–02:00
+      fri: 10:00–02:00
+      sat: 10:00–02:00
+      sun: 10:00–02:00
+    prices:
+    - gel: 80
+  padel-port-new-park:
+    source: https://sapadelo.com/georgia/clubs/padel-port-new-park
+    address: 4 Gogebashvili St, Batumi
+    lat: 41.652796
+    lng: 41.643232
+    courts:
+    - name: Park Court 1
+      cover: outdoor
+    - name: Park Court 2
+      cover: outdoor
+    hours:
+      mon: 10:00–02:00
+      tue: 10:00–02:00
+      wed: 10:00–02:00
+      thu: 10:00–02:00
+      fri: 10:00–02:00
+      sat: 10:00–02:00
+      sun: 10:00–02:00
+    prices:
+    - gel: 80

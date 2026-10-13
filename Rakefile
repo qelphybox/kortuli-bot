@@ -92,13 +92,31 @@ namespace :discover do
     page = http.get_body("https://#{subdomain}.reservio.com/")
     business_id = page[/"businessId":"([a-f0-9-]{36})"/, 1] or abort "no businessId on that page"
 
-    services = http.get_json("#{Booking::Adapters::Reservio::BASE_URL}/businesses/#{business_id}/services")
-    courts = http.get_json("#{Booking::Adapters::Reservio::BASE_URL}/businesses/#{business_id}/resources")
+    base = "#{Booking::Adapters::Reservio::BASE_URL}/businesses/#{business_id}"
+    business = http.get_json(base).fetch("data").fetch("attributes")
+    # Included so each service names the courts it books — one service over
+    # every court, or one per court, is what decides `service_ids`.
+    services = http.get_json("#{base}/services", { "include" => "resources" })
+    courts = services.fetch("included", []).select { _1["type"] == "resource" }.to_h { [_1["id"], _1.dig("attributes", "name")] }
+    hours = http.get_json("#{base}/opening-hours").fetch("data")
+    clock = ->(seconds) { format("%02d:%02d", seconds / 3600, seconds % 3600 / 60) }
+    week = %w[mo tu we th fr sa su]
 
-    puts "business_id: #{business_id}"
-    puts "services:"
-    services.fetch("data").each { puts "  #{_1["id"]}  #{_1.dig("attributes", "name")}  #{_1.dig("attributes", "cost")}" }
-    puts "courts:"
-    courts.fetch("data").each { puts "  #{_1["id"]}  #{_1.dig("attributes", "name")}" }
+    puts "business_id: #{business_id}  (#{business["name"]})"
+    # Past this the source answers with nothing at all, so it is the club's
+    # own window; `max_days` counts today as well.
+    ahead = business.dig("settings", "reservationsLaterThan").to_i / 86_400
+    puts "window: #{ahead} days ahead, so max_days: #{ahead + 1}"
+    puts "services (for service_ids), each with the courts it books:"
+    services.fetch("data").each do |service|
+      booked = service.dig("relationships", "resources", "data").to_a.map { courts.fetch(_1["id"], _1["id"]) }
+      puts "  #{service["id"]}  #{service.dig("attributes", "name")}  #{service.dig("attributes", "cost")}  -> #{booked.join(", ")}"
+    end
+    # The business's own hours. A court can carry narrower ones of its own;
+    # those are skipped, because opening_hours is declared per club.
+    puts "opening hours:"
+    hours.reject { _1.dig("relationships", "resource", "data") }
+         .group_by { [_1.dig("attributes", "start"), _1.dig("attributes", "end")] }.sort
+         .each { |(from, to), rows| puts "  #{clock.(from)}–#{clock.(to)}  #{(week & rows.flat_map { _1.dig("attributes", "days") }).join(" ")}" }
   end
 end

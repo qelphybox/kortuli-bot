@@ -5,15 +5,21 @@ require "json"
 class FakeHttp
   attr_reader :requests
 
-  def initialize(pages: nil)
+  # `by_service` answers each booking-slots request from a recording keyed by
+  # the service it asked for — the shape of a business that sells every court
+  # as its own service.
+  def initialize(pages: nil, resources: "reservio_resources", by_service: nil)
     @requests = []
     @pages = pages
+    @resources = resources
+    @by_service = by_service && fixture(by_service)
   end
 
   def get_json(url, params = {})
     @requests << { url:, params: }
-    return fixture("reservio_resources") if url.include?("/resources")
+    return fixture(@resources) if url.include?("/resources")
     return @pages.shift if @pages
+    return @by_service.fetch(params["filter[serviceId]"]) if @by_service
 
     fixture("reservio_booking_slots")
   end
@@ -25,6 +31,9 @@ RSpec.describe Booking::Adapters::Reservio do
   subject(:adapter) { described_class.new(club, http:) }
 
   let(:http) { FakeHttp.new }
+  # Recorded from Padel Club 2 before it was dropped as a duplicate of
+  # GymBreeze Ninoshvili. Kept: it is the other shape a business takes — one
+  # service over four resources — and it still spells the single `service_id`.
   let(:club) do
     Booking::Club.new(
       slug: "padel-club-2",
@@ -187,6 +196,135 @@ RSpec.describe Booking::Adapters::Reservio do
 
       expect(slot.court_ref).to eq("brand-new-court")
       expect(slot.court_label).to eq("brand-new-court")
+    end
+  end
+
+  describe "when the source does not answer with a list" do
+    it "says the source is unavailable rather than reporting an empty club" do
+      http = FakeHttp.new(pages: [{ "errors" => [{ "status" => "500", "title" => "Something happened" }] }])
+
+      expect { described_class.new(club, http:).fetch(window) }
+        .to raise_error(Booking::Adapters::SourceUnavailable, /no data/)
+    end
+
+    it "says the same of a court list that is not one" do
+      # Any bare array will do: a JSON:API document is always an object.
+      http = FakeHttp.new(resources: "kustba_available_slots")
+
+      expect { described_class.new(club, http:).fetch(window) }
+        .to raise_error(Booking::Adapters::SourceUnavailable, %r{/resources: no data})
+    end
+
+    it "takes an empty list at its word: every court can sell out" do
+      http = FakeHttp.new(pages: [{ "data" => [], "meta" => { "total" => 0 } }])
+
+      expect(described_class.new(club, http:).fetch(window)).to eq([])
+    end
+  end
+
+  it "drops a start that is not on the hour, which no Cell could hold" do
+    body = JSON.parse(File.read("spec/fixtures/reservio_booking_slots.json"))
+    body["data"].first["attributes"].merge!("start" => "2026-08-01T08:30:00+04:00", "end" => "2026-08-01T09:29:00+04:00")
+    http = FakeHttp.new(pages: [body])
+
+    expect(described_class.new(club, http:).fetch(window).size).to eq(5)
+  end
+
+  # Padel Port Batumi sells each of its six courts as its own service, four at
+  # the original site and two at New Park, all under one business. Recorded
+  # for 15 October 2026, one booking-slots answer per service.
+  describe "a business that sells every court as its own service" do
+    let(:http) { FakeHttp.new(resources: "reservio_padel_port_resources", by_service: "reservio_padel_port_booking_slots") }
+    let(:window) { Date.new(2026, 10, 15)..Date.new(2026, 10, 21) }
+    let(:club) do
+      Booking::Club.new(
+        slug: "padel-port",
+        name: "Padel Port",
+        adapter: "reservio",
+        settings: {
+          "business_id" => "1e32bd0a-0d5c-4e30-9788-ea488e713c4d",
+          "service_ids" => PADEL_PORT_SERVICES,
+          "booking_url" => "https://padel-port-batumi2.reservio.com/",
+          "price" => "80 GEL"
+        }
+      )
+    end
+    let(:new_park) do
+      club.with(slug: "padel-port-new-park", name: "Padel Port New Park",
+                settings: club.settings.merge("service_ids" => NEW_PARK_SERVICES))
+    end
+
+    PADEL_PORT_SERVICES = %w[
+      6dcc4d1f-c73b-4a35-ad3a-3ede2cb321a6
+      c36479d3-8201-4d80-9822-e9c08014468b
+      303f3adf-8a99-4c1f-89fe-f9a9b56a620b
+      1dfea382-0fe9-42de-a3d0-36d82629b071
+    ].freeze
+    NEW_PARK_SERVICES = %w[24481fd5-3320-4133-b762-03f13f1b200e 09922dde-639d-4bdc-8b53-73077a57cca2].freeze
+
+    it "reads every service it was given, and only those" do
+      # 10 + 9 + 10 + 11 free on Padel Court 1–4 that day.
+      expect(adapter.fetch(window).size).to eq(40)
+    end
+
+    it "asks once per service, because the filter takes a single id" do
+      adapter.fetch(window)
+      asked = http.requests.filter_map { _1[:params]["filter[serviceId]"] }
+
+      expect(asked).to eq(PADEL_PORT_SERVICES)
+    end
+
+    it "names each court as the club does" do
+      expect(adapter.fetch(window).map(&:court_label).uniq).to contain_exactly("Court 1", "Court 2", "Court 3", "Court 4")
+    end
+
+    it "keeps the court's stable id as its ref" do
+      first = adapter.fetch(window).find { _1.court_label == "Court 1" }
+
+      expect(first.court_ref).to eq("929c2389-5a21-444f-bb78-bdcaef2dbf3c")
+    end
+
+    it "splits one business into two clubs by the services each is given" do
+      slots = described_class.new(new_park, http:).fetch(window)
+
+      # 12 on Park Court 1, 11 on Park Court 2.
+      expect(slots.size).to eq(23)
+      expect(slots.map(&:court_label).uniq).to contain_exactly("Park Court 1", "Park Court 2")
+      expect(slots.map(&:club_slug).uniq).to eq(["padel-port-new-park"])
+    end
+
+    it "takes the hours after midnight at their word rather than rolling them over" do
+      # Listed last, after 23:00, but stamped with the date they fall on.
+      late = adapter.fetch(window).select { _1.court_label == "Court 1" }.min_by(&:starts_at)
+
+      expect(late.starts_at).to eq(Time.utc(2026, 10, 14, 20, 0))
+      expect(late.local_starts_at.hour).to eq(0)
+      expect(late.local_date).to eq(Date.new(2026, 10, 15))
+    end
+
+    it "is court-level: every court that is free at an hour is its own slot" do
+      at_fifteen = adapter.fetch(window).select { _1.local_starts_at.hour == 15 }
+
+      expect(at_fifteen.map(&:court_ref).uniq.size).to eq(4)
+    end
+
+    it "asks no further than the club's own window" do
+      described_class.new(club.with(settings: club.settings.merge("max_days" => 3)), http:).fetch(window)
+      asked = http.requests.filter_map { _1[:params]["filter[to]"] }.uniq
+
+      expect(asked).to eq(["2026-10-17"])
+    end
+
+    it "still accepts one service under the old `service_id` spelling" do
+      single = club.with(settings: club.settings.except("service_ids").merge("service_id" => PADEL_PORT_SERVICES.first))
+
+      expect(described_class.new(single, http:).fetch(window).size).to eq(10)
+    end
+
+    it "refuses a club with no services, which would read as sold out forever" do
+      empty = club.with(settings: club.settings.merge("service_ids" => []))
+
+      expect { described_class.new(empty, http:) }.to raise_error(Booking::Error, /service_ids is empty/)
     end
   end
 end

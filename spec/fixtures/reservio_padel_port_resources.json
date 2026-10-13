@@ -1,0 +1,206 @@
+{
+  "meta": {
+    "total": 6
+  },
+  "links": {
+    "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources?page[limit]=50&page[offset]=0",
+    "first": null,
+    "prev": null,
+    "next": null,
+    "last": null
+  },
+  "data": [
+    {
+      "type": "resource",
+      "id": "929c2389-5a21-444f-bb78-bdcaef2dbf3c",
+      "attributes": {
+        "name": "Court 1",
+        "description": "",
+        "hasOpeningHours": false
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/929c2389-5a21-444f-bb78-bdcaef2dbf3c/services",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/929c2389-5a21-444f-bb78-bdcaef2dbf3c/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/929c2389-5a21-444f-bb78-bdcaef2dbf3c/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/929c2389-5a21-444f-bb78-bdcaef2dbf3c/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/929c2389-5a21-444f-bb78-bdcaef2dbf3c/picture",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/929c2389-5a21-444f-bb78-bdcaef2dbf3c/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/929c2389-5a21-444f-bb78-bdcaef2dbf3c"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "0631fb34-f14e-44e3-80e4-9a19a78e78e7",
+      "attributes": {
+        "name": "Court 2",
+        "description": "",
+        "hasOpeningHours": false
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/0631fb34-f14e-44e3-80e4-9a19a78e78e7/services",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/0631fb34-f14e-44e3-80e4-9a19a78e78e7/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/0631fb34-f14e-44e3-80e4-9a19a78e78e7/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/0631fb34-f14e-44e3-80e4-9a19a78e78e7/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/0631fb34-f14e-44e3-80e4-9a19a78e78e7/picture",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/0631fb34-f14e-44e3-80e4-9a19a78e78e7/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/0631fb34-f14e-44e3-80e4-9a19a78e78e7"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "272d64e1-c73e-43c1-af69-8ce588e72454",
+      "attributes": {
+        "name": "Court 3",
+        "description": "",
+        "hasOpeningHours": false
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/272d64e1-c73e-43c1-af69-8ce588e72454/services",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/272d64e1-c73e-43c1-af69-8ce588e72454/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/272d64e1-c73e-43c1-af69-8ce588e72454/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/272d64e1-c73e-43c1-af69-8ce588e72454/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/272d64e1-c73e-43c1-af69-8ce588e72454/picture",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/272d64e1-c73e-43c1-af69-8ce588e72454/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/272d64e1-c73e-43c1-af69-8ce588e72454"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe",
+      "attributes": {
+        "name": "Court 4",
+        "description": "",
+        "hasOpeningHours": false
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe/services",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe/picture",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/44c319e1-7d24-4c9a-ae7d-6ae6dace1cbe"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "a0b0e4d6-4af0-4236-80b3-73312e6e93a9",
+      "attributes": {
+        "name": "Park Court 1",
+        "description": "Payment:\nAll payments are made at the PadelPort Reception.\n\nEquipment:\nTo rent rackets for park courts, players must provide ID. ",
+        "hasOpeningHours": false
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/a0b0e4d6-4af0-4236-80b3-73312e6e93a9/services",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/a0b0e4d6-4af0-4236-80b3-73312e6e93a9/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/a0b0e4d6-4af0-4236-80b3-73312e6e93a9/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/a0b0e4d6-4af0-4236-80b3-73312e6e93a9/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/a0b0e4d6-4af0-4236-80b3-73312e6e93a9/picture",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/a0b0e4d6-4af0-4236-80b3-73312e6e93a9/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/a0b0e4d6-4af0-4236-80b3-73312e6e93a9"
+      }
+    },
+    {
+      "type": "resource",
+      "id": "f947f9f0-b817-4864-9843-5348d3173a44",
+      "attributes": {
+        "name": "Park Court 2",
+        "description": "Payment:\nAll payments are made at the PadelPort Reception.\n\nEquipment:\nTo rent rackets for park courts, players must provide ID. ",
+        "hasOpeningHours": false
+      },
+      "relationships": {
+        "services": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/f947f9f0-b817-4864-9843-5348d3173a44/services",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/f947f9f0-b817-4864-9843-5348d3173a44/relationships/services"
+          }
+        },
+        "openingHours": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/f947f9f0-b817-4864-9843-5348d3173a44/opening-hours",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/f947f9f0-b817-4864-9843-5348d3173a44/relationships/opening-hours"
+          }
+        },
+        "picture": {
+          "links": {
+            "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/f947f9f0-b817-4864-9843-5348d3173a44/picture",
+            "related": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/f947f9f0-b817-4864-9843-5348d3173a44/relationships/picture"
+          }
+        }
+      },
+      "links": {
+        "self": "https://api.reservio.com/v2/businesses/1e32bd0a-0d5c-4e30-9788-ea488e713c4d/resources/f947f9f0-b817-4864-9843-5348d3173a44"
+      }
+    }
+  ]
+}
