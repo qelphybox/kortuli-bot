@@ -357,6 +357,23 @@ module Booking
 
         def any_free?(table) = table.rows.any? { |row| row.cells.any?(&:free?) }
 
+        # Every Club's last Poll by slug, read once per request like the
+        # tables.
+        def last_polls = @last_polls ||= settings.repos.polls.all
+
+        # Nothing we hold about the club can be believed as "taken": its last
+        # Poll could not read the source, or there has not been one. A club
+        # with no free Cell is then unknown rather than fully booked.
+        def no_data?(slug)
+          poll = last_polls[slug]
+
+          poll.nil? || poll.outcome == "failed"
+        end
+
+        # When the newest Poll that read one of the current City's clubs
+        # finished. Nil before any has, so nothing is claimed.
+        def city_updated_at = city_clubs.filter_map { last_polls[_1.slug] }.select(&:ok?).map(&:polled_at).max
+
         # One dict per horizon date, in the shape the Dates template reads.
         # A day with anything free names the number of clubs and the number
         # of hours; a day with nothing says "fully booked" and dims itself.
@@ -405,10 +422,11 @@ module Booking
 
         # One dict per Club on the selected date. Clubs with anything free
         # come first, then the fully-booked ones — dimmed rather than hidden,
-        # so the eye reads "we did look" rather than "the club is gone".
-        # Within each half, Favourites lead: they are the rows the eye is
-        # hunting for — unless rain is likely, when the clubs entirely in the
-        # open sink below the rest of their half, favourite or not.
+        # so the eye reads "we did look" rather than "the club is gone" —
+        # and last the ones we could not read, which are not booked, only
+        # unknown. Within each part, Favourites lead: they are the rows the
+        # eye is hunting for — unless rain is likely, when the clubs entirely
+        # in the open sink below the rest of their part, favourite or not.
         def clubs_view(date)
           table = horizon_tables.fetch(date)
           wet = !!outlook(table)&.wet?
@@ -420,6 +438,7 @@ module Booking
               slug: row.club_slug,
               name: row.club_name,
               any_free:,
+              no_data: !any_free && no_data?(row.club_slug),
               free_count: free_cells.size,
               favourite: favourite?(row.club_slug),
               rained_off: wet && open_air?(row.club_slug),
@@ -431,7 +450,8 @@ module Booking
 
           # The index breaks ties, because Ruby's sort_by is not stable and
           # the rows already arrive in an order worth keeping.
-          rows.each_with_index.sort_by { |c, i| [c[:any_free] ? 0 : 1, c[:rained_off] ? 1 : 0, c[:favourite] ? 0 : 1, i] }.map(&:first)
+          part = ->(c) { if c[:any_free] then 0 elsif c[:no_data] then 2 else 1 end }
+          rows.each_with_index.sort_by { |c, i| [part[c], c[:rained_off] ? 1 : 0, c[:favourite] ? 0 : 1, i] }.map(&:first)
         end
 
         # One dict per hour on the selected club-and-date, under the sky of the
@@ -590,6 +610,7 @@ module Booking
         require_visitor!
 
         @dates = dates_view
+        @updated_at = city_updated_at
         @watches_count = visible_watches.size
         @owner = owner?
         erb :dates, layout: :layout
@@ -643,6 +664,8 @@ module Booking
         @price = price_parts(row.club_slug)
         @courts = courts_stat(row.club_slug)
         @outlook = outlook(table, city: club.city)
+        # Whom the rain is news for, when the Profile says some court is open.
+        @open_courts = profile(row.club_slug)&.covers.to_a.any? { |cover, _| cover == "outdoor" }
         erb :slots, layout: :layout
       end
 

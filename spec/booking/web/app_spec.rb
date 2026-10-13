@@ -11,9 +11,9 @@ RSpec.describe Booking::Web::App do
   # are what is under test, not Sequel. Watches, Favourites, Visits and
   # Preferences are the real repositories over an in-memory database, because here the web
   # *writes* — and a faked repository would prove only that the route called
-  # the method it was written to call. The Forecast is real too, because filling it is
-  # simpler than faking it.
-  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences)
+  # the method it was written to call. The Forecast and the Polls are real too, because
+  # filling them is simpler than faking them.
+  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences, :polls)
   FakeClubs = Struct.new(:enabled)
   FakeSlots = Struct.new(:all)
 
@@ -57,7 +57,8 @@ RSpec.describe Booking::Web::App do
       )
     }
   end
-  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences) }
+  let(:polls) { Booking::Repo::Polls.new(db) }
+  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences, polls) }
 
   let(:owner_id) { 7 }
   let(:log_dir) { Dir.mktmpdir }
@@ -1417,7 +1418,7 @@ RSpec.describe Booking::Web::App do
       )
     end
     let(:batumi_clubs) { [*clubs, padel_port] }
-    let(:repos) { FakeRepos.new(FakeClubs.new(batumi_clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences) }
+    let(:repos) { FakeRepos.new(FakeClubs.new(batumi_clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences, polls) }
     let(:free_slots) do
       [slot(club: "padel-club-2", at: "#{day} 18:00"), slot(club: "kus-tba-padel", court: "any", at: "#{day} 18:00"),
        slot(club: "padel-port", at: "#{day} 19:00")]
@@ -1440,7 +1441,7 @@ RSpec.describe Booking::Web::App do
         get "/"
 
         expect(last_response.body).not_to include("city-picker")
-        expect(last_response.body).to include("Free padel courts across Tbilisi.")
+        expect(last_response.body).to include("Free padel courts in Tbilisi.")
       end
     end
 
@@ -1497,7 +1498,7 @@ RSpec.describe Booking::Web::App do
       it "counts only Batumi's free hours on the dates" do
         get "/"
 
-        expect(last_response.body).to include("Free padel courts across Batumi.")
+        expect(last_response.body).to include("Free padel courts in Batumi.")
         expect(switch).to include('value="Batumi" aria-current="true"')
         row = last_response.body[%r{href="/date/#{day}".*?</a>}m].to_s
         expect(row).to include('<span class="day-row__slots">1</span>')
@@ -1573,11 +1574,11 @@ RSpec.describe Booking::Web::App do
 
       it "is remembered for the next visit, and for nobody else" do
         get "/"
-        expect(last_response.body).to include("across Batumi")
+        expect(last_response.body).to include("courts in Batumi")
 
         sign_in(user_id: 99)
         get "/"
-        expect(last_response.body).to include("across Tbilisi")
+        expect(last_response.body).to include("courts in Tbilisi")
       end
     end
 

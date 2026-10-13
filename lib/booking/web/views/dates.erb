@@ -3,7 +3,9 @@
   link into the day — looking, sharing a Rundown and sharing a Game all start
   from one. A day with nothing open is dimmed rather than hidden, so the eye
   reads "we did look and there was nothing" rather than "this club shut
-  down". The bar under each day is its free hours against the week's busiest.
+  down". The bar under each day is its free hours against the week's busiest,
+  and "Updated" over them is the age of the City's newest good Poll — so a
+  quiet week reads as quiet, not as a poller that stopped.
 
   Watches and the clubs directory are the other two tabs; the owner's
   Dashboard is a chip beside the city, because nobody else has one. Every
@@ -22,7 +24,7 @@
 </header>
 
 <main class="page page--roomy">
-  <p class="lede">Free padel courts across <%= h(current_city) %>. Pick a day, book it, tell your group.</p>
+  <p class="lede">Free padel courts in <%= h(current_city) %>. Pick a day, book it, tell your group.</p>
 
   <a class="hero" href="/date/<%= today[:date] %>">
     <%= court(:hero, "hero__court") %>
@@ -43,6 +45,9 @@
   <section class="section">
     <div class="section__head">
       <h2 class="section__title">This week</h2>
+      <% if @updated_at %>
+        <span class="section__aside"><%= Booking::Messages.updated_ago(Booking::Clock.now - @updated_at) %></span>
+      <% end %>
     </div>
     <ul class="dates card">
       <% week.each do |d| %>
@@ -61,7 +66,7 @@
                   <span class="day-row__clubs">fully booked</span>
                 <% end %>
               </span>
-              <span class="meter-bar"><span style="width: <%= d[:share] %>%"></span></span>
+              <progress class="meter-bar" max="100" value="<%= d[:share] %>" aria-hidden="true"></progress>
             </span>
             <% if d[:weather] %>
               <span class="rain-chip" title="Rain in the forecast"><%= icon(:rain, size: 14) %>Rain</span>

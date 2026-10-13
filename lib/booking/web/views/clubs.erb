@@ -8,15 +8,19 @@
   Each card says when the club is free from, what it costs and what its
   courts are under — the first thing anybody asks when it rains — and, big,
   how many hours are left. A club with nothing open drops to the bottom as a
-  dashed outline. The star is where Favourites are made: a form post outside
-  the card's link, so tapping it never opens the club.
+  dashed outline — "Fully booked" only when its last Poll read the source;
+  one we could not read says "No data", because that is all we know.
+
+  The star before the name is where Favourites are made: a form post beside
+  the club's link rather than inside it, so tapping it never opens the club.
+  The link is the name, stretched by CSS over the whole card.
 %>
 <header class="bar">
   <div class="bar__row">
     <a class="icon-btn" href="/" aria-label="Back to dates"><%= icon(:back) %></a>
     <div class="bar__title bar__day">
       <h1 class="bar__h1"><%= @weekday.upcase %></h1>
-      <span class="bar__date"><%= @date_label %></span>
+      <span class="bar__date"><%= @date_label %> · <%= h(current_city) %></span>
     </div>
     <a class="pill pill--slab" href="/date/<%= @date %>/share"><%= icon(:share, size: 16) %>Share day</a>
   </div>
@@ -54,31 +58,31 @@
 
   <ul class="club-cards clubs">
     <% @clubs.each do |c| %>
-      <li class="club-card<%= " is-empty" unless c[:any_free] %>">
-        <form class="fav" method="post" action="/favourites/<%= c[:slug] %><%= "/delete" if c[:favourite] %>">
-          <input type="hidden" name="date" value="<%= @date %>">
-          <button class="fav__star<%= " is-on" if c[:favourite] %>" aria-pressed="<%= c[:favourite] %>"
-                  aria-label="<%= c[:favourite] ? Booking::Messages.favourite_remove : Booking::Messages.favourite_add %>"><%= c[:favourite] ? "★" : "☆" %></button>
-        </form>
-        <a class="club-card__link" href="/date/<%= @date %>/club/<%= c[:slug] %>">
-          <span class="club-card__body">
-            <span class="club-row__name"><%= c[:name] %></span>
-            <% if c[:any_free] %>
-              <span class="club-card__meta">
-                <% c[:covers].each do |cover| %><span class="tag tag--<%= cover %>"><%= cover %></span><% end %>
-                <span class="club-card__sub"><%= c[:sub] %></span>
-              </span>
-            <% end %>
-          </span>
+      <li class="club-card<%= " is-empty" unless c[:any_free] %><%= " is-unknown" if c[:no_data] %>">
+        <div class="club-card__body">
+          <div class="club-card__head">
+            <form class="fav" method="post" action="/favourites/<%= c[:slug] %><%= "/delete" if c[:favourite] %>">
+              <input type="hidden" name="date" value="<%= @date %>">
+              <button class="fav__star<%= " is-on" if c[:favourite] %>" aria-pressed="<%= c[:favourite] %>"
+                      aria-label="<%= c[:favourite] ? Booking::Messages.favourite_remove : Booking::Messages.favourite_add %>"><%= star(size: 16) %></button>
+            </form>
+            <a class="club-card__link" href="/date/<%= @date %>/club/<%= c[:slug] %>"><span class="club-row__name"><%= c[:name] %></span></a>
+          </div>
           <% if c[:any_free] %>
-            <span class="club-card__tile">
-              <span class="club-card__left"><%= c[:free_count] %></span>
-              <span class="club-card__unit">free</span>
+            <span class="club-card__meta">
+              <% c[:covers].each do |cover| %><span class="tag tag--<%= cover %>"><%= cover %></span><% end %>
+              <span class="club-card__sub"><%= c[:sub] %></span>
             </span>
-          <% else %>
-            <span class="club-card__booked">Fully booked</span>
           <% end %>
-        </a>
+        </div>
+        <% if c[:any_free] %>
+          <span class="club-card__tile">
+            <span class="club-card__left"><%= c[:free_count] %></span>
+            <span class="club-card__unit">free</span>
+          </span>
+        <% else %>
+          <span class="club-card__booked"><%= c[:no_data] ? "No data" : "Fully booked" %></span>
+        <% end %>
       </li>
     <% end %>
   </ul>
