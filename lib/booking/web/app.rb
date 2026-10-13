@@ -301,8 +301,8 @@ module Booking
         end
 
         # Two letters a club is recognised by in a list: "KT" for Kus Tba
-        # Padel, "GR" for GymBreeze Radio City, "P2" for Padel Club 2 (a
-        # number is what tells it apart), "PH" for PadelHub.
+        # Padel, "GR" for GymBreeze Radio City, "P2" for a "Padel Club 2"
+        # (a number is what tells it apart), "PH" for PadelHub.
         def initials(name)
           words = name.split
           return "#{words.first[0]}#{words.last}".upcase if words.size > 1 && words.last.match?(/\A\d+\z/)

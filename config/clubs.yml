@@ -2,32 +2,12 @@
 # source of truth. Nothing here is secret: Reservio's ids are public.
 #
 # To add another Reservio club:  bundle exec rake "discover:reservio[subdomain]"
-
-- slug: padel-club-2
-  name: Padel Club 2
-  adapter: reservio
-  enabled: true
-  poll_interval_seconds: 240
-  settings:
-    business_id: "4ead107e-6791-4f9b-95d9-3588bffe0794"
-    service_id: "1b9d8011-d73e-4810-bba8-4098b7ad536b"
-    booking_url: "https://padel-club2.reservio.com/"
-    # No `sapadelo:` — the directory does not list this club, so it has no
-    # Profile.
-    price: "50 GEL"
-    # Declared rather than observed: Reservio publishes neither opening hours
-    # nor bookings, so there is nothing to read them from. `to` is when the
-    # club shuts, so the last bookable hour starts at 23:00.
-    opening_hours:
-      from: "08:00"
-      to: "24:00"
-    # Present only for a court-level club — its source names the individual
-    # court, so a cell can say how many of these are free. Its absence is what
-    # makes a club hour-level.
-    courts: 4
-    # Only needed by adapters that identify courts by name; Reservio hands out
-    # stable ids, so this stays empty here.
-    court_aliases: {}
+#
+# Removing an entry disables that club on the next boot; its row stays.
+#
+# Not here on purpose: padel-club2.reservio.com ("Padel Club 2") is GymBreeze
+# Ninoshvili's own Reservio page — the same courts, read twice. Dropped
+# 2026-10-13; gymbreeze-ninoshvili is the one we watch.
 
 - slug: kus-tba-padel
   name: Kus Tba Padel

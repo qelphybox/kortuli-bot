@@ -22,6 +22,13 @@ module Booking
         find(slug)
       end
 
+      # Switches off every club whose slug is not among these. A club deleted
+      # from config would otherwise keep its row, still enabled, and go on
+      # being polled and drawn from a definition nobody can see.
+      def disable_all_but!(slugs)
+        @db[:clubs].exclude(slug: slugs.map(&:to_s)).update(enabled: false)
+      end
+
       # Records how far along the sliding window this club has been polled.
       # Only ever moves forward — a short fetch must not retract the horizon and
       # re-arm the "new day" suppression for days we already know.

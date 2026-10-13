@@ -92,7 +92,7 @@ Adding another Reservio club — this prints the ids to paste into
 [config/clubs.yml](config/clubs.yml):
 
 ```bash
-bundle exec rake "discover:reservio[padel-club2]"
+bundle exec rake "discover:reservio[padel-port-batumi2]"
 ```
 
 ## Using it
@@ -154,8 +154,7 @@ number and the booking page. The same screen is one tap away as **Info** on a
 club's hours for a date, and the day's list of clubs names the covers beside
 each one, which is the first thing anybody asks when it rains. Profiles come
 from the clubs' own listings on sapadelo.com and say so; they are for reading,
-and the Grid still draws from declared Opening hours. Padel Club 2 is not
-listed there and has none.
+and the Grid still draws from declared Opening hours.
 
 The **Forecast** rides along with all of it, because rain is what decides
 between an open court and a roofed one. A date's list of clubs opens with one
@@ -294,10 +293,10 @@ bundle exec kamal app exec 'bundle exec rake poll'
 The log is the health check. Every tick prints one line per club:
 
 ```
-poll padel-club-2: 388 free, +2 freed, -1 taken, 1 sent
-poll padel-club-2: failed — timeout
-poll padel-club-2: suspect response (empty_response) — snapshot kept
-poll padel-club-2: 388 free, +0 freed, -0 taken, 0 sent (held back 2026-08-03 — arrived as a whole day)
+poll padelbade-krtsanisi: 388 free, +2 freed, -1 taken, 1 sent
+poll padelbade-krtsanisi: failed — timeout
+poll padelbade-krtsanisi: suspect response (empty_response) — snapshot kept
+poll padelbade-krtsanisi: 388 free, +0 freed, -0 taken, 0 sent (held back 2026-08-03 — arrived as a whole day)
 ```
 
 If that line stops appearing, or `free` sits at zero for hours, the adapter has
@@ -380,9 +379,8 @@ exactly two edges: adapters parsing a club's clock, and messages printing one.
 
 This is an MVP, deliberately:
 
-- **Seven sources, ten clubs.** Padel Club 2 (Reservio), Kus Tba Padel
-  (`turtle-booking`), GymBreeze (three locations), Padelbade (Book & Go, two),
-  PadelHub (Supabase), Padel Academy (its own API, behind a member login) and
+- **Six sources, nine clubs.** Kus Tba Padel (`turtle-booking`), GymBreeze
+  (three locations), Padelbade (Book & Go, two), PadelHub (Supabase), Padel Academy (its own API, behind a member login) and
   Lemans Padel (its own API, open)
   — a venue with several locations is several clubs, because they sit in
   different parts of town. `tbilisipadel.com` runs BookingPress, which needs its

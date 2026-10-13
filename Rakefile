@@ -83,7 +83,7 @@ namespace :sapadelo do
 end
 
 namespace :discover do
-  desc "Find the ids needed for a Reservio club: rake 'discover:reservio[padel-club2]'"
+  desc "Find the ids needed for a Reservio club: rake 'discover:reservio[padel-port-batumi2]'"
   task :reservio, [:subdomain] do |_, args|
     boot!
     subdomain = args[:subdomain] or abort "usage: rake 'discover:reservio[subdomain]'"

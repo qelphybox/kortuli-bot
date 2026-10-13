@@ -9,12 +9,11 @@ directory listing.
 
 ## Where we are
 
-Ten clubs, 44 courts, all Tbilisi: Padel Club 2 (Reservio), Kus Tba,
-GymBreeze Ninoshvili, GymBreeze Radio City, GymBreeze Sport Palace,
+Nine clubs, 40 courts, all Tbilisi: Kus Tba, GymBreeze Ninoshvili, GymBreeze Radio City, GymBreeze Sport Palace,
 Padelbade Krtsanisi and Padelbade Dighomi (since #10), PadelHub, Padel
 Academy and Lemans Padel.
 
-The two adapters still open below take that to **fourteen clubs and 54
+The two adapters still open below take that to **thirteen clubs and 50
 courts** without touching a single club that has asked not to be read.
 
 ## Decisions this plan assumes
@@ -32,13 +31,17 @@ Taken 2026-07-31:
 
 Court counts from sapadelo.ge, which disagrees with every other directory and
 is the only one sourced from the clubs themselves. Neither it nor the market
-survey is complete — sapadelo omits Padel Club 2, which we already watch.
+survey is complete.
+
+**Padel Club 2 is not a club.** `padel-club2.reservio.com` is GymBreeze
+Ninoshvili's own Reservio page — the same courts under a second name. It was
+watched as a club of its own until 2026-10-13 and dropped then; do not add it
+back when a directory or `discover:reservio` turns it up again.
 
 | Club | Courts | System | State |
 |---|---|---|---|
 | GymBreeze Ninoshvili | 8 | gymbreeze | watched |
 | Kus Tba | 8 | kustba | watched |
-| Padel Club 2 | 4 | reservio | watched |
 | GymBreeze Radio City | 3 | gymbreeze | watched |
 | Padelbade Krtsanisi | 5 | Book & Go | watched |
 | Padelbade Dighomi | 2 | Book & Go | watched |
@@ -128,7 +131,7 @@ Independent within a wave; ordered by courts-per-unit-of-work.
   `POST /wp-json/bookingpress-app/v1/form-v3/month-details` returns a whole
   month per request — cheaper per slot than anything we run today. Free slots
   only. Service ids 1 / 4 / 6, and Didi Dighomi's `remaining_capacity` makes it
-  a **court-level club** like Padel Club 2. Auth is a triple scraped from the
+  a **court-level club** like Padelbade. Auth is a triple scraped from the
   page per tick (`X-WP-Nonce`, `bp_v3_nonce`, and a matched
   `instanceId`/`instanceToken` pair) — no login. Expect to retry once on a
   stale nonce.
@@ -183,8 +186,8 @@ city is not an adapter problem, it is a domain and UI one:
 4. Then the clubs themselves, which are mostly cheap:
    - **Batumi**: Padel Port (4) + Padel Port New Park (2) are one Reservio
      business, `1e32bd0a-0d5c-4e30-9788-ea488e713c4d`, verified live. But its
-     six courts are six *services*, where Padel Club 2 has one service and four
-     resources — and `Reservio` takes a single `service_id`
+     six courts are six *services*, where `Reservio` was written against one
+     service with four resources — and `Reservio` takes a single `service_id`
      (`lib/booking/adapters/reservio.rb:18`). **Batumi needs `service_ids` as a
      list**, and that same change is what splits one business into the two
      Clubs the domain says it should be. Grand Padel (2) and Dunlop (1) are
