@@ -120,7 +120,7 @@ module Booking
       <<~TEXT.strip
         🎾 <b>Padel slot watcher</b>
 
-        Evening courts in Tbilisi get taken a day or two ahead and only come back when somebody cancels. This watches for those cancellations and pings you the moment one happens.
+        Evening padel courts in Georgia get taken a day or two ahead and only come back when somebody cancels. This watches for those cancellations and pings you the moment one happens.
 
         Open the app to see the week and to say which hours you want watching. It does not book or pay for anything — you get a link and take it from there.
       TEXT

@@ -10,7 +10,7 @@ bundle is marked **UNVERIFIED**.
 |---|---|---|---|---|---|
 | [AIA Padel](#aia-padel--aiapadelge) | Kutaisi | 4 (3 active) | own Next.js + JSON API | none for reads | **Adapted** — `aiapadel` |
 | [Sportscape Samgori](#sportscape-samgori) | Tbilisi | 4 | — | — | **No online booking found** |
-| [Grand Padel Batumi](#grand-padel-batumi--reservio) | Batumi | 2 | Reservio | none | **Excluded: `api.reservio.com/robots.txt` disallows everything** |
+| [Grand Padel Batumi](#grand-padel-batumi--reservio) | Batumi | 2 | Reservio | none | **Watched since 2026-10-13** — excluded at first on robots.txt; [ADR-0004](../adr/0004-robots-txt-is-not-a-refusal-a-login-is.md) reversed that |
 | [Dunlop Batumi](#dunlop-batumi--tennisbatumicom) | Batumi | 1 | — (WhatsApp) | — | **No online booking** |
 
 ## Where the booking links come from
@@ -222,7 +222,9 @@ Sportscape stays out. Re-check sapadelo's profile when it next gains a
 
 ## Grand Padel Batumi — Reservio
 
-**Excluded on robots.txt.** The booking link is
+**Excluded on robots.txt when this note was written; watched since, under
+[ADR-0004](../adr/0004-robots-txt-is-not-a-refusal-a-login-is.md), which
+decided a robots file alone does not keep a club out.** The booking link is
 `https://grandpadelbatumi.reservio.com/`, a stock Reservio page
 (`"businessId":"aac3b1f5-7e80-4052-bd09-adc7396cfbec"` in its HTML). The page
 host's `robots.txt` disallows `/api/`, `/booking`, `/order` and the

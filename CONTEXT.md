@@ -61,14 +61,16 @@ _Avoid_: region, area, location
 
 **Court-level club**:
 A Club whose source names the individual court, so its Cells can say how many
-of them are free. Both Padelbade locations, PadelHub, Padel Academy and
-Lemans Padel.
+of them are free. Most Clubs are: every Padelbade location, PadelHub, Padel
+Academy, Lemans, Tbilisi Padel Didi Dighomi, the three in Batumi,
+Higgs, Love Padel and AIA. `courts:` in its config is what marks one.
 _Avoid_: per-court, granular
 
 **Hour-level club**:
 A Club whose source reports only whether *some* court is free that hour. Its
 Cells say whether, not how many. Kus Tba and all three GymBreeze locations —
-for Kus Tba by our choice, for GymBreeze because its API refuses.
+for Kus Tba by our choice, for GymBreeze because its API refuses — and the two
+one-court Tbilisi Padel locations, where whether is how many.
 _Avoid_: per-hour, coarse, aggregate
 
 **Profile**:
