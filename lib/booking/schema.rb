@@ -107,6 +107,17 @@ module Booking
         DateTime :fetched_at, null: false
       end
 
+      # Who opened the mini app, one row per person per local date. A person is
+      # a Telegram id and nothing else, as in `favourites`; what they looked at
+      # is not kept. The key is what makes a second screen on the same
+      # day cost nothing.
+      db.create_table?(:visits) do
+        Bignum :user_id, null: false
+        Date :date, null: false
+        primary_key %i[user_id date]
+        index [:date]
+      end
+
       # `create_table?` does nothing to a table that already exists, and by the
       # time the Dated watch arrived there were watches in the file. Guarded so
       # it is as re-runnable as everything above it.

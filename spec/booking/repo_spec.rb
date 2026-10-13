@@ -120,6 +120,29 @@ RSpec.describe "repositories" do
     end
   end
 
+  describe Booking::Repo::Visits do
+    subject(:repo) { described_class.new(db) }
+
+    let(:monday) { Date.new(2026, 10, 12) }
+
+    def rows = db[:visits].order(:date).select_map(%i[user_id date])
+
+    it "keeps one row a day per person, however many screens they open" do
+      repo.record(42, on: monday)
+      repo.record(42, on: monday)
+      repo.record(7, on: monday)
+
+      expect(rows).to contain_exactly([42, monday], [7, monday])
+    end
+
+    it "keeps a second day as a second row" do
+      repo.record(42, on: monday)
+      repo.record(42, on: monday + 1)
+
+      expect(rows).to eq([[42, monday], [42, monday + 1]])
+    end
+  end
+
   describe Booking::Repo::Clubs do
     subject(:repo) { described_class.new(db) }
 

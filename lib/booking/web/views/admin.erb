@@ -60,11 +60,30 @@
     <h2 class="profile__label">Activity</h2>
     <% activity = @dashboard.activity(now: @now) %>
     <dl class="facts">
-      <dt>People</dt><dd><%= activity.people %></dd>
+      <dt>With a watch or a star</dt><dd><%= activity.people %></dd>
       <dt>Active watches</dt><dd><%= activity.active_watches %></dd>
       <dt>Slots freed, 24h</dt><dd><%= activity.freed_24h %></dd>
       <dt>Notifications sent, 24h</dt><dd><%= activity.notified_24h %></dd>
     </dl>
+  </div>
+
+  <div class="profile__section">
+    <h2 class="profile__label">Visitors</h2>
+    <% visitors = @dashboard.visitors(now: @now) %>
+    <p class="profile__lede"><%= visitors.total %> opened the app</p>
+    <dl class="facts">
+      <dt>Today</dt><dd><%= visitors.today %></dd>
+      <dt>Last 7 days</dt><dd><%= visitors.week %></dd>
+      <dt>Last 30 days</dt><dd><%= visitors.month %></dd>
+      <dt>New, last 7 days</dt><dd><%= visitors.new_week %></dd>
+      <dt>Came back another day</dt><dd><%= visitors.returning %></dd>
+    </dl>
+    <dl class="facts">
+      <% visitors.days.each do |day| %>
+        <dt><%= day_label(day.date) %></dt><dd><%= day.people %><% if day.new.positive? %> · <%= day.new %> new<% end %></dd>
+      <% end %>
+    </dl>
+    <p class="ops-note">A person counts once a day, from the first screen they open. Your own visits are left out.</p>
   </div>
 
   <div class="profile__section">
