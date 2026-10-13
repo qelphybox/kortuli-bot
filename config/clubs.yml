@@ -438,6 +438,7 @@
       from: "09:00"
       to: "24:00"
     max_days: 14
+    court_aliases: {}
 
 # AIA Padel is in Kutaisi. Its site has a sign-in and a card payment, but the
 # booking page reads dates, courts and starts before anyone signs in, and so
