@@ -81,6 +81,18 @@ module Booking
           %(<line x1="17" y1="1" x2="17" y2="21" stroke-width="1.5"/><line x1="7" y1="11" x2="27" y2="11" stroke-width="1"/></svg>)
       end
 
+      # Two roads, a pond and a pin: the drawing over a Profile's link to Google
+      # Maps. Not a map of anywhere — there is no map service behind it — only
+      # a picture that says "this opens a map". Coloured by the stylesheet.
+      def place_art
+        %(<svg class="place__art" viewBox="0 0 358 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">) +
+          %(<path class="place__road" d="M0 80 C80 60 120 100 200 70 S320 40 358 60" stroke-width="10"/>) +
+          %(<path class="place__road" d="M140 0 L170 120" stroke-width="6"/>) +
+          %(<ellipse class="place__pond" cx="250" cy="34" rx="44" ry="18"/>) +
+          %(<path class="place__pin" d="M181 76 L169.5 59.6 A15 15 0 1 1 192.5 59.6 Z"/>) +
+          %(<circle class="place__dot" cx="181" cy="50" r="5"/></svg>)
+      end
+
       # The ball with a tick through it: a Watch has been made.
       def done
         %(<svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">) +

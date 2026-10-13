@@ -1042,6 +1042,21 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include("Turtle Lake · 2 outdoor")
     end
 
+    # The City pill counts the clubs, so the header says nothing more.
+    it "leaves the count to the City pill" do
+      sign_in
+      get "/clubs"
+
+      expect(last_response.body).not_to include("watched")
+    end
+
+    it "says a club without a Profile has none yet" do
+      sign_in
+      get "/clubs"
+
+      expect(last_response.body).to include("No directory profile yet")
+    end
+
     it "puts favourites first" do
       sign_in
       post "/favourites/padel-club-2"
@@ -1063,6 +1078,44 @@ RSpec.describe Booking::Web::App do
       get "/clubs/kus-tba-padel"
 
       expect(last_response.body).to include("2 outdoor").and include("Court 1").and include("cover--outdoor")
+    end
+
+    # Covers are the point of a Profile: a court under a roof is drawn dark.
+    context "with a court under a roof" do
+      let(:club_profiles) do
+        {
+          "kus-tba-padel" => Booking::ClubProfile.from(
+            { "courts" => [{ "name" => "Court 1", "cover" => "covered" }, { "name" => "Court 2", "cover" => "outdoor" }] },
+            checked_on: "2026-10-11"
+          )
+        }
+      end
+
+      it "draws that court dark and the open one light" do
+        sign_in
+        get "/clubs/kus-tba-padel"
+
+        roofed = last_response.body[%r{<li class="court is-roofed">.*?</li>}m].to_s
+        open_air = last_response.body[%r{<li class="court">.*?</li>}m].to_s
+        expect(roofed).to include("Court 1").and include("cover--covered")
+        expect(open_air).to include("Court 2").and include("cover--outdoor")
+      end
+
+      it "draws no map for a club the listing gives no pin" do
+        sign_in
+        get "/clubs/kus-tba-padel"
+
+        expect(last_response.body).not_to include("place__art")
+        expect(last_response.body).not_to include("google.com/maps")
+      end
+    end
+
+    it "names the area on its link to Google Maps, and draws no pretend map" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include("Turtle Lake · Open in Google Maps")
+      expect(last_response.body).not_to include("[MAP]")
     end
 
     it "opens its pin in Google Maps, outside the app" do
@@ -1098,8 +1151,8 @@ RSpec.describe Booking::Web::App do
       sign_in
       get "/clubs/kus-tba-padel"
 
-      expect(last_response.body).to include("sapadelo.com, as of 11 Oct")
-      expect(last_response.body).to include("https://sapadelo.com/georgia/clubs/kus-tba-padel")
+      expect(last_response.body).to include("sapadelo.com</a>, as of 11 Oct")
+      expect(last_response.body).to include('href="https://sapadelo.com/georgia/clubs/kus-tba-padel" target="_blank" rel="noopener">sapadelo.com</a>')
     end
 
     it "says there is nothing to show for a club without one, and still links to its booking page" do
@@ -1520,7 +1573,7 @@ RSpec.describe Booking::Web::App do
       it "lists only Batumi's clubs in the directory" do
         get "/clubs"
 
-        expect(last_response.body).to include("1 watched")
+        expect(last_response.body.scan('class="club-line"').size).to eq(1)
         expect(switch).to include('value="Batumi" aria-current="true"')
         expect(last_response.body).to include('href="/clubs/padel-port"')
         expect(last_response.body).not_to include('href="/clubs/kus-tba-padel"')
