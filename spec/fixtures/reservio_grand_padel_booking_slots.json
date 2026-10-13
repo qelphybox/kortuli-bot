@@ -1,0 +1,545 @@
+{
+  "972672c5-94ba-4d1a-bdfd-f2839a0ceeb7": {
+    "meta": {
+      "total": 1
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/availability/booking-slots?page[limit]=200&filter[from]=2026-10-20&filter[to]=2026-10-20&filter[serviceId]=972672c5-94ba-4d1a-bdfd-f2839a0ceeb7",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "fee21a2d-11f4-53be-be87-efb5737df7da",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:26+04:00",
+          "start": "2026-10-20T08:00:00+04:00",
+          "end": "2026-10-20T08:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "78060f65-7b46-4caf-a15d-f8a9b150f126"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "8f38cc70-a224-40e6-81d6-b6c7e32d8344": {
+    "meta": {
+      "total": 4
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/availability/booking-slots?page[limit]=200&filter[from]=2026-10-20&filter[to]=2026-10-20&filter[serviceId]=8f38cc70-a224-40e6-81d6-b6c7e32d8344",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "df74757b-7326-5df9-b882-d30537365639",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:26+04:00",
+          "start": "2026-10-20T13:00:00+04:00",
+          "end": "2026-10-20T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "0f5b5160-6acf-5b12-a756-eb9f24ed0b66",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:26+04:00",
+          "start": "2026-10-20T14:00:00+04:00",
+          "end": "2026-10-20T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "b4448e52-3f65-52f5-8b41-fad9eea68650",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:26+04:00",
+          "start": "2026-10-20T15:00:00+04:00",
+          "end": "2026-10-20T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ba768165-7d36-5850-a809-8592cdb19057",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:26+04:00",
+          "start": "2026-10-20T16:00:00+04:00",
+          "end": "2026-10-20T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "896c724c-6d75-405c-80ae-87e73e58eec4": {
+    "meta": {
+      "total": 4
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/availability/booking-slots?page[limit]=200&filter[from]=2026-10-20&filter[to]=2026-10-20&filter[serviceId]=896c724c-6d75-405c-80ae-87e73e58eec4",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "e66ecfae-3a7d-5ea5-b135-296f87ad0f14",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:27+04:00",
+          "start": "2026-10-20T13:00:00+04:00",
+          "end": "2026-10-20T13:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "61acffdf-fd07-4a7f-9596-a5721267c1b6"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "92b02c2e-fabb-5268-a9ed-d37bd912bca2",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:27+04:00",
+          "start": "2026-10-20T14:00:00+04:00",
+          "end": "2026-10-20T14:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "61acffdf-fd07-4a7f-9596-a5721267c1b6"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "50b448a8-871a-5d43-92e7-a5e794a9d079",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:27+04:00",
+          "start": "2026-10-20T15:00:00+04:00",
+          "end": "2026-10-20T15:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "61acffdf-fd07-4a7f-9596-a5721267c1b6"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "9e5c5bbc-63cf-55e9-b5d9-ad8b431e5157",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:27+04:00",
+          "start": "2026-10-20T16:00:00+04:00",
+          "end": "2026-10-20T16:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "61acffdf-fd07-4a7f-9596-a5721267c1b6"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "77bc9810-6d74-406a-9568-544d0f381924": {
+    "meta": {
+      "total": 8
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/availability/booking-slots?page[limit]=200&filter[from]=2026-10-20&filter[to]=2026-10-20&filter[serviceId]=77bc9810-6d74-406a-9568-544d0f381924",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "4bb8a6b6-f714-5ebd-8f2d-b56df167550d",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T17:00:00+04:00",
+          "end": "2026-10-20T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "a5e27a0e-ca85-5177-8df8-afcd925ff95b",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T18:00:00+04:00",
+          "end": "2026-10-20T18:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "1f6b7c23-fb4f-506d-836e-4331a41a5c5b",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T19:00:00+04:00",
+          "end": "2026-10-20T19:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "dd2b2123-2b1a-501f-b1c6-af3d9cfa62dc",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T20:00:00+04:00",
+          "end": "2026-10-20T20:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "838632d6-065b-55fa-a2fe-d4301f28f1de",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T21:00:00+04:00",
+          "end": "2026-10-20T21:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ec704474-6649-584d-acac-f4f814248a7d",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T22:00:00+04:00",
+          "end": "2026-10-20T22:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "66de1aad-dfb4-526c-8209-de1148052c61",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T00:00:00+04:00",
+          "end": "2026-10-20T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "1c675d70-e25f-5f5c-96ed-2aa13c04a848",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T01:00:00+04:00",
+          "end": "2026-10-20T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "687ce25c-523a-462a-bb39-9446689b78a1"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "9813ae70-d196-4426-8b04-480916a8d981": {
+    "meta": {
+      "total": 7
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/availability/booking-slots?page[limit]=200&filter[from]=2026-10-20&filter[to]=2026-10-20&filter[serviceId]=9813ae70-d196-4426-8b04-480916a8d981",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "864d29c4-e1ba-59e6-9da2-b6d2006157c2",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T17:00:00+04:00",
+          "end": "2026-10-20T17:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "c6bc04a5-4e61-5b68-a06c-a64f84a0e91f",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T18:00:00+04:00",
+          "end": "2026-10-20T18:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "dba09b3f-a280-58c8-bf6b-7cc5ef28ece0",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T19:00:00+04:00",
+          "end": "2026-10-20T19:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "aa1a7bbf-ce0d-580b-a991-ecd2ff5876a4",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T20:00:00+04:00",
+          "end": "2026-10-20T20:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "0a71634f-e96c-5c39-9fae-0e4dfdb0a627",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T21:00:00+04:00",
+          "end": "2026-10-20T21:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "db3f26dc-053a-570e-9790-35647f452a20",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T00:00:00+04:00",
+          "end": "2026-10-20T00:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "ad58381e-0758-5f98-ac5e-cc59bf09947f",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:28+04:00",
+          "start": "2026-10-20T01:00:00+04:00",
+          "end": "2026-10-20T01:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "adcd4ab2-597c-4173-8090-75595b5ef390": {
+    "meta": {
+      "total": 3
+    },
+    "links": {
+      "self": "https://api.reservio.com/v2/businesses/aac3b1f5-7e80-4052-bd09-adc7396cfbec/availability/booking-slots?page[limit]=200&filter[from]=2026-10-20&filter[to]=2026-10-20&filter[serviceId]=adcd4ab2-597c-4173-8090-75595b5ef390",
+      "first": null,
+      "prev": null,
+      "next": null,
+      "last": null
+    },
+    "data": [
+      {
+        "type": "timeSlot",
+        "id": "b435df34-31e5-5bc0-a523-11ed37dc7ffe",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:29+04:00",
+          "start": "2026-10-20T08:00:00+04:00",
+          "end": "2026-10-20T08:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "f6ef1cf5-c7f1-56f0-af29-0c586e4a12ed",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:29+04:00",
+          "start": "2026-10-20T11:00:00+04:00",
+          "end": "2026-10-20T11:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3"
+            }
+          }
+        }
+      },
+      {
+        "type": "timeSlot",
+        "id": "166673a9-c46b-5457-abcd-01c19542f694",
+        "attributes": {
+          "createdAt": "2026-10-13T23:17:29+04:00",
+          "start": "2026-10-20T12:00:00+04:00",
+          "end": "2026-10-20T12:59:00+04:00"
+        },
+        "relationships": {
+          "resource": {
+            "data": {
+              "type": "resource",
+              "id": "408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
