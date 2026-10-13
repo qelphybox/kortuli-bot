@@ -286,13 +286,19 @@ that for itself on every boot from `APP_URL` — and nor is anything else
 Telegram says about the bot: its description, its short description and its
 command menu come from [`Messages`](lib/booking/messages.rb) and are written
 on boot wherever Telegram's copy differs, so an edit in @BotFather lasts until
-the next deploy. The log says which:
+the next deploy. The profile photo is [config/avatar.jpg](config/avatar.jpg)
+— a JPEG, the only format Telegram takes for one. Telegram never hands that
+back as it was given, so the bot cannot compare; it keeps the digest of what
+it last uploaded in `data/avatar.sha256` and uploads only when the file
+changes. A photo changed by hand in @BotFather therefore stays until the next
+one is committed; delete the stamp to force an upload. The log says which:
 
 ```
 telegram: menu button -> https://kortuli-tgapp.qelphybox.space
 telegram: description set
 telegram: short description unchanged
 telegram: commands unchanged
+telegram: profile photo set
 ```
 
 The database is a bind mount at `/srv/kortuli-bot/data` on the host, created

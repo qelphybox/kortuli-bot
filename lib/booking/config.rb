@@ -75,6 +75,12 @@ module Booking
     # Written by `rake sapadelo:import`; read by the web alone.
     def club_profiles_file = ENV.fetch("CLUB_PROFILES_FILE", "config/club_profiles.yml")
 
+    # The bot's profile photo, and where the bot notes which one it last
+    # uploaded — on the data mount, the one place that outlives a deploy.
+    def avatar_file = ENV.fetch("AVATAR_FILE", "config/avatar.jpg")
+
+    def avatar_stamp = ENV.fetch("AVATAR_STAMP", "data/avatar.sha256")
+
     def http_timeout = Integer(ENV.fetch("HTTP_TIMEOUT", "15"))
 
     # Padel Academy shows its schedule only to a signed-in member, so polling
