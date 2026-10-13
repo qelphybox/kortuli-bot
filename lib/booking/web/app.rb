@@ -53,10 +53,10 @@ module Booking
       # user manually clears the cache. Appending `?v=…` makes the URL new
       # for every deploy without asking Sinatra to compute anything per
       # request.
-      ASSET_VERSION = [
-        File.mtime(File.expand_path("public/app.css", __dir__)),
-        File.mtime(File.expand_path("public/app.js", __dir__))
-      ].max.to_i.to_s.freeze
+      # Every stylesheet and script counts, the per-screen ones included: a
+      # deploy that touches only screens/day.css must still change the URL.
+      ASSET_VERSION = Dir[File.expand_path("public/**/*.{css,js}", __dir__)]
+                      .map { File.mtime(_1) }.max.to_i.to_s.freeze
 
       BYTE_UNITS = %w[B KB MB GB TB].freeze
 
