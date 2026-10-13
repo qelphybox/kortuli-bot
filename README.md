@@ -282,10 +282,17 @@ be unresponsive for roughly ten seconds mid-deploy.
 Two steps happen outside the repository and cannot be automated from it: point
 a DNS A record at the server, and register the mini app's URL once with
 `@BotFather`. The menu button that opens it is *not* one of them — the bot sets
-that for itself on every boot from `APP_URL`, and says so in the log:
+that for itself on every boot from `APP_URL` — and nor is anything else
+Telegram says about the bot: its description, its short description and its
+command menu come from [`Messages`](lib/booking/messages.rb) and are written
+on boot wherever Telegram's copy differs, so an edit in @BotFather lasts until
+the next deploy. The log says which:
 
 ```
 telegram: menu button -> https://kortuli-tgapp.qelphybox.space
+telegram: description set
+telegram: short description unchanged
+telegram: commands unchanged
 ```
 
 The database is a bind mount at `/srv/kortuli-bot/data` on the host, created
