@@ -15,6 +15,15 @@ module Booking
     # that location's courts. Either way a slot names its resource, and the
     # resource is the court.
     #
+    # Except when it is not. Grand Padel Batumi sells each of its two courts as
+    # three price bands, and every band is its own service over its own
+    # resource ("Court A- 50 Gel" 08–13, "Court A - 65 Gel" 13–17, "Court A-
+    # 80 Gel" 17–02), each resource open only for its band's hours. Nothing in
+    # the API says which bands are one court, so `court_aliases` does: each
+    # band's resource is aliased to the physical court, and that alias becomes
+    # the ref *and* the label. The slot key is built from the ref, so two bands
+    # ever offering the same hour still make one Slot per court-hour.
+    #
     # `filter[serviceId]` takes exactly one uuid: a comma-separated pair is a
     # 400 ("Invalid UUID string"), `filter[serviceId][]` a 500, and leaving it
     # out a 404. So it is one request per service — four a tick for Padel
@@ -123,17 +132,27 @@ module Booking
         # place in a Cell.
         return nil unless starts_at.min.zero?
 
+        court_ref = @club.canonical_court(court_id)
+
         Slot.new(
           club_slug: @club.slug,
-          court_ref: @club.canonical_court(court_id),
-          # A court added since the last resources call still deserves a
-          # notification; an ugly label beats a dropped slot.
-          court_label: courts[court_id] || court_id,
+          court_ref:,
+          court_label: label(court_id, court_ref, courts),
           starts_at:,
           ends_at: Time.iso8601(attributes.fetch("end")),
           price: @club.settings["price"],
           deeplink: @club.settings["booking_url"]
         )
+      end
+
+      # A court the config has aliased is named by the alias: the resource's
+      # own name may be a price band rather than a court. Otherwise Reservio's
+      # name — and for a court added since the last resources call, its raw
+      # id, because an ugly label beats a dropped slot.
+      def label(court_id, court_ref, courts)
+        return court_ref unless court_ref == court_id
+
+        courts[court_id] || court_id
       end
     end
   end

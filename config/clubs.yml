@@ -284,6 +284,51 @@
       to: "02:00"
     max_days: 8
     courts: 2
+    court_aliases: {}
+
+# Grand Padel sells each of its two courts as three price bands, and every band
+# is its own Reservio service over its own resource, open only for the band's
+# hours. Six services, two courts: the aliases below are what fold each court's
+# three band resources back into one, and the alias is also the court's label.
+# Bookings wait for the club's confirmation (`reservationsManualConfirmation`),
+# so a freed hour is a request away, not a booking.
+- slug: grand-padel-batumi
+  name: Grand Padel
+  adapter: reservio
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Batumi
+    business_id: "aac3b1f5-7e80-4052-bd09-adc7396cfbec"
+    service_ids:
+      - "adcd4ab2-597c-4173-8090-75595b5ef390" # Court A-(08:00-13:00)
+      - "8f38cc70-a224-40e6-81d6-b6c7e32d8344" # Court A-(13:00-17:00)
+      - "77bc9810-6d74-406a-9568-544d0f381924" # Court A-(17:00-02:00)
+      - "972672c5-94ba-4d1a-bdfd-f2839a0ceeb7" # Court B-(08:00-13:00)
+      - "896c724c-6d75-405c-80ae-87e73e58eec4" # Court B-(13:00-17:00)
+      - "9813ae70-d196-4426-8b04-480916a8d981" # Court B-(17:00-02:00)
+    sapadelo: grand-padel-batumi
+    booking_url: "https://grandpadelbatumi.reservio.com/"
+    # By band: 50 for starts 08:00–12:00, 65 for 13:00–16:00, 80 from 17:00.
+    price: "50–80 GEL"
+    # The business's own hours on Reservio, 08:00–24:00 and 00:00–02:00 every
+    # day, and the bands cover them end to end. sapadelo says 09:00, but the
+    # source offered 08:00 starts on 18–20 October.
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
+    # `reservationsLaterThan` is 604800 s, as at Padel Port.
+    max_days: 8
+    courts: 2
+    # Resource uuid => the physical court. The resources are named for their
+    # band ("Court A- 50 Gel"), not their court.
+    court_aliases:
+      "408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3": "Court A" # Court A- 50 Gel
+      "242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891": "Court A" # Court A - 65 Gel
+      "687ce25c-523a-462a-bb39-9446689b78a1": "Court A" # Court A- 80 Gel
+      "78060f65-7b46-4caf-a15d-f8a9b150f126": "Court B" # Court B- 50 Gel
+      "61acffdf-fd07-4a7f-9596-a5721267c1b6": "Court B" # Court B- 65 Gel
+      "cd72f9a6-f3ba-4099-a8a3-5aa579197335": "Court B" # Court B-80 Gel
 
 # Tbilisi Padel runs BookingPress on WordPress, one booking form for all of its
 # locations, each a BookingPress service told apart by service_id. Ids, prices

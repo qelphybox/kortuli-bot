@@ -12,7 +12,7 @@ class FakeHttp
     @requests = []
     @pages = pages
     @resources = resources
-    @by_service = by_service && fixture(by_service)
+    @by_service = by_service.is_a?(String) ? fixture(by_service) : by_service
   end
 
   def get_json(url, params = {})
@@ -325,6 +325,77 @@ RSpec.describe Booking::Adapters::Reservio do
       empty = club.with(settings: club.settings.merge("service_ids" => []))
 
       expect { described_class.new(empty, http:) }.to raise_error(Booking::Error, /service_ids is empty/)
+    end
+  end
+
+  # Grand Padel Batumi sells each of its two courts as three price bands, and
+  # every band is its own service over its own resource. Recorded for 20
+  # October 2026, one booking-slots answer per service.
+  describe "a business that sells every court as several price bands" do
+    let(:http) { FakeHttp.new(resources: "reservio_grand_padel_resources", by_service: "reservio_grand_padel_booking_slots") }
+    let(:window) { Date.new(2026, 10, 20)..Date.new(2026, 10, 26) }
+    let(:club) do
+      Booking::Club.new(
+        slug: "grand-padel-batumi",
+        name: "Grand Padel",
+        adapter: "reservio",
+        settings: {
+          "business_id" => "aac3b1f5-7e80-4052-bd09-adc7396cfbec",
+          "service_ids" => GRAND_PADEL_BANDS.keys,
+          "booking_url" => "https://grandpadelbatumi.reservio.com/",
+          "price" => "50–80 GEL",
+          "courts" => 2,
+          "court_aliases" => GRAND_PADEL_COURTS
+        }
+      )
+    end
+
+    # Service => the resource it books, band by band.
+    GRAND_PADEL_BANDS = {
+      "adcd4ab2-597c-4173-8090-75595b5ef390" => "408fddbc-1ace-45f0-8e9b-b3b7c5e8b3c3",
+      "8f38cc70-a224-40e6-81d6-b6c7e32d8344" => "242d0df6-c5b8-4f99-b8d3-5b7aa3ba4891",
+      "77bc9810-6d74-406a-9568-544d0f381924" => "687ce25c-523a-462a-bb39-9446689b78a1",
+      "972672c5-94ba-4d1a-bdfd-f2839a0ceeb7" => "78060f65-7b46-4caf-a15d-f8a9b150f126",
+      "896c724c-6d75-405c-80ae-87e73e58eec4" => "61acffdf-fd07-4a7f-9596-a5721267c1b6",
+      "9813ae70-d196-4426-8b04-480916a8d981" => "cd72f9a6-f3ba-4099-a8a3-5aa579197335"
+    }.freeze
+    GRAND_PADEL_COURTS = GRAND_PADEL_BANDS.values.each_with_index.to_h { |resource, i| [resource, i < 3 ? "Court A" : "Court B"] }.freeze
+
+    it "reads all three bands of both courts" do
+      # Court A: 3 + 4 + 8, Court B: 1 + 4 + 7 free that day.
+      expect(adapter.fetch(window).size).to eq(27)
+    end
+
+    it "comes out as the two courts the club has, not six bands" do
+      slots = adapter.fetch(window)
+
+      expect(slots.map(&:court_ref).uniq).to contain_exactly("Court A", "Court B")
+      expect(slots.map(&:court_label).uniq).to contain_exactly("Court A", "Court B")
+    end
+
+    it "joins the bands into one court's day" do
+      hours = adapter.fetch(window).select { _1.court_ref == "Court A" }.map { _1.local_starts_at.hour }.sort
+
+      expect(hours).to eq([0, 1, 8, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22])
+    end
+
+    it "makes one slot per court-hour even if two bands offer the same hour" do
+      bands = FakeHttp.new.fixture("reservio_grand_padel_booking_slots")
+      morning, midday = GRAND_PADEL_BANDS.keys.first(2)
+      # The midday band reaching back an hour into the morning band's 12:00.
+      overlap = bands[morning]["data"].last.merge("relationships" => bands[midday]["data"].first["relationships"])
+      bands[midday] = bands[midday].merge("data" => [overlap] + bands[midday]["data"], "meta" => { "total" => 5 })
+      http = FakeHttp.new(resources: "reservio_grand_padel_resources", by_service: bands)
+
+      at_noon = described_class.new(club, http:).fetch(window).select { _1.court_ref == "Court A" && _1.local_starts_at.hour == 12 }
+
+      expect(at_noon.size).to eq(1)
+    end
+
+    it "still labels a band the config does not mention by Reservio's name for it" do
+      unaliased = club.with(settings: club.settings.merge("court_aliases" => {}))
+
+      expect(described_class.new(unaliased, http:).fetch(window).map(&:court_label)).to include("Court A- 80 Gel")
     end
   end
 end

@@ -466,3 +466,31 @@ clubs:
     - gel: 40
       from: '08:00'
       to: '16:00'
+
+  grand-padel-batumi:
+    source: https://sapadelo.com/georgia/clubs/grand-padel-batumi
+    address: Sherif Khimshiashvili Street 18
+    phone: "+995599672672"
+    lat: 41.6371022
+    lng: 41.6085884
+    courts:
+    - name: Court A
+      cover: outdoor
+    - name: Court B
+      cover: outdoor
+    hours:
+      mon: '09:00–02:00'
+      tue: '09:00–02:00'
+      wed: '09:00–02:00'
+      thu: '09:00–02:00'
+      fri: '09:00–02:00'
+      sat: '09:00–02:00'
+      sun: '09:00–02:00'
+    prices:
+    - gel: 65
+    - gel: 50
+      from: '09:00'
+      to: '13:00'
+    - gel: 80
+      from: '17:00'
+      to: '02:00'
