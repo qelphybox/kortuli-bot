@@ -271,6 +271,41 @@ clubs:
       days:
       - sat
       - sun
+  padel-gldani:
+    source: https://sapadelo.com/georgia/clubs/padel-gldani
+    area: Gldani
+    address: 56 Ilia Vekua St
+    phone: "+995555503303"
+    lat: 41.8042129
+    lng: 44.8308884
+    courts:
+    - name: Court 1
+      cover: covered
+    - name: Court 2
+      cover: covered
+    - name: Court 3
+      cover: outdoor
+    hours:
+      mon: '08:00–02:00'
+      tue: '08:00–02:00'
+      wed: '08:00–02:00'
+      thu: '08:00–02:00'
+      fri: '08:00–02:00'
+      sat: '08:00–02:00'
+      sun: '08:00–02:00'
+    prices:
+    - gel: 60
+      from_price: true
+    - gel: 50
+      from_price: true
+    - gel: 60
+      days:
+      - sat
+      - sun
+    - gel: 70
+      days:
+      - sat
+      - sun
   padel-port:
     source: https://sapadelo.com/georgia/clubs/padel-port
     address: 3 Tengiz Abuladze

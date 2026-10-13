@@ -1,0 +1,224 @@
+{
+  "courts": [
+    {
+      "result": {
+        "data": {
+          "json": [
+            {
+              "id": 1,
+              "name": "Croco Court I - გადახურული",
+              "status": "available",
+              "priceWeekday": "60.00",
+              "priceWeekend": "70.00",
+              "maintenanceReason": null,
+              "mediaUrl": "/manus-storage/PADEL13D_469f045b.mp4",
+              "mediaType": "video",
+              "createdAt": "2026-06-18T19:48:59.000Z"
+            },
+            {
+              "id": 2,
+              "name": "Croco Court II - გადახურული",
+              "status": "available",
+              "priceWeekday": "60.00",
+              "priceWeekend": "70.00",
+              "maintenanceReason": null,
+              "mediaUrl": "/manus-storage/PADEL13D_469f045b.mp4",
+              "mediaType": "video",
+              "createdAt": "2026-06-18T19:48:59.000Z"
+            },
+            {
+              "id": 3,
+              "name": "Court III - ღია",
+              "status": "available",
+              "priceWeekday": "50.00",
+              "priceWeekend": "60.00",
+              "maintenanceReason": null,
+              "mediaUrl": "/manus-storage/PADEL23D_bd25ea1e.mp4",
+              "mediaType": "video",
+              "createdAt": "2026-06-18T19:48:59.000Z"
+            }
+          ],
+          "meta": {
+            "values": {
+              "0.createdAt": [
+                "Date"
+              ],
+              "1.createdAt": [
+                "Date"
+              ],
+              "2.createdAt": [
+                "Date"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "booked": {
+    "2026-10-13": [
+      {
+        "result": {
+          "data": {
+            "json": [
+              {
+                "startTime": "22:00",
+                "endTime": "23:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              },
+              {
+                "startTime": "23:00",
+                "endTime": "01:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              }
+            ]
+          }
+        }
+      },
+      {
+        "result": {
+          "data": {
+            "json": [
+              {
+                "startTime": "20:00",
+                "endTime": "22:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              },
+              {
+                "startTime": "23:00",
+                "endTime": "00:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              }
+            ]
+          }
+        }
+      },
+      {
+        "result": {
+          "data": {
+            "json": [
+              {
+                "startTime": "20:00",
+                "endTime": "22:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              },
+              {
+                "startTime": "22:00",
+                "endTime": "23:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              },
+              {
+                "startTime": "23:00",
+                "endTime": "00:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "2026-10-14": [
+      {
+        "result": {
+          "data": {
+            "json": [
+              {
+                "startTime": "20:00",
+                "endTime": "21:00",
+                "bookingDate": "2026-10-14",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              },
+              {
+                "startTime": "00:00",
+                "endTime": "01:00",
+                "bookingDate": "2026-10-13",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              }
+            ]
+          }
+        }
+      },
+      {
+        "result": {
+          "data": {
+            "json": [
+              {
+                "startTime": "00:00",
+                "endTime": "01:00",
+                "bookingDate": "2026-10-14",
+                "isHold": false,
+                "expiresAt": null,
+                "sessionId": null,
+                "isPending": false
+              }
+            ]
+          }
+        }
+      },
+      {
+        "result": {
+          "data": {
+            "json": []
+          }
+        }
+      }
+    ],
+    "2026-10-15": [
+      {
+        "result": {
+          "data": {
+            "json": []
+          }
+        }
+      },
+      {
+        "result": {
+          "data": {
+            "json": []
+          }
+        }
+      },
+      {
+        "result": {
+          "data": {
+            "json": []
+          }
+        }
+      }
+    ]
+  }
+}

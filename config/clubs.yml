@@ -227,6 +227,35 @@
     courts: 4
     court_aliases: {}
 
+# Padel Gldani reads through its own tRPC API, open to anyone; its robots.txt
+# disallows /api/ and the adapter says why we read it regardless. Courts and
+# whether each is selling come from the source every tick.
+- slug: padel-gldani
+  name: Padel Gldani
+  adapter: padelgldani
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Tbilisi
+    # The adapter appends `?court=<id>`, which the page opens on.
+    booking_url: "https://padelgldani.ge/booking"
+    sapadelo: padel-gldani
+    # Courts I and II (covered) 60 weekdays and 70 weekends; Court III (open
+    # air) 50 and 60 — each court's own `priceWeekday`/`priceWeekend`.
+    price: "50–70 GEL"
+    # The site's grid, hard-coded client-side: 08:00 to a last start at 01:00,
+    # 02:00 being closing time. Matches its own "open 08:00–02:00".
+    opening_hours:
+      from: "08:00"
+      to: "02:00"
+    # The booking page's date chips: fourteen, counting today.
+    max_days: 14
+    # The source answers per court, so a cell can say how many of the three
+    # are free.
+    courts: 3
+    # Court ids are stable integers, so there is nothing to alias.
+    court_aliases: {}
+
 # Padel Port is one Reservio business at two Batumi sites, and sells each court
 # as its own service: Padel Court 1–4 at the original site, Park Court 1–2 at
 # New Park. A club is the services that are its site's courts, so one business
