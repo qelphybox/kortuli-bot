@@ -226,3 +226,32 @@
     # free.
     courts: 4
     court_aliases: {}
+
+# AIA Padel is in Kutaisi. Its site has a sign-in and a card payment, but the
+# booking page reads dates, courts and starts before anyone signs in, and so
+# do we — nothing behind the login is touched.
+- slug: aia-padel
+  name: AIA Padel
+  adapter: aiapadel
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Kutaisi
+    booking_url: "https://aiapadel.ge/book"
+    sapadelo: aia-padel-club
+    # The court list prices an hour at 6000 tetri on every court.
+    price: "60 GEL"
+    # The source's own grid: 09:00 to a last start at 00:00, which it files
+    # under the date before. sapadelo says 08:00; the club's API says 09:00.
+    opening_hours:
+      from: "09:00"
+      to: "01:00"
+    # The `/days` list: ten dates, counting today. Past it the slots route
+    # still answers, with every hour free.
+    max_days: 10
+    # Four courts on the list, but Court 4 is `isActive: false` and refused by
+    # the slots route, so three are watched. The adapter re-reads the list
+    # every tick and would pick a reopened fourth up by itself; this count,
+    # the "of" in a Cell's "2/3", would then want raising to 4.
+    courts: 3
+    court_aliases: {}
