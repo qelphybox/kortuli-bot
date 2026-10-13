@@ -416,3 +416,7 @@ This is an MVP, deliberately:
 - **Snapshots are not kept.** Current state plus a transition log, not full
   history — enough for "when do evening slots free up?", not enough to replay an
   arbitrary past moment.
+
+## License
+
+[MIT](LICENSE).
