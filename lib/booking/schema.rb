@@ -119,6 +119,24 @@ module Booking
         index [:date]
       end
 
+      # Every time somebody opens a date's list of clubs, and how far it got:
+      # which weekday, how far ahead of today, at what hour it was opened, and
+      # whether a club's Book was tapped or a Game shared from it after. What
+      # decides, later, which day the home screen leads with. One row per
+      # opening rather than per person, because the repeats are the signal.
+      db.create_table?(:day_opens) do
+        primary_key :id
+        Bignum :user_id, null: false
+        Date :date, null: false
+        Integer :weekday, null: false
+        Integer :days_ahead, null: false
+        Integer :hour, null: false
+        DateTime :opened_at, null: false
+        DateTime :booked_at
+        DateTime :shared_at
+        index %i[user_id date]
+      end
+
       # `create_table?` does nothing to a table that already exists, and by the
       # time the Dated watch arrived there were watches in the file. Guarded so
       # it is as re-runnable as everything above it.

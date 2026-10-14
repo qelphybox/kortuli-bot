@@ -2,51 +2,37 @@
   Every hour a single club sells on one date, as a tile: free or taken, and
   the Forecast for it — the rain is what decides between this club and one
   with a roof. On a day with any, a strip over the tiles says when, and
-  whether this club has open courts for it to fall on. The club's booking
-  page is a single button in the header rather than one on every free tile,
-  because every tile would point at the same page.
+  whether this club has open courts for it to fall on. The header is the
+  club: its name is the link to its Profile, the line under it says what it
+  is and costs, and the star beside it makes it a Favourite.
 
-  Every hour not yet over can be ticked, free or taken — the Grid may not
-  have seen a booking yet — and the ticked ones become a Game to share. Each
-  tile is a label around its checkbox, and the boxes belong to the form in
-  the dock by its id, so ticking works without JavaScript.
+  Three things to do here, in that order. Book, always, at the bottom: out
+  to the club's own page, once rather than on every free tile, because every
+  tile would point at the same page. Share my game, once an hour is ticked:
+  every hour not yet over can be ticked, free or taken — the Grid may not
+  have seen a booking yet — and the ticked ones become a Game. Each tile is
+  a label around its checkbox, and the boxes belong to the form in the dock
+  by its id, so ticking works without JavaScript.
 %>
 <header class="bar">
   <div class="bar__row">
-    <a class="icon-btn" href="/date/<%= @date %>" aria-label="Back to clubs"><%= icon(:back) %></a>
-    <div class="bar__title">
+    <a class="icon-btn" href="<%= h(@back) %>" aria-label="Back to clubs"><%= icon(:back) %></a>
+    <a class="bar__title bar__link" href="/clubs/<%= @club_slug %>?date=<%= @date %>">
       <h1 class="bar__h1"><%= @club_name %></h1>
-      <div class="bar__sub"><%= [@weekday, @date_label, @area].compact.join(" · ") %></div>
-    </div>
-    <a class="icon-btn" href="/clubs/<%= @club_slug %>?date=<%= @date %>" aria-label="About <%= @club_name %>"><%= icon(:info) %></a>
-    <% if @booking_url %>
-      <a class="pill pill--ball" data-external href="<%= @booking_url %>"
-         aria-label="Book at <%= @club_name %>">Book <%= icon(:external, size: 16) %></a>
-    <% end %>
-  </div>
-  <div class="stats">
-    <div class="stat stat--slab">
-      <div class="stat__n"><%= @free_hours %></div>
-      <div class="stat__what"><%= @free_hours == 1 ? "hour free" : "hours free" %></div>
-    </div>
-    <% if @price %>
-      <div class="stat">
-        <div class="stat__n"><%= @price.first %><% if @price.last %><small> <%= @price.last %></small><% end %></div>
-        <div class="stat__what">per hour</div>
-      </div>
-    <% end %>
-    <% if @courts %>
-      <div class="stat">
-        <div class="stat__n"><%= @courts.first %></div>
-        <div class="stat__what"><%= @courts.last %></div>
-      </div>
-    <% end %>
+      <div class="bar__sub"><%= h(@about) %></div>
+    </a>
+    <form class="fav" method="post" action="/favourites/<%= @club_slug %><%= "/delete" if @favourite %>">
+      <input type="hidden" name="date" value="<%= @date %>">
+      <input type="hidden" name="back" value="hours">
+      <button class="fav-btn<%= " is-on" if @favourite %>" aria-pressed="<%= @favourite %>"
+              aria-label="<%= @favourite ? Booking::Messages.favourite_remove : Booking::Messages.favourite_add %>"><%= star(size: 22) %></button>
+    </form>
   </div>
 </header>
 
 <main class="page">
   <div class="hint-row">
-    <p>Booked some hours? Tick them and share with your group.</p>
+    <p>Booked? Tick your hours to share.</p>
     <div class="legend"><span class="is-free">Free</span><span class="is-taken">Taken</span></div>
   </div>
 
@@ -77,6 +63,8 @@
 </main>
 
 <form class="game-pick dock" id="game-pick" method="get" action="/date/<%= @date %>/club/<%= @club_slug %>/game">
-  <button class="btn btn--slab" type="submit" data-game-pick
-          data-none="<%= Booking::Messages.game_pick_none %>"><%= icon(:share, size: 18) %><span><%= Booking::Messages.game_pick %></span></button>
+  <% if @booking_url %>
+    <a class="btn btn--ball btn--big" data-external href="<%= @booking_url %>" data-book="<%= @date %>">Book at <%= @club_name %> <%= icon(:external, size: 16) %></a>
+  <% end %>
+  <button class="btn btn--outline" type="submit" data-game-pick><%= icon(:share, size: 16) %><span><%= Booking::Messages.game_pick %></span></button>
 </form>

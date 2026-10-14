@@ -1,7 +1,7 @@
 module Booking
   # One handle for the tables, so callers take a single collaborator instead
   # of a constructor argument per table.
-  Repos = Data.define(:clubs, :slots, :events, :watches, :notifications, :favourites, :polls, :forecast, :visits, :preferences) do
+  Repos = Data.define(:clubs, :slots, :events, :watches, :notifications, :favourites, :polls, :forecast, :visits, :preferences, :day_opens) do
     def self.for(db)
       new(
         clubs: Repo::Clubs.new(db),
@@ -13,7 +13,8 @@ module Booking
         polls: Repo::Polls.new(db),
         forecast: Repo::Forecast.new(db),
         visits: Repo::Visits.new(db),
-        preferences: Repo::Preferences.new(db)
+        preferences: Repo::Preferences.new(db),
+        day_opens: Repo::DayOpens.new(db)
       )
     end
   end

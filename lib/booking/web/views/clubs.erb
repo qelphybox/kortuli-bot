@@ -1,91 +1,134 @@
 <%#
-  One date's clubs. Above them, the week as a strip of tabs, so the next day
-  is one tap away without going back; then the Forecast for the hours still
-  to come — on a wet one the clubs entirely in the open have already sunk,
-  and the banner says so. The chips narrow the list to the clubs with a roof
-  or to the Favourites, in the URL like everything else.
+  One date's clubs, against the hours somebody wants to play. Under the
+  week's strip, one strip of the day's hours still to come: a tap picks an
+  hour or lets it go, and the list answers for exactly those. The hours live
+  in the URL, so a day tapped on the strip, a club's hours and the way back
+  all keep them; app.js swaps the list in place rather than reloading it.
+  The rain is a blue line under its hours.
 
-  Each card says when the club is free from, what it costs and what its
-  courts are under — the first thing anybody asks when it rains — and, big,
-  how many hours are left. A club with nothing open drops to the bottom as a
-  dashed outline — "Fully booked" only when its last Poll read the source;
-  one we could not read says "No data", because that is all we know.
+  A club is on the list only when every hour picked is free there — a
+  two-hour game needs both. The rest fold into one line, each saying what
+  it does have instead. Nothing picked is "any time": every club with an
+  hour left, and its first few. Favourites lead, in the order they were
+  starred; under rain the clubs with a roof come next.
 
-  The star before the name is where Favourites are made: a form post beside
-  the club's link rather than inside it, so tapping it never opens the club.
-  The link is the name, stretched by CSS over the whole card.
+  Over the list, one line names a club worth going to: a favourite with the
+  hours free and dry, a roof when the rain rules the favourites out — or
+  says the favourites have nothing. A whole card is one link, to the club's
+  hours, where the star is.
 %>
-<header class="bar">
+<% pick = @pick %>
+<header class="bar day-bar">
   <div class="bar__row">
-    <a class="icon-btn" href="/" aria-label="Back to dates"><%= icon(:back) %></a>
+    <a class="icon-btn" href="/" aria-label="Back to the week"><%= icon(:back) %></a>
     <div class="bar__title bar__day">
       <h1 class="bar__h1"><%= @weekday.upcase %></h1>
       <span class="bar__date"><%= @date_label %> · <%= h(current_city) %></span>
     </div>
     <a class="pill pill--slab" href="/date/<%= @date %>/share"><%= icon(:share, size: 16) %>Share day</a>
   </div>
-  <nav class="strip" aria-label="Days">
+  <nav class="strip" aria-label="Days" data-day-swap="days">
     <% @strip.each do |s| %>
-      <a class="strip__day<%= " is-wet" if s[:wet] %>" href="/date/<%= s[:date] %><%= "?only=#{@only}" if @only %>"<%= ' aria-current="date"' if s[:current] %>>
+      <a class="strip__day<%= " is-wet" if s[:wet] %>" href="<%= h(day_path(s[:date], pick)) %>"<%= ' aria-current="date"' if s[:current] %>>
         <span class="strip__dow"><%= s[:weekday] %></span>
         <span class="strip__n"><%= s[:day] %></span>
         <span class="strip__dot"></span>
       </a>
     <% end %>
   </nav>
+  <% if pick.hours.any? %>
+    <div class="when" data-day-swap="when">
+      <span class="when__label"><%= icon(:clock, size: 13) %>When · <%= Booking::Messages.day_span(pick) %></span>
+      <% if pick.any_rain? %><span class="when__rain">rain</span><% end %>
+    </div>
+    <nav class="hour-strip" aria-label="Hours you want to play" data-hour-strip data-day-swap="hours">
+      <% pick.hours.each do |hour| %>
+        <% on = pick.wanted.include?(hour) %>
+        <a class="hour-chip<%= " is-rainy" if pick.rainy_hour?(hour) %>" role="button" aria-pressed="<%= on %>" data-hour="<%= hour %>"
+           aria-label="<%= Booking::Messages.hour_clock(hour) %><%= ", rain" if pick.rainy_hour?(hour) %>"
+           href="/date/<%= @date %>?hours=<%= pick.toggled(hour) %>"><%= Booking::Messages.hour_chip(hour) %></a>
+      <% end %>
+    </nav>
+  <% end %>
 </header>
 
-<main class="page">
-  <% if @outlook %>
-    <div class="weather notice<%= " is-wet" if @outlook.wet? %><%= " is-dry" unless @outlook.wet? || @outlook.damp? %>">
-      <span class="notice__icon"><%= icon(@outlook.wet? || @outlook.damp? ? :rain : :sun) %></span>
-      <span class="notice__body">
-        <strong class="notice__title"><%= Booking::Messages.weather_headline(@outlook) %></strong>
-        <span class="notice__sub"><%= @outlook.wet? ? Booking::Messages.weather_roofed_first : Booking::Messages.temperature_range(@outlook) %></span>
-      </span>
-    </div>
-  <% end %>
-
-  <nav class="filters" aria-label="Narrow the clubs">
-    <a class="chip" href="/date/<%= @date %>"<%= ' aria-current="true"' unless @only %>>All <%= @open_count %></a>
-    <a class="chip" href="/date/<%= @date %>?only=covered"<%= ' aria-current="true"' if @only == "covered" %>>Covered</a>
-    <a class="chip" href="/date/<%= @date %>?only=favourites"<%= ' aria-current="true"' if @only == "favourites" %>><%= star(size: 12) %>Favourites</a>
-  </nav>
-
-  <% if @clubs.empty? %>
-    <p class="empty"><%= @only == "favourites" ? "No favourites yet — tap the star beside a club." : "No club with a roof has anything on this day." %></p>
-  <% end %>
-
-  <ul class="club-cards clubs">
-    <% @clubs.each do |c| %>
-      <li class="club-card<%= " is-empty" unless c[:any_free] %><%= " is-unknown" if c[:no_data] %>">
-        <div class="club-card__body">
-          <div class="club-card__head">
-            <form class="fav" method="post" action="/favourites/<%= c[:slug] %><%= "/delete" if c[:favourite] %>">
-              <input type="hidden" name="date" value="<%= @date %>">
-              <button class="fav__star<%= " is-on" if c[:favourite] %>" aria-pressed="<%= c[:favourite] %>"
-                      aria-label="<%= c[:favourite] ? Booking::Messages.favourite_remove : Booking::Messages.favourite_add %>"><%= star(size: 16) %></button>
-            </form>
-            <a class="club-card__link" href="/date/<%= @date %>/club/<%= c[:slug] %>"><span class="club-row__name"><%= c[:name] %></span></a>
-          </div>
-          <% if c[:any_free] %>
-            <span class="club-card__meta">
-              <% c[:covers].each do |cover| %><span class="tag tag--<%= cover %>"><%= cover %></span><% end %>
-              <span class="club-card__sub"><%= c[:sub] %></span>
-            </span>
-          <% end %>
-        </div>
-        <% if c[:any_free] %>
-          <span class="club-card__tile">
-            <span class="club-card__left"><%= c[:free_count] %></span>
-            <span class="club-card__unit">free</span>
-          </span>
-        <% else %>
-          <span class="club-card__booked"><%= c[:no_data] ? "No data" : "Fully booked" %></span>
+<main class="page day-list" data-day-swap="list">
+  <% if pick.hours.empty? %>
+    <p class="empty">Nothing left to book today — every club has shut for the night.</p>
+  <% else %>
+    <% if (hint = pick.hint) %>
+      <% lead, rest = Booking::Messages.day_hint(pick) %>
+      <% wet = %i[rain roof].include?(hint.kind) %>
+      <% tag = hint.club ? "a" : "div" %>
+      <<%= tag %> class="day-hint day-hint--<%= hint.kind %>"<% if hint.club %> href="/date/<%= @date %>/club/<%= hint.club.slug %><%= "?hours=#{pick.param}" if pick.param %>"<% end %>>
+        <span class="day-hint__icon"><%= wet ? icon(:rain, size: 18) : star(size: 16) %></span>
+        <span class="day-hint__text"><strong><%= h(lead) %></strong> <%= h(rest) %></span>
+        <% if hint.club %>
+          <span class="day-hint__cta"><%= hint.kind == :roof ? "See" : "Book" %><%= icon(:chevron, size: 12) %></span>
         <% end %>
-      </li>
+      </<%= tag %>>
     <% end %>
-  </ul>
+
+    <p class="day-summary"><%= Booking::Messages.day_summary(pick) %></p>
+
+    <ul class="day-clubs">
+      <% pick.live.each do |club| %>
+        <% card = day_card(club.slug) %>
+        <li>
+          <a class="day-club" href="/date/<%= @date %>/club/<%= club.slug %><%= "?hours=#{pick.param}" if pick.param %>">
+            <span class="day-club__body">
+              <span class="day-club__head">
+                <% if club.favourite? %><span class="day-club__fav" role="img" aria-label="Favourite"><%= star(size: 16) %></span><% end %>
+                <span class="day-club__name"><%= h(club.name) %></span>
+              </span>
+              <% if card[:covers].any? || !card[:sub].empty? %>
+                <span class="day-club__meta">
+                  <% card[:covers].each do |cover| %><span class="tag tag--<%= cover %>"><%= cover %></span><% end %>
+                  <span class="day-club__sub"><%= h(card[:sub]) %></span>
+                </span>
+              <% end %>
+              <% if pick.any_time? %>
+                <span class="day-club__hours">
+                  <% pick.chips(club).each do |hour| %>
+                    <span class="free-chip<%= " is-wet" if club.open_air && pick.rainy_hour?(hour) %>"><%= Booking::Messages.hour_chip(hour) %></span>
+                  <% end %>
+                  <% if pick.more(club).positive? %><span class="free-chip__more">+<%= pick.more(club) %></span><% end %>
+                </span>
+              <% elsif (wet = Booking::Messages.day_wet(pick, club)) %>
+                <span class="day-club__wet"><%= wet %></span>
+              <% end %>
+            </span>
+            <span class="day-club__free">
+              <% if pick.any_time? %>
+                <span class="day-club__n"><%= pick.free_in(club).size %></span>
+                <span class="day-club__unit"><%= pick.free_in(club).size == 1 ? "hour" : "hours" %></span>
+              <% else %>
+                <span class="day-club__n"><%= pick.span.size %>h</span>
+                <span class="day-club__unit">free</span>
+              <% end %>
+              <%= icon(:chevron, size: 16) %>
+            </span>
+          </a>
+        </li>
+      <% end %>
+    </ul>
+
+    <% if pick.folded.any? %>
+      <details class="fold">
+        <summary class="fold__head"><span><%= Booking::Messages.day_folded(pick) %></span><%= icon(:chevron, size: 16) %></summary>
+        <ul class="fold__list">
+          <% pick.folded.each do |miss| %>
+            <li>
+              <a class="fold__club" href="/date/<%= @date %>/club/<%= miss.club.slug %><%= "?hours=#{pick.param}" if pick.param %>">
+                <span class="fold__name"><%= h(miss.club.name) %></span>
+                <span class="fold__why"><%= Booking::Messages.day_miss(miss) %></span>
+              </a>
+            </li>
+          <% end %>
+        </ul>
+      </details>
+    <% end %>
+  <% end %>
 
   <%= erb :_feedback, locals: { label: Booking::Messages.feedback_pill_clubs } %>
 </main>

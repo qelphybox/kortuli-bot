@@ -15,6 +15,10 @@
 # Look one up by searching the club's name at its pin on maps.google.com, and
 # check the card's name and address before writing it down.
 #
+# `settings.short_name` is what the club's pin on the map says — a few
+# capitals a person recognises, "KUS TBA", "GB NIN". Chosen by hand, because
+# no rule shortens every name well; a club without one shows its first word.
+#
 # `settings.city` is the City the club is in, and Tbilisi when it is left out.
 # The app shows one city's clubs at a time, and fetches the Forecast once per
 # city — at the point named in Weather::CITIES, so a city new to this file
@@ -30,6 +34,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "KUS TBA"
     city: Tbilisi
     place_id: ChIJ1RLok6sNREARKXr7JmQiu8A
     booking_url: "https://kustbapadel.ge/book/"
@@ -58,6 +63,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "GB NIN"
     city: Tbilisi
     place_id: ChIJOQTI8tcNREARp1KD9QaOfWM
     location_id: "63f663fa-1852-5bde-bf94-dee5b176de1d"
@@ -83,6 +89,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "GB RC"
     city: Tbilisi
     place_id: ChIJyR88eCVtREAR_V6NlYFdzeg
     location_id: "752155d7-39aa-53d9-bc18-682695f85244"
@@ -104,6 +111,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "GB SP"
     city: Tbilisi
     place_id: ChIJuTulcgBzREARvhH6q4xTKIw
     location_id: "7a896411-0c3a-5336-a522-a6da08b6132c"
@@ -126,6 +134,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PB KRT"
     city: Tbilisi
     place_id: ChIJjUyxFPINREARSYG9mflWPKo
     location_id: 163
@@ -159,6 +168,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PB DIG"
     city: Tbilisi
     place_id: ChIJHwmxkkVvREARFURA6wYTnJQ
     location_id: 141
@@ -185,6 +195,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "HUB"
     city: Tbilisi
     place_id: ChIJ4TXRtoRzREARqhNSQLiwg-w
     booking_url: "https://www.padelhub.ge/booking"
@@ -215,6 +226,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "ACAD"
     city: Tbilisi
     place_id: ChIJ3-6K3ThzREARHZ9Iqud0bms
     booking_url: "https://booking.padelacademy.ge/"
@@ -239,6 +251,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "LEMANS"
     city: Tbilisi
     place_id: ChIJX_ITaPpzREARX9uYE_6ENm4
     booking_url: "https://lemanspadel.ge/book-padel/"
@@ -269,6 +282,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "GLD"
     city: Tbilisi
     place_id: ChIJ_S-BUwBtREARq-vCNRaLYp8
     # The adapter appends `?court=<id>`, which the page opens on.
@@ -302,6 +316,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PORT"
     city: Batumi
     place_id: ChIJS7uha9WHZ0ARZZcuuKReC5o
     business_id: "1e32bd0a-0d5c-4e30-9788-ea488e713c4d"
@@ -335,6 +350,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PORT NP"
     city: Batumi
     place_id: ChIJHSG1NACHZ0AR_y_94PRMdNM
     business_id: "1e32bd0a-0d5c-4e30-9788-ea488e713c4d"
@@ -363,6 +379,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "GRAND"
     city: Batumi
     place_id: ChIJveIStQaFZ0ARobuDSlC3a_Q
     business_id: "aac3b1f5-7e80-4052-bd09-adc7396cfbec"
@@ -407,6 +424,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "TP DD"
     city: Tbilisi
     place_id: ChIJc5mHWwBvREARFfTsVYma36M
     service_id: 6
@@ -434,6 +452,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "TP MT"
     city: Tbilisi
     place_id: ChIJl872u7wNREARqMz1TfgwYds
     service_id: 4
@@ -454,6 +473,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "TP IG"
     city: Tbilisi
     # Listed on Google as "URBAN TBILISI PADEL" — the place the club's own
     # site embeds a map of.
@@ -477,6 +497,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "AIA"
     city: Kutaisi
     # Listed on Google as "AIA Arena", the complex the courts are in.
     place_id: ChIJiQrekdPyXEAR6c5jaCJ9lew
@@ -510,6 +531,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PB RUS"
     city: Rustavi
     place_id: ChIJ2zWtQfYBREARTouInIqzFT0
     location_id: 142
@@ -537,6 +559,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "HIGGS"
     city: Rustavi
     place_id: ChIJJen8lnEBREAR3AuPISvaNOg
     booking_url: "https://higgs.ge/booking"
@@ -562,6 +585,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "LOVE"
     city: Kutaisi
     place_id: ChIJf5wlHUeNXEARUjfGB0bHrTA
     base_url: "https://api.bookandgo.app/api/v1/apps/126"
@@ -596,6 +620,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PI LISI"
     city: Tbilisi
     place_id: ChIJN3PTLGFzREARXmkCrPrjdnE
     cuadro_id: 6
@@ -622,6 +647,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PI EXPO"
     city: Tbilisi
     place_id: ChIJqWg3gDBzREARoEJSG_Uni0U
     cuadro_id: 8
@@ -643,6 +669,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PI GUD"
     city: Gudauri
     # Google's "Padel island" by the hotel, rather than the hotel itself.
     place_id: ChIJi-eoAAApRUAR1VbzHgEbFFQ
@@ -668,6 +695,7 @@
   enabled: true
   poll_interval_seconds: 240
   settings:
+    short_name: "PI KACH"
     city: Kachreti
     # Google has no card for the courts, only the resort they are in.
     place_id: ChIJ_-IT8KyaRkARw7w2A8IIpYE

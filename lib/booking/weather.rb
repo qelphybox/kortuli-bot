@@ -37,6 +37,10 @@ module Booking
     WET_CHANCE = 50
     # Worth a mention, not worth changing plans over.
     DAMP_CHANCE = 20
+    # Where a day's list starts calling an open court wet: the blue under an
+    # hour, the roof that leads the hint. Between the two above, because the
+    # list is choosing between courts rather than calling the evening off.
+    RAINY_CHANCE = 30
     # Millimetres stand in only where the chance is missing: they come from a
     # single model run, which drizzles a tenth of a millimetre into hours the
     # ensemble gives one chance in ten — "🌦 8%" helps nobody.
@@ -55,6 +59,9 @@ module Booking
       def wet? = storm? || likely?(WET_CHANCE, WET_MM)
 
       def damp? = !wet? && likely?(DAMP_CHANCE, DAMP_MM)
+
+      # Rain enough that an open court is the wrong one to pick tonight.
+      def rainy? = wet? || likely?(RAINY_CHANCE, WET_MM)
 
       def storm? = STORM_CODES.include?(code)
 

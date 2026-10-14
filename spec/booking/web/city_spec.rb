@@ -26,10 +26,10 @@ RSpec.describe "The City picker" do
      slot(club: "kus-tba-padel", at: "#{today + 1} 21:00")]
   end
   let(:repos) do
-    Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences, :polls).new(
+    Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences, :polls, :notifications, :day_opens).new(
       Struct.new(:enabled).new(clubs), Struct.new(:all).new(free_slots), Booking::Repo::Watches.new(db),
       Booking::Repo::Favourites.new(db), Booking::Repo::Forecast.new(db), Booking::Repo::Visits.new(db), preferences,
-      Booking::Repo::Polls.new(db)
+      Booking::Repo::Polls.new(db), Booking::Repo::Notifications.new(db), Booking::Repo::DayOpens.new(db)
     )
   end
 

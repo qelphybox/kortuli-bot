@@ -60,7 +60,7 @@ module Booking
 
       BYTE_UNITS = %w[B KB MB GB TB].freeze
 
-      # The ways a date's clubs can be narrowed, beside "all of them".
+      # The ways the map's clubs can be narrowed, beside "all of them".
       CLUB_FILTERS = %w[covered favourites].freeze
 
       # The screens the city switch is drawn on, and so the only places it
@@ -220,6 +220,9 @@ module Booking
 
         def favourite?(slug) = favourites.include?(slug)
 
+        # The same stars, first-given first: the order a day's list leads with.
+        def favourite_order = @favourite_order ||= settings.repos.favourites.ordered(visitor_id)
+
         # Every city's: a star, a watch or a club's own page names its club by
         # slug, and the slug already says which city it is in.
         def enabled_slugs = enabled_clubs.map(&:slug)
@@ -371,7 +374,7 @@ module Booking
         # At least one court under a roof — what "Covered" narrows a day to.
         def roofed?(slug) = profile(slug)&.covers.to_a.any? { |cover, _| cover != "outdoor" }
 
-        # What a date's clubs are narrowed to: everything, the ones with a
+        # What the map's clubs are narrowed to: everything, the ones with a
         # roof, or the Favourites. Anything else is everything.
         def club_filter = CLUB_FILTERS.include?(params[:only]) ? params[:only] : nil
 
@@ -425,8 +428,6 @@ module Booking
           capitals = name.scan(/[[:upper:]]/)
           (capitals.size >= 2 ? capitals.first(2).join : name[0, 2]).upcase
         end
-
-        def any_free?(table) = table.rows.any? { |row| row.cells.any?(&:free?) }
 
         # Every Club's last Poll by slug, read once per request like the
         # tables.
@@ -491,39 +492,41 @@ module Booking
           end
         end
 
-        # One dict per Club on the selected date. Clubs with anything free
-        # come first, then the fully-booked ones — dimmed rather than hidden,
-        # so the eye reads "we did look" rather than "the club is gone" —
-        # and last the ones we could not read, which are not booked, only
-        # unknown. Within each part, Favourites lead: they are the rows the
-        # eye is hunting for — unless rain is likely, when the clubs entirely
-        # in the open sink below the rest of their part, favourite or not.
-        def clubs_view(date)
+        # One date's clubs against the hours this person wants to play — see
+        # DayPick. Only hours still to come are offered, and only the free
+        # ones among them count: an hour that has started is no use to
+        # anybody looking for a court.
+        def day_pick(date, now: Clock.now)
           table = horizon_tables.fetch(date)
-          wet = !!outlook(table)&.wet?
-          rows = table.rows.map do |row|
-            free_cells = row.cells.select(&:free?)
-            any_free = free_cells.any?
-            earliest = free_cells.first
-            {
-              slug: row.club_slug,
-              name: row.club_name,
-              any_free:,
-              no_data: !any_free && no_data?(row.club_slug),
-              free_count: free_cells.size,
-              favourite: favourite?(row.club_slug),
-              rained_off: wet && open_air?(row.club_slug),
-              roofed: roofed?(row.club_slug),
-              covers: profile(row.club_slug)&.covers.to_a.map(&:first),
-              sub: [("from #{hour_label(earliest.starts_at)}:00" if earliest), club_price(row.club_slug)].compact.join(" · ")
-            }
+          ahead = table.columns.select { _1 > now }
+          offset = ->(at) { HourSpan.offset(date, at) }
+          hours = ahead.map(&offset)
+          clubs = table.rows.map do |row|
+            slug = row.club_slug
+            DayPick::Club.new(
+              slug:, name: row.club_name,
+              free: row.cells.select { _1.free? && _1.starts_at > now }.map { offset.(_1.starts_at) }.to_set,
+              favourite: favourite_order.index(slug), roofed: roofed?(slug), open_air: open_air?(slug),
+              no_data: no_data?(slug), cover: profile(slug)&.covers.to_a.first&.first
+            )
           end
 
-          # The index breaks ties, because Ruby's sort_by is not stable and
-          # the rows already arrive in an order worth keeping.
-          part = ->(c) { if c[:any_free] then 0 elsif c[:no_data] then 2 else 1 end }
-          rows.each_with_index.sort_by { |c, i| [part[c], c[:rained_off] ? 1 : 0, c[:favourite] ? 0 : 1, i] }.map(&:first)
+          DayPick.new(hours:, wanted: DayPick.wanted(params[:hours], hours), rainy: ahead.select { weather_at(_1)&.rainy? }.map(&offset), clubs:)
         end
+
+        # What a club's card says beside its hours: its covers, where it is,
+        # what it costs.
+        def day_card(slug)
+          found = profile(slug)
+
+          {
+            covers: found&.covers.to_a.map(&:first),
+            sub: [found&.area, club_price(slug)].compact.join(" · ")
+          }
+        end
+
+        # A date's own link, keeping the hours picked.
+        def day_path(date, pick) = "/date/#{date}#{"?hours=#{pick.param}" if pick&.param}"
 
         # One dict per hour on the selected club-and-date, under the sky of the
         # city the club is in.
@@ -565,6 +568,7 @@ module Booking
         def back_to_clubs
           date = parse_date(params[:date])
           return redirect(to("/clubs/#{params[:slug]}#{"?date=#{date}" if date}")) if params[:back] == "profile"
+          return redirect(to("/date/#{date}/club/#{params[:slug]}")) if date && params[:back] == "hours"
 
           redirect(to(date ? "/date/#{date}" : "/"))
         end
@@ -594,81 +598,64 @@ module Booking
         # nobody.
         def map_date = @map_date ||= horizon.first(2).find { map_hours(_1).any? } || horizon.first
 
-        # The hours of a date the map can be asked about: any club's in the
-        # City that have not started yet.
+        # The hours of a date still to come at any club in the City.
         def map_hours(date)
           now = Clock.now
 
           horizon_tables.fetch(date).columns.select { _1 > now }
         end
 
-        # The hour the map shows, counted from its date's midnight as HourSpan
-        # counts it, so 25 is 01:00 after that day. The first one left unless
-        # the page asks for another it offers.
-        def map_hour(date)
-          offered = map_hours(date)
-          asked = Integer(params[:at].to_s, exception: false)
+        # The map with a chip pressed or let go.
+        def map_path(only:) = only ? "/clubs/map?only=#{only}" : "/clubs/map"
 
-          offered.find { HourSpan.offset(date, _1) == asked } || offered.first
-        end
-
-        # "Today · 19:00", for the hour picker and for what the pins answer.
-        def map_hour_label(date, starts_at)
-          day = date == horizon.first ? "Today" : "Tomorrow"
-
-          "#{day} · #{hour_label(starts_at)}:00"
-        end
-
-        # The map with its chips changed and its hour kept.
-        def map_path(only:)
-          query = { at: @offset, only: }.compact
-
-          query.empty? ? "/clubs/map" : "/clubs/map?#{Rack::Utils.build_query(query)}"
-        end
-
-        # One dict per club of the City that has a pin, for the map at one
-        # hour: what is free then and over the next three, and the way there.
-        # A club the listing gives no pin is left off the map rather than
-        # guessed at; the list still has it.
-        def map_view(date, starts_at)
+        # One dict per club of the City that has a pin: what it is rather than
+        # what it has free — the map is the directory drawn where the clubs
+        # are. Its card carries one grey line on the day's slots, and the way
+        # to its hours. A club the listing gives no pin is left off the map
+        # rather than guessed at; the list still has it.
+        def map_view(date)
           table = horizon_tables.fetch(date)
-          later = table.columns.select { _1 >= starts_at }.first(4)
+          now = Clock.now
 
           directory_view.filter_map do |club|
             found = profile(club[:slug])
             next unless found&.located?
 
+            settings_of = enabled_club(club[:slug])
             row = table.rows.find { _1.club_slug == club[:slug] }
+            left = row.cells.select { _1.free? && _1.starts_at > now }
             club.merge(
               lat: found.lat,
               lng: found.lng,
               maps_url: found.maps_url,
-              **map_pin(row.cell_at(starts_at), no_data?(club[:slug])),
-              next: later.map { |at| { label: "#{hour_label(at)}:00", free: !!row.cell_at(at)&.free? } }
+              short: settings_of.short_name,
+              mark: if club[:favourite] then :favourite elsif club[:roofed] then :roof else :court end,
+              area: found.area,
+              courts: map_courts(found, settings_of),
+              price: price_parts(club[:slug]),
+              open: map_open(settings_of.opening_hours),
+              slots: map_slots(left, no_data?(club[:slug]))
             )
           end
         end
 
-        # What a pin says about one hour: how many courts are free of how many
-        # when the source names them, only "something" when it does not —
-        # inventing a count would claim precision the club refused to give —
-        # and nothing at all for an hour it is shut or a club we cannot read.
-        def map_pin(cell, no_data)
-          return { state: "shut", figure: "–", total: nil } if cell.nil?
-          return { state: "free", figure: cell.counted? ? cell.free_courts.to_s : "✓", total: cell.total_courts } if cell.free?
-          return { state: "unknown", figure: "?", total: nil } if no_data
+        # "8 outdoor", "5 mixed": the Courts tile.
+        def map_courts(found, club)
+          covers = found.covers
+          return [club.court_count, nil] if covers.empty?
 
-          { state: "taken", figure: "0", total: cell.total_courts }
+          [covers.sum { _2 }, covers.size == 1 ? covers.first.first : "mixed"]
         end
 
-        # The pin and its card, said in words: "3 of 8 courts free at 19:00".
-        def map_headline(club, time)
-          case club[:state]
-          when "free" then club[:total] ? "#{club[:figure]} of #{club[:total]} courts free at #{time}" : "Free at #{time}"
-          when "taken" then "Fully booked at #{time}"
-          when "shut" then "Closed at #{time}"
-          else "No data for #{time}"
-          end
+        # "08–02": the hours the club keeps, as the Grid draws them.
+        def map_open(hours) = format("%02d–%02d", hours.from_hour, hours.to_hour)
+
+        # "3 free · next 19:00", in hours still to come.
+        def map_slots(left, no_data)
+          return "no data" if left.empty? && no_data
+          return "none left" if left.empty?
+
+          "#{left.size} free · next #{hour_label(left.first.starts_at)}:00"
         end
 
         # Memoised per request: every club card on a date asks for its price.
@@ -709,6 +696,39 @@ module Booking
         def visible_watches
           @visible_watches ||= settings.repos.watches.for_user(visitor_id).reject(&:expired?)
         end
+
+        # The freed slots this person's watches were told about that are still
+        # free by the last Poll and still to come, soonest first — the home
+        # screen's banner, which goes when the slot does. One per club and
+        # hour, however many courts or watches it took.
+        def watch_hits(now: Clock.now)
+          mine = visible_watches.select(&:active?).to_h { [_1.id, _1] }
+          sent = settings.repos.notifications.sent_since(mine.keys, since: now - (Config.horizon_days * 86_400))
+          free = free_slots.to_h { [_1.key, _1] }
+
+          hits = sent.filter_map do |told|
+            slot = free[told[:slot_key]]
+            club = slot && enabled_club(slot.club_slug)
+            next unless club && slot.starts_at > now
+
+            { slot:, club:, watch: mine.fetch(told[:watch_id]), sent_at: told[:sent_at] }
+          end
+          hits.uniq { [_1[:slot].club_slug, _1[:slot].starts_at] }.sort_by { _1[:slot].starts_at }
+        end
+
+        # What the banner says about the club beside the hour: its covers, its
+        # price an hour, how warm it will be.
+        def hit_facts(hit)
+          club = hit[:club]
+          covers = profile(club.slug)&.covers.to_a.map(&:first)
+          temperature = weather_at(hit[:slot].starts_at, club.city)&.temperature
+
+          [covers.join(" + ").then { _1.empty? ? nil : _1 }, per_hour(club.settings["price"]),
+           ("#{temperature.round}°" if temperature)].compact.join(" · ")
+        end
+
+        # "80 GEL" an hour, said as the screens say it: "80 GEL/h".
+        def per_hour(price) = price && "#{price}/h"
 
         # The number on the Watches tab, wherever the tabs are drawn.
         def watches_count = visible_watches.size
@@ -770,36 +790,49 @@ module Booking
         halt(city_screen("/", first_run: true)) if first_run?
 
         @dates = dates_view
+        @hits = watch_hits
         @updated_at = city_updated_at
         @watches_count = visible_watches.size
         @owner = owner?
         erb :dates, layout: :layout
       end
 
-      # The clubs open on one date. Reached from a Dates row; sends on to a
-      # Slots screen when a club is tapped.
+      # One date's clubs against the hours picked on its strip — `hours` in
+      # the URL, so a strip tap, a day tap and the way back all keep them.
+      # Reached from a Dates row; sends on to a club's hours when one is
+      # tapped. Every opening is kept, for which days people play on.
       get "/date/:date" do
         require_visitor!
 
         date = parse_date(params[:date])
         redirect(to("/")) if date.nil?
 
+        # A tap on the strip of hours fetches the same page to swap in; it
+        # is the same opening, not another.
+        settings.repos.day_opens.record(visitor_id, date:) unless owner? || request.env["HTTP_X_DAY_SWAP"]
         @date = date.to_s
         @weekday = weekday_short(date)
         @date_label = date_label(date)
         @strip = day_strip(date)
-        @only = club_filter
-        all = clubs_view(date)
-        @open_count = all.count { _1[:any_free] }
-        @clubs = filter_clubs(all, @only)
-        @outlook = outlook(horizon_tables.fetch(date))
+        @pick = day_pick(date)
         erb :clubs, layout: :layout
+      end
+
+      # The way out to a club's booking page, said before it is taken: the
+      # page opens outside the app, where nothing of ours can see it. Sent as
+      # a beacon, so it never holds the tap up.
+      post "/date/:date/booked" do
+        require_visitor!
+
+        date = parse_date(params[:date])
+        settings.repos.day_opens.booked(visitor_id, date:) if date
+        status 204
       end
 
       # The hours a single club sells on one date, tapped from the Clubs
       # screen: which are free, and the weather over each. The club's booking
-      # page is one link in the header — every Cell would point at the same
-      # page anyway.
+      # page is one big link at the bottom — every Cell would point at the
+      # same page anyway — and its star is beside its name.
       get "/date/:date/club/:slug" do
         require_visitor!
 
@@ -817,12 +850,16 @@ module Booking
         @date_label = date_label(date)
         @club_slug = row.club_slug
         @club_name = row.club_name
-        @area = profile(row.club_slug)&.area
+        @favourite = favourite?(row.club_slug)
+        @about = [@weekday, @date_label, profile(row.club_slug)&.area,
+                  profile(row.club_slug)&.covers.to_a.map(&:first).join(" + "), per_hour(club_price(row.club_slug))]
+                 .reject { _1.nil? || _1.empty? }.join(" · ")
         @booking_url = club.settings["booking_url"]
+        # Back to the list with the hours it was picked under. Only hours or
+        # "any" travel: the value arrives from the page.
+        hours = params[:hours].to_s[/\A(?:any|\d+(?:,\d+)*)\z/]
+        @back = "/date/#{date}#{"?hours=#{hours}" if hours}"
         @slots = slots_view(date, row, club.city)
-        @free_hours = row.cells.count { _1.free? && _1.starts_at + 3600 > Clock.now }
-        @price = price_parts(row.club_slug)
-        @courts = courts_stat(row.club_slug)
         @outlook = outlook(table, city: club.city)
         # Whom the rain is news for, when the Profile says some court is open.
         @open_courts = profile(row.club_slug)&.covers.to_a.any? { |cover, _| cover == "outdoor" }
@@ -847,6 +884,7 @@ module Booking
         @span = HourSpan.pick(params, date:, columns: row.cells.map(&:starts_at))
         redirect(to("/date/#{date}/club/#{club.slug}")) unless @span
 
+        settings.repos.day_opens.shared(visitor_id, date:)
         @date = date.to_s
         @weekday = weekday_short(date)
         @date_label = date_label(date)
@@ -930,21 +968,18 @@ module Booking
         erb :directory, layout: :layout
       end
 
-      # The same clubs where they are, each pin saying what it has free at
-      # one hour of today, and a card with the way there once one is tapped.
-      # Narrowed by the same chips as a date's list. Drawn by map.js; without
-      # it the page says to use the list.
+      # The same clubs where they are: a pin each, named and marked as a
+      # favourite, a roof or a plain court, and a card with the club's facts,
+      # the day's slots in a line and the way there once one is tapped. The
+      # chips narrow it to the roofs or the Favourites. Drawn by map.js;
+      # without it the page says to use the list.
       get "/clubs/map" do
         require_visitor!
 
         @map = true
         @only = club_filter
         @date = map_date
-        @at = map_hour(@date)
-        @offset = @at && HourSpan.offset(@date, @at)
-        @hours = map_hours(@date).map { [HourSpan.offset(@date, _1), map_hour_label(@date, _1)] }
-        @time = @at && "#{hour_label(@at)}:00"
-        @clubs = @at ? filter_clubs(map_view(@date, @at), @only) : []
+        @clubs = filter_clubs(map_view(@date), @only)
         @centre = Weather::CITIES[current_city]
         erb :clubs_map, layout: :layout
       end

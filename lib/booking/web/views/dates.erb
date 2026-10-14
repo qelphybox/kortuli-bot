@@ -1,23 +1,28 @@
 <%#
-  The home screen: today, big, and then the rest of the week. Each date is a
-  link into the day — looking, sharing a Rundown and sharing a Game all start
-  from one. A day with nothing open is dimmed rather than hidden, so the eye
-  reads "we did look and there was nothing" rather than "this club shut
-  down". The bar under each day is its free hours against the week's busiest,
-  and "Updated" over them is the age of the City's newest good Poll — so a
-  quiet week reads as quiet, not as a poller that stopped.
+  The home screen: the week, one row per date, every day as good as any
+  other — today wears a small badge where its date would be, and nothing
+  more, until the opens we
+  log say which day people actually play on. Each row is a link into the
+  day, where looking, sharing a Rundown and sharing a Game all start. A day
+  with nothing open is dimmed rather than hidden, so the eye reads "we did
+  look" rather than "this club shut down". The bar is the day's free hours
+  against the week's busiest, and "Updated" over them is the age of the
+  City's newest good Poll — so a quiet week reads as quiet, not as a poller
+  that stopped.
+
+  Over the week, only when one of this person's watches has fired and the
+  slot is still free by the last Poll: that slot, big, with the way to book
+  it. No ×: it goes on its own once the slot is taken or over. More than
+  one, the soonest shows and the rest are a link to the Watches.
 
   Watches and the clubs directory are the other two tabs; the owner's
-  Dashboard is a chip beside the city, because nobody else has one. Every
-  count here is the current City's; where there is more than one, the City
-  pill opens a picker for another.
+  Dashboard is an icon beside the city, because nobody else has one.
 %>
-<% today, *week = @dates %>
 <header class="brand-row">
   <span class="brand"><%= ball %><span class="brand__word">KORTULI</span></span>
   <span class="brand-row__aside">
     <% if @owner %>
-      <a class="pill pill--small" href="/admin"><%= icon(:gauge, size: 14) %>Dashboard</a>
+      <a class="icon-btn icon-btn--small" href="/admin" aria-label="Dashboard"><%= icon(:gauge, size: 18) %></a>
     <% end %>
     <%= erb :_city_switch, locals: { back: "/" } %>
   </span>
@@ -26,21 +31,29 @@
 <main class="page page--roomy">
   <p class="lede">Free padel courts in <%= h(current_city) %>. Pick a day, book it, tell your group.</p>
 
-  <a class="hero" href="/date/<%= today[:date] %>">
-    <%= court(:hero, "hero__court") %>
-    <span class="hero__eyebrow">Today · <%= today[:weekday] %>, <%= today[:date_label] %></span>
-    <span class="hero__count">
-      <span class="hero__number"><%= today[:free_cells] %></span>
-      <span class="hero__what">
-        free <%= today[:free_cells] == 1 ? "slot" : "slots" %>
-        <span><%= today[:any_free] ? "at #{today[:clubs_label]}" : "fully booked" %></span>
-      </span>
-    </span>
-    <span class="hero__foot">
-      <span class="hero__next"><% if week.first %>Tomorrow: <%= week.first[:slots_label] %><% end %></span>
-      <span class="hero__go">See courts <%= icon(:arrow, size: 16) %></span>
-    </span>
-  </a>
+  <% if (hit = @hits.first) %>
+    <% slot = hit[:slot] %>
+    <section class="hit" aria-label="A watched slot opened">
+      <div class="hit__top">
+        <span class="hit__kicker"><%= icon(:bell, size: 14) %>Slot opened</span>
+        <span class="hit__ago"><%= Booking::Messages.time_ago(Booking::Clock.now - hit[:sent_at]) %></span>
+      </div>
+      <div class="hit__body">
+        <span class="hit__when"><%= weekday_short(Booking::Clock.local_date(slot.starts_at)) %> · <%= Booking::Messages.local_clock(slot.starts_at) %>–<%= Booking::Messages.local_clock(slot.ends_at) %></span>
+        <span class="hit__club"><%= h(hit[:club].name) %><% unless (facts = hit_facts(hit)).empty? %> <span>· <%= h(facts) %></span><% end %></span>
+        <span class="hit__watch">Matches your watch: <%= watch_days(hit[:watch]) %> · <%= Booking::Messages.time_range(hit[:watch]) %></span>
+      </div>
+      <div class="hit__actions">
+        <% if (book = slot.deeplink || hit[:club].settings["booking_url"]) %>
+          <a class="hit__book" data-external href="<%= h(book) %>">Book now <%= icon(:external, size: 15) %></a>
+        <% end %>
+        <a class="hit__hours" href="/date/<%= Booking::Clock.local_date(slot.starts_at) %>/club/<%= hit[:club].slug %>">All hours</a>
+      </div>
+      <% if @hits.size > 1 %>
+        <a class="hit__more" href="/watches">+<%= @hits.size - 1 %> more</a>
+      <% end %>
+    </section>
+  <% end %>
 
   <section class="section">
     <div class="section__head">
@@ -50,12 +63,16 @@
       <% end %>
     </div>
     <ul class="dates card">
-      <% week.each do |d| %>
+      <% @dates.each do |d| %>
         <li>
           <a class="day-row<%= " is-empty" unless d[:any_free] %>" href="/date/<%= d[:date] %>">
             <span class="day-row__day">
               <span class="day-row__dow"><%= d[:weekday] %></span>
-              <span class="day-row__date"><%= d[:date_label] %></span>
+              <% if d[:today] %>
+                <span class="today-badge" title="<%= d[:date_label] %>">today</span>
+              <% else %>
+                <span class="day-row__date"><%= d[:date_label] %></span>
+              <% end %>
             </span>
             <span class="day-row__body">
               <span class="day-row__count">

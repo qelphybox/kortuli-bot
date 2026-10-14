@@ -106,34 +106,55 @@ club's own pages open from any of them.
 [ADR-0003](docs/adr/0003-city-is-a-club-attribute.md) says why a City lives on
 the Club and nowhere else.
 
-The **mini app** shows the week: one row per club, one column per hour, one
-page per date. The home screen is the dates — today big, with its free slots
-and clubs, and the rest of the week under it with a bar for how busy each day
-is — because looking, sharing a Rundown and sharing a Game all start from one
-of them. Watches and the clubs directory are the other two of three **tabs**
-along the bottom; the owner also gets a **Dashboard** chip in the corner. A
-date's screen carries the whole week as a strip of tabs, so the next day is
-one tap away. A club's screen for a date says which
-hours are free and carries one **Book ↗** in its header, out to that club's
-booking page — every hour would link to the same page. An hour outside a
-club's opening hours is left blank rather than drawn as taken. Clubs
-whose source names the court say how many of them are free (`2/4`); the rest
-can only say that something is (`✓`).
+The **mini app** shows the week. The home screen is the dates — seven equal
+rows, today marked with a small badge and nothing more, each with its free
+slots and a bar for how busy it is — because looking, sharing a Rundown and
+sharing a Game all start from one of them. Over the week, and only when one of
+your watches has fired and its slot is still free by the last Poll, a banner
+shows that slot big with **Book now ↗** and the club's hours; it goes on its
+own once the slot is taken or over. Watches and the clubs directory are the
+other two of three **tabs** along the bottom; the owner also gets a
+**Dashboard** icon in the corner.
 
-The clubs directory has a **List / Map** switch. The map pins every club of
-the City whose listing gives a location, each pin saying what it has free at
-one hour of today — `3/8` where the source names courts, a tick where it only
-says something is, grey when nothing is — and a tap opens a card with the
-next hours, directions and the club's Profile. A club's Profile shows its own
+A date's screen carries the whole week as a strip of tabs, and under it the
+day's hours still to come as a second strip: tap the hours you want to play —
+18:00 and 19:00 to begin with — and the list holds only the clubs where
+**every** hour picked is free. A two-hour game needs both, so a club with one
+of them is folded into a single line at the bottom with what it does have
+(`only 19:00`, `next free 21:00`). Pick nothing and it is any time: every
+club with an hour left, and the first few of them. The hours live in the URL
+(`?hours=18,19`), so a day on the strip, a club and the way back all keep
+them; with JavaScript a tap swaps the list in place. Over the list, one line
+names a club worth going to — your first Favourite with the hours free, a
+roof when the rain rules the Favourites out — or says the Favourites have
+nothing. Every opening of a date is kept (`day_opens`: the weekday, how far
+ahead, the hour, and whether it ended at a Book or a shared Game), so the
+week can one day lead with the day you actually play on.
+
+A club's screen for a date is the club: its name opens its Profile, the line
+under it says where it is, what its courts are under and what an hour costs,
+and the star beside it makes it a Favourite. It says which hours are free, and
+carries one big **Book at … ↗** at the bottom, out to that club's booking
+page — every hour would link to the same page. An hour outside a club's
+opening hours is left blank rather than drawn as taken.
+
+The clubs directory has a **List / Map** switch. The map is the directory
+drawn where the clubs are, not a search for slots: it pins every club of the
+City whose listing gives a location, each pin its short name (`short_name`
+in [config/clubs.yml](config/clubs.yml)) and a mark — a star for a Favourite,
+in the ball's yellow, a roof, or a court — and a tap opens a card with where
+it is, its courts, price and hours, one grey line on what is left today,
+and the ways on: its hours, directions and its Profile. A club's Profile shows its own
 pin on a still map. The streets are MapLibre GL over OpenFreeMap's free
 vector tiles, styled from the `--map-*` tokens in `app.css`; MapLibre is
 vendored under [lib/booking/web/public/vendor/maplibre/](lib/booking/web/public/vendor/maplibre/),
 so Telegram's SDK stays the only script loaded from elsewhere.
 
-The star beside each club on a date's list, or in the corner of its Profile,
-makes it a **Favourite**: one tap, kept per person. Favourites lead their half
-of that list, and come already ticked on the form that creates a standing
-watch. Two chips over the list narrow it to the clubs with a roof, or to the
+The star beside a club's name on its hours, or in the corner of its Profile,
+makes it a **Favourite**: one tap, kept per person. Favourites lead a date's
+list in the order they were starred, the hint over it looks among them first,
+and they come already ticked on the form that creates a standing watch. On
+the map, two chips narrow the pins to the clubs with a roof, or to the
 Favourites.
 
 A date's **Share** button turns it into one message for whoever you play
@@ -152,8 +173,8 @@ an empty message. It leaves through Telegram's own share sheet
 every other messenger.
 
 Once you have booked, every hour on a club's screen has a tick, free or
-taken alike — the booking may not have reached us yet. Tick the hours, press
-**Share my game**, and they become a **Game**: one message with
+taken alike — the booking may not have reached us yet. Tick the hours and
+**Share my game** appears under Book; press it, and they become a **Game**: one message with
 the club, the day and the stretch (`Wed 14 Oct, 19:00–21:00`), the wettest
 hour's Forecast, the price, the club in Google Maps and a link to add it to a
 calendar. Ticking 19:00 and 21:00 takes 20:00 with them, since a booking is
@@ -176,11 +197,12 @@ from the clubs' own listings on sapadelo.com and say so; they are for reading,
 and the Grid still draws from declared Opening hours.
 
 The **Forecast** rides along with all of it, because rain is what decides
-between an open court and a roofed one. A date's list of clubs opens with one
-banner — "Rain likely 19:00–22:00", "Showers possible …", or "No rain
-expected" with the day's temperatures — counted over the hours still to come. When rain is
-likely, the clubs whose every court is in the open sink below the rest of
-their half, favourite or not, and the line says so. Every hour on a club's
+between an open court and a roofed one. On a date's strip of hours, an hour
+with a chance of rain of 30% or more carries a blue line along its bottom.
+When the hours picked are wet, the clubs with a roof come straight after the
+Favourites, a club in the open says `☂ rain on court`, and the hint over the
+list names a Favourite with a roof — or, when every Favourite is in the open,
+the first roof there is. Every hour on a club's
 screen carries its own mark (`☂ 75% · 19°`, or just `17°` when it stays
 dry), the home screen puts a Rain chip beside a date with rain in it, and a date's Share message
 opens with its line. A message about a freed slot carries the same mark for
@@ -337,7 +359,7 @@ Check it before concluding nobody wants the product.
 
 The same picture without a terminal is **`/admin`** in the mini app, which
 opens for `OWNER_TELEGRAM_ID` alone (anybody else gets a 404) and is linked
-from the Dashboard chip on the owner's home screen. It shows:
+from the Dashboard icon on the owner's home screen. It shows:
 
 - each process's **Heartbeat** — `up`, `silent` once it is more than 90
   seconds old, or `unknown`;

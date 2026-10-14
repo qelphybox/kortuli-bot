@@ -16,6 +16,14 @@ module Booking
 
       def sent?(watch_id:, slot_key:) = !@db[:notifications].where(watch_id:, slot_key:).empty?
 
+      # What these watches were told about since `since`, newest first: the
+      # slots the home screen may still have a banner for.
+      def sent_since(watch_ids, since:)
+        return [] if watch_ids.empty?
+
+        @db[:notifications].where(watch_id: watch_ids).where { sent_at >= since }.reverse(:sent_at).all
+      end
+
       # A send that failed should not keep the slot muted forever.
       def release(watch_id:, slot_key:) = @db[:notifications].where(watch_id:, slot_key:).delete
     end

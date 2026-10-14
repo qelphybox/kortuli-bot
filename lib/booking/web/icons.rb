@@ -30,6 +30,9 @@ module Booking
         locate: [2.2, %(<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>)],
         gauge: [2, %(<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/>)],
         list: [2.2, %(<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>)],
+        clock: [2.2, %(<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>)],
+        roof: [2.6, %(<path d="M3 11l9-7 9 7M6 10v9h12v-9"/>)],
+        court: [2.4, %(<rect x="4" y="6" width="16" height="12" rx="1"/><path d="M12 6v12M8 6v12M16 6v12"/>)],
         map: [2.2, %(<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>)]
       }.freeze
 
@@ -58,10 +61,8 @@ module Booking
       end
 
       # A padel court seen from above, in the ball's yellow, drawn faintly
-      # behind the dark slabs. The same lines at four sizes.
+      # behind the dark slabs. The same lines at three sizes.
       COURTS = {
-        hero: [220, 150, 'x="2" y="2" width="216" height="146"',
-               [[110, 2, 110, 148, 3], [40, 2, 40, 148, 2], [180, 2, 180, 148, 2], [40, 75, 180, 75, 2]]],
         ticket: [354, 230, 'x="18" y="18" width="318" height="194"',
                  [[177, 18, 177, 212, 3], [80, 18, 80, 212, 1.5], [274, 18, 274, 212, 1.5], [80, 115, 274, 115, 1.5]]],
         profile: [300, 200, 'x="2" y="2" width="296" height="196"',

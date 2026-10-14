@@ -118,6 +118,15 @@ RSpec.describe "repositories" do
 
       expect(repo.for_user(42)).to be_empty
     end
+
+    # The order a day's list leads with them.
+    it "keeps the stars in the order they were given" do
+      repo.add(42, "kus-tba-padel")
+      repo.add(42, "padel-club-2")
+      repo.add(42, "padelhub")
+
+      expect(repo.ordered(42)).to eq(%w[kus-tba-padel padel-club-2 padelhub])
+    end
   end
 
   describe Booking::Repo::Visits do
