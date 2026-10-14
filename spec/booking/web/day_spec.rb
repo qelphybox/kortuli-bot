@@ -319,6 +319,16 @@ RSpec.describe Booking::Web::App do
         end
       end
 
+      # Gldani's only free hour is 18:00, so nothing with a roof has 19:00.
+      it "says only when it will rain when no roof is free, with nothing to book" do
+        forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: _1 == 19 ? 70 : 0) }, city: "Tbilisi")
+        get "/date/#{day}?hours=19"
+
+        expect(hint).to start_with('<div class="day-hint">')
+        expect(hint).to include("<strong>Rain 19:00–20:00.</strong> No court under a roof is free then.")
+        expect(hint).not_to include("Book")
+      end
+
       it "says nothing over a dry span, favourite or not" do
         Booking::Repo::Favourites.new(db).add(42, "gldani")
         get "/date/#{day}?hours=18"

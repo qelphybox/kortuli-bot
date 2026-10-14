@@ -110,13 +110,17 @@ RSpec.describe Booking::Web::DayPick do
       expect(said(day)).to eq("Rain 19:00–20:00. Your favourite Hub is covered and has the whole 18:00–20:00 free.")
     end
 
-    # A roof only fits the filter when the club is on the list for it.
-    it "offers no roof without every hour picked free" do
-      expect(pick([club("Hub", free: [18], roofed: true, cover: "covered")], rainy: [18, 19]).hint).to be_nil
+    # A roof only fits the filter when the club is on the list for it;
+    # without one the line is the rain alone, with nothing to book.
+    it "says only when it will rain without every hour picked free under a roof" do
+      day = pick([club("Hub", free: [18], roofed: true, cover: "covered")], rainy: [18, 19])
+
+      expect(day.hint.club).to be_nil
+      expect(said(day)).to eq("Rain 18:00–20:00. No court under a roof is free then.")
     end
 
-    it "has nothing to say with no roof on the list" do
-      expect(pick([club("Kus", free: [18, 19], favourite: 0, open_air: true)], rainy: [18, 19]).hint).to be_nil
+    it "says only when it will rain with no roof on the list" do
+      expect(pick([club("Kus", free: [18, 19], favourite: 0, open_air: true)], rainy: [18, 19]).hint.club).to be_nil
     end
 
     # Any time, the roof is for the hours the rain falls on.

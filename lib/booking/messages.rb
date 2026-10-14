@@ -324,10 +324,13 @@ module Booking
 
     # The hint over the list, as [bold lead, the rest]: rain, and a roof to
     # book through it — "Rain 19:00–21:00." "Your favourite PadelHub is
-    # covered and has the whole 18:00–20:00 free."
+    # covered and has the whole 18:00–20:00 free." With no roof free, the
+    # rain alone.
     def day_hint(pick)
       hint = pick.hint
       club = hint.club
+      return [day_rain(pick), "No court under a roof is free then."] unless club
+
       shelter = club.cover == "indoor" ? "indoors" : "covered"
       free =
         if pick.whole?(club) then "the whole #{day_span(pick)}"
