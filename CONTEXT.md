@@ -99,13 +99,22 @@ _Avoid_: weather data, meteo
 
 **Wet hour**:
 An hour of the Forecast when rain is likely (a chance of 50% or more) or a
-thunderstorm is due. A date with one sinks the Clubs whose every court is
-`outdoor` below the rest of their half.
+thunderstorm is due. What the Rundown, a club's hours and a freed slot's
+message call rain.
 _Avoid_: rainy slot, bad weather
 
+**Rainy hour**:
+An hour of the Forecast with a chance of rain of 30% or more, or a
+thunderstorm. Looser than a Wet hour on purpose: it is when a date's list
+calls an open court wet and puts the roofs first — choosing between courts,
+not calling the evening off.
+_Avoid_: wet hour (that is the 50% one)
+
 **Favourite**:
-A Club one person has starred. Theirs alone; it narrows a Rundown, leads the
-list of Clubs, and comes pre-ticked when making a Standing watch.
+A Club one person has starred. Theirs alone, and kept in the order starred:
+it narrows a Rundown, leads the list of Clubs in that order, is where the
+hint over the list looks first, and comes pre-ticked when making a Standing
+watch.
 _Avoid_: bookmark, pinned, saved club
 
 ## Watching

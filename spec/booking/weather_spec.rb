@@ -113,6 +113,22 @@ RSpec.describe Booking::Weather do
     expect(described_class::CITIES.values).to all(satisfy { |lat, lng| lat.between?(41, 43.6) && lng.between?(40, 46.8) })
   end
 
+  # Where a day's list calls an open court wet: from three in ten, which is
+  # less than a Wet hour asks and more than a shower worth mentioning.
+  describe "a rainy hour" do
+    it "starts at a 30% chance, and takes in every wet hour" do
+      expect([20, 29, 30, 70].map { hour(chance: _1).rainy? }).to eq([false, false, true, true])
+    end
+
+    it "counts a thunderstorm whatever the odds" do
+      expect(hour(chance: 5, code: 95).rainy?).to be(true)
+    end
+
+    it "falls back on the millimetres where the chance is missing" do
+      expect([0.2, 0.5].map { hour(chance: nil, mm: _1).rainy? }).to eq([false, true])
+    end
+  end
+
   describe ".worst" do
     let(:forecast) do
       described_class.by_hour([hour(at: "2026-10-12 19:00", chance: 10), hour(at: "2026-10-12 20:00", chance: 70)])

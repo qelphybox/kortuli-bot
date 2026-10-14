@@ -13,7 +13,7 @@ RSpec.describe Booking::Web::App do
   # *writes* — and a faked repository would prove only that the route called
   # the method it was written to call. The Forecast and the Polls are real too, because
   # filling them is simpler than faking them.
-  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences, :polls)
+  FakeRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences, :polls, :notifications, :day_opens)
   FakeClubs = Struct.new(:enabled)
   FakeSlots = Struct.new(:all)
 
@@ -58,7 +58,9 @@ RSpec.describe Booking::Web::App do
     }
   end
   let(:polls) { Booking::Repo::Polls.new(db) }
-  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences, polls) }
+  let(:notifications) { Booking::Repo::Notifications.new(db) }
+  let(:day_opens) { Booking::Repo::DayOpens.new(db) }
+  let(:repos) { FakeRepos.new(FakeClubs.new(clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences, polls, notifications, day_opens) }
 
   let(:owner_id) { 7 }
   let(:log_dir) { Dir.mktmpdir }
@@ -253,26 +255,30 @@ RSpec.describe Booking::Web::App do
     end
 
     describe "starring a club" do
-      def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+      def club_names_in_order = last_response.body.scan(%r{<span class="(?:day-club|fold)__name">([^<]+)</span>}).flatten
 
-      it "offers a star on every club, none of them lit at first" do
+      # The star lives on a club's hours, beside its name: one place to make
+      # a Favourite from the day, rather than a second tap target inside a
+      # card that is itself a link.
+      it "offers a star on a club's hours, not lit at first" do
         sign_in
-        get "/date/#{today}"
+        get "/date/#{today}/club/kus-tba-padel"
 
-        expect(last_response.body).to include(%(action="/favourites/padel-club-2"))
         expect(last_response.body).to include(%(action="/favourites/kus-tba-padel"))
-        expect(last_response.body).not_to include("is-on")
+        expect(last_response.body).to include('<input type="hidden" name="back" value="hours">')
+        expect(last_response.body).not_to include("fav-btn is-on")
       end
 
-      it "remembers the star and turns it over on the same screen" do
+      it "remembers the star and turns it over on the club's hours" do
         sign_in(user_id: 42)
-        post "/favourites/kus-tba-padel", date: today.to_s
+        post "/favourites/kus-tba-padel", date: today.to_s, back: "hours"
 
-        expect(last_response.location).to end_with("/date/#{today}")
+        expect(last_response.location).to end_with("/date/#{today}/club/kus-tba-padel")
         expect(favourites.for_user(42)).to eq(Set["kus-tba-padel"])
 
         follow_redirect!
         expect(last_response.body).to include(%(action="/favourites/kus-tba-padel/delete"))
+        expect(last_response.body).to include("fav-btn is-on")
       end
 
       it "takes the star back off" do
@@ -284,8 +290,8 @@ RSpec.describe Booking::Web::App do
         expect(favourites.for_user(42)).to be_empty
       end
 
-      # Kus Tba sorts after Padel Club 2 by slug, so leading is the star's doing.
-      it "lists favourites first" do
+      # Kus Tba sorts after Padel Club 2 by name, so leading is the star's doing.
+      it "lists favourites first, and marks them" do
         sign_in(user_id: 42)
         favourites.add(42, "kus-tba-padel")
 
@@ -298,9 +304,9 @@ RSpec.describe Booking::Web::App do
         favourites.add(7, "kus-tba-padel")
         sign_in(user_id: 42)
 
-        get "/date/#{today}"
+        get "/date/#{today + 1}/club/kus-tba-padel"
 
-        expect(last_response.body).not_to include("is-on")
+        expect(last_response.body).not_to include("fav-btn is-on")
       end
 
       it "refuses a club nobody watches" do
@@ -319,7 +325,7 @@ RSpec.describe Booking::Web::App do
 
       it "lands on the dates screen when the page's date has gone by" do
         sign_in(user_id: 42)
-        post "/favourites/kus-tba-padel", date: (today - 1).to_s
+        post "/favourites/kus-tba-padel", date: (today - 1).to_s, back: "hours"
 
         expect(last_response.location).to end_with("/")
       end
@@ -344,31 +350,102 @@ RSpec.describe Booking::Web::App do
       expect(strip).to include(%(href="/date/#{today + 1}" aria-current="date"))
     end
 
-    describe "narrowed by the chips" do
-      def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+    it "keeps the hours picked on every date's link" do
+      sign_in
+      get "/date/#{today + 1}?hours=20,21"
 
-      # Kus Tba has a Profile with every court outdoors; Padel Club 2 has no
-      # Profile, so neither is known to have a roof.
-      it "keeps only the clubs with a roof when asked for covered ones" do
-        sign_in
-        get "/date/#{today}?only=covered"
+      strip = last_response.body[%r{<nav class="strip".*?</nav>}m].to_s
+      expect(strip).to include(%(href="/date/#{today + 2}?hours=20,21"))
+    end
 
-        expect(club_names_in_order).to be_empty
+    describe "against the hours picked" do
+      def club_names_in_order = last_response.body.scan(%r{<span class="(?:day-club|fold)__name">([^<]+)</span>}).flatten
+      def live = last_response.body.scan(%r{<span class="day-club__name">([^<]+)</span>}).flatten
+      def folded = last_response.body[%r{<details class="fold">.*?</details>}m].to_s
+      def chip(hour) = last_response.body[%r{<a class="hour-chip[^"]*"[^>]*data-hour="#{hour}"[^>]*>}].to_s
+
+      let(:day) { today + 1 }
+      let(:free_slots) do
+        [slot(club: "padel-club-2", at: "#{day} 18:00"), slot(club: "padel-club-2", at: "#{day} 19:00"),
+         slot(club: "kus-tba-padel", court: "any", at: "#{day} 19:00"), slot(club: "kus-tba-padel", court: "any", at: "#{day} 21:00")]
       end
 
-      it "keeps only the favourites when asked for them" do
-        sign_in(user_id: 42)
-        favourites.add(42, "padel-club-2")
-        get "/date/#{today}?only=favourites"
+      it "opens on the evening, 18:00 to 20:00" do
+        sign_in
+        get "/date/#{day}"
 
-        expect(club_names_in_order).to eq(["Padel Club 2"])
+        expect(chip(18)).to include('aria-pressed="true"')
+        expect(chip(19)).to include('aria-pressed="true"')
+        expect(chip(20)).to include('aria-pressed="false"')
+        expect(last_response.body).to include("When · 18:00–20:00")
       end
 
-      it "shows every club for anything it does not know" do
+      # Binary: Kus Tba has 19:00 but not 18:00, which is no court for a
+      # two-hour game.
+      it "lists only the clubs with every hour picked free, and folds the rest" do
         sign_in
-        get "/date/#{today}?only=nonsense"
+        get "/date/#{day}"
 
-        expect(club_names_in_order).to contain_exactly("Padel Club 2", "Kus Tba Padel")
+        expect(live).to eq(["Padel Club 2"])
+        expect(last_response.body).to include("1 club free 18:00–20:00")
+        expect(folded).to include("1 club not free 18:00–20:00").and include("Kus Tba Padel").and include("only 19:00")
+      end
+
+      it "says where a folded club is free next, or was last" do
+        sign_in
+        get "/date/#{day}?hours=20"
+        expect(folded).to include("next free 21:00")
+
+        get "/date/#{day}?hours=22"
+        expect(folded).to include("last free 21:00")
+      end
+
+      it "picks or lets go of an hour with each tap" do
+        sign_in
+        get "/date/#{day}?hours=18,19"
+
+        expect(chip(20)).to include(%(href="/date/#{day}?hours=18,19,20"))
+        expect(chip(19)).to include(%(href="/date/#{day}?hours=18"))
+      end
+
+      # Letting go of the last hour is any time: every club with an hour
+      # left, by how many, and the first few of them.
+      it "shows every club with anything left when no hour is picked" do
+        sign_in
+        get "/date/#{day}?hours=18"
+        expect(chip(18)).to include(%(href="/date/#{day}?hours=any"))
+
+        get "/date/#{day}?hours=any"
+        expect(live).to eq(["Kus Tba Padel", "Padel Club 2"])
+        expect(last_response.body).to include("When · Any time")
+        expect(last_response.body).to include("2 clubs have free courts · tap hours to narrow")
+        expect(last_response.body.scan(%r{<span class="free-chip">(\d+)</span>}).flatten).to eq(%w[19 21 18 19])
+      end
+
+      it "drops an hour it does not offer, and any time is what is left" do
+        sign_in
+        get "/date/#{day}?hours=5,nonsense"
+
+        expect(last_response.body).to include("When · Any time")
+      end
+
+      it "carries the hours to a club's hours and back" do
+        sign_in
+        get "/date/#{day}?hours=19"
+        expect(last_response.body).to include(%(href="/date/#{day}/club/padel-club-2?hours=19"))
+
+        get "/date/#{day}/club/padel-club-2?hours=19"
+        expect(last_response.body).to include(%(href="/date/#{day}?hours=19" aria-label="Back to clubs"))
+      end
+
+      # An hour that has started is no use to anybody looking for a court.
+      it "offers only the hours still to come today" do
+        sign_in
+        allow(Booking::Clock).to receive(:now).and_return(Booking::Clock.local_to_utc("#{today} 18:30"))
+        get "/date/#{today}"
+
+        expect(chip(18)).to be_empty
+        expect(chip(19)).to include('aria-pressed="true"')
       end
     end
   end
@@ -660,16 +737,27 @@ RSpec.describe Booking::Web::App do
     end
 
     # We do not book, we hand over. Every free hour would link to the same
-    # page, so the screen carries that page once, in its header — marked so
-    # the client opens it through Telegram rather than inside the mini app's
-    # own webview.
-    it "links out to the club's booking page once, from its header" do
+    # page, so the screen carries that page once, big, at the bottom —
+    # marked so the client opens it through Telegram rather than inside the
+    # mini app's own webview, and so the way out is counted.
+    it "links out to the club's booking page once, from the dock" do
+      sign_in
+      get "/date/#{today + 1}/club/kus-tba-padel"
+
+      dock = last_response.body[%r{<form class="game-pick dock".*?</form>}m]
+      expect(dock).to include(%(data-external href="https://kustba.example/book/" data-book="#{today + 1}">Book at Kus Tba Padel))
+      expect(last_response.body.scan("data-external").size).to eq(1)
+    end
+
+    # The header is the club: its name opens its Profile, and the line
+    # under it is what it is and costs.
+    it "names the club, linked to its Profile, with what it is and costs" do
       sign_in
       get "/date/#{today + 1}/club/kus-tba-padel"
 
       header = last_response.body[%r{<header.*?</header>}m]
-      expect(header).to include('data-external href="https://kustba.example/book/"')
-      expect(last_response.body.scan("data-external").size).to eq(1)
+      expect(header).to include(%(<a class="bar__title bar__link" href="/clubs/kus-tba-padel?date=#{today + 1}">))
+      expect(header).to include("Turtle Lake · outdoor")
     end
 
     it "offers the booking page even when nothing is free" do
@@ -1409,98 +1497,86 @@ RSpec.describe Booking::Web::App do
       end
     end
 
-    it "answers for the first hour still to come" do
+    # The map is the directory, drawn: no hour to pick, no counts on a pin.
+    it "asks for no hour and counts nothing on a pin" do
       at_morning
       get "/clubs/map"
 
-      expect(last_response.body).to include("Tap a pin · free courts at 10:00")
-      expect(last_response.body).to include('<option value="10" selected>Today · 10:00</option>')
+      expect(last_response.body).not_to include('name="at"')
+      expect(pin("kus-tba-padel")).not_to include('class="pin__n"')
+      expect(pin("kus-tba-padel")).not_to include("pin__of")
+      expect(last_response.body).to include("Tap a pin to see the club")
     end
 
-    it "offers every hour left today, a club's after midnight among them" do
+    it "names each pin by the club's short name, marked as a court by default" do
       at_morning
       get "/clubs/map"
 
-      expect(last_response.body).to include('<option value="23">Today · 23:00</option>')
-      expect(last_response.body).to include('<option value="25">Today · 01:00</option>')
-      expect(last_response.body).not_to include('<option value="9">')
+      expect(pin("kus-tba-padel")).to include("pin--court").and include('<span class="pin__short">KUS</span>')
+      expect(pin("kus-tba-padel")).to include('aria-label="Kus Tba Padel, Turtle Lake, 2 outdoor courts"')
     end
 
-    it "answers for the hour picked, and the first one left for an hour it does not offer" do
-      at_morning
-      get "/clubs/map?at=19"
-      expect(last_response.body).to include("free courts at 19:00")
-
-      get "/clubs/map?at=99"
-      expect(last_response.body).to include("free courts at 10:00")
-    end
-
-    context "with a court free at the hour" do
-      let(:free_slots) { [slot(club: "kus-tba-padel", court: "any", at: "#{today} 19:00")] }
-
-      # Kus Tba's source does not name its courts, so the pin cannot count.
-      it "ticks the pin of a club that only says something is free" do
-        at_morning
-        get "/clubs/map?at=19"
-
-        expect(pin("kus-tba-padel")).to include("pin--free").and include('<span class="pin__n">✓</span>')
-        expect(pin("kus-tba-padel")).not_to include("pin__of")
-        expect(pin("kus-tba-padel")).to include('aria-label="Kus Tba Padel, free at 19:00"')
+    context "with a short name in the club's settings and a roof over a court" do
+      let(:clubs) do
+        [Booking::Club.new(slug: "kus-tba-padel", name: "Kus Tba Padel", adapter: "kustba",
+                           settings: { "opening_hours" => { "from" => "08:00", "to" => "02:00" }, "short_name" => "KUS TBA",
+                                       "price" => "80 GEL" })]
       end
-
-      it "says on the card which of the next hours are free too" do
-        at_morning
-        get "/clubs/map?at=19"
-
-        expect(card("kus-tba-padel")).to include("Free at 19:00")
-        expect(card("kus-tba-padel")).to include('<span class="map-card__hour is-free">19:00')
-        expect(card("kus-tba-padel")).to include('<span class="map-card__hour">20:00')
-      end
-    end
-
-    context "with a club whose source names its courts" do
       let(:club_profiles) do
         {
-          "padel-club-2" => Booking::ClubProfile.from({ "area" => "Vake", "lat" => 41.71, "lng" => 44.75 }, checked_on: "2026-10-11")
+          "kus-tba-padel" => Booking::ClubProfile.from(
+            { "area" => "Turtle Lake", "lat" => 41.7, "lng" => 44.75,
+              "courts" => [{ "name" => "1", "cover" => "covered" }, { "name" => "2", "cover" => "outdoor" }] },
+            checked_on: "2026-10-11"
+          )
         }
       end
+
+      it "says the short name, and marks the roof" do
+        at_morning
+        get "/clubs/map"
+
+        expect(pin("kus-tba-padel")).to include("pin--roof").and include('<span class="pin__short">KUS TBA</span>')
+      end
+
+      it "puts the club's courts, price and hours on its card" do
+        at_morning
+        get "/clubs/map"
+
+        expect(card("kus-tba-padel")).to include("<dt>Courts</dt>").and include('2 <small class="is-cover">mixed</small>')
+        expect(card("kus-tba-padel")).to include("80 <small>GEL/h</small>")
+        expect(card("kus-tba-padel")).to include("<dd>08–02</dd>")
+      end
+    end
+
+    context "with hours free later today" do
       let(:free_slots) do
-        [slot(club: "padel-club-2", court: "Court 1", at: "#{today} 19:00"), slot(club: "padel-club-2", court: "Court 3", at: "#{today} 19:00")]
+        [slot(club: "kus-tba-padel", court: "any", at: "#{today} 19:00"), slot(club: "kus-tba-padel", court: "any", at: "#{today} 21:00"),
+         slot(club: "kus-tba-padel", court: "any", at: "#{today} 08:00")]
       end
 
-      it "counts the free courts against all of them" do
+      # One grey line, counted in hours still to come.
+      it "says on the card how many are left today, and the next" do
         at_morning
-        get "/clubs/map?at=19"
+        get "/clubs/map"
 
-        expect(pin("padel-club-2")).to include('<span class="pin__n">2</span><span class="pin__of">/4</span>')
-        expect(card("padel-club-2")).to include("2 of 4 courts free at 19:00")
+        expect(card("kus-tba-padel")).to include('<p class="map-card__slots">Slots today: 2 free · next 19:00</p>')
       end
+    end
 
-      it "counts none free at an hour that is taken, once the club has been read" do
-        polls.record("padel-club-2", outcome: "ok", summary: "", at: morning)
-        at_morning
-        get "/clubs/map?at=20"
+    it "says when nothing is left today" do
+      polls.record("kus-tba-padel", outcome: "ok", summary: "", at: morning)
+      at_morning
+      get "/clubs/map"
 
-        expect(pin("padel-club-2")).to include("pin--taken").and include('<span class="pin__n">0</span><span class="pin__of">/4</span>')
-        expect(card("padel-club-2")).to include("Fully booked at 20:00")
-      end
+      expect(card("kus-tba-padel")).to include("Slots today: none left")
+    end
 
-      # Padel Club 2 shuts at midnight; Kus Tba keeps the hour on offer.
-      it "says the club is closed at an hour outside its day" do
-        at_morning
-        get "/clubs/map?at=25"
+    it "claims nothing for a club it could not read" do
+      at_morning
+      get "/clubs/map"
 
-        expect(pin("padel-club-2")).to include("pin--shut").and include('<span class="pin__n">–</span>')
-        expect(card("padel-club-2")).to include("Closed at 01:00")
-      end
-
-      it "claims nothing for a club it could not read" do
-        at_morning
-        get "/clubs/map?at=20"
-
-        expect(pin("padel-club-2")).to include("pin--unknown").and include('<span class="pin__n">?</span>')
-        expect(card("padel-club-2")).to include("No data for 20:00")
-      end
+      expect(card("kus-tba-padel")).to include("Slots today: no data")
     end
 
     context "with every club shut before midnight" do
@@ -1514,18 +1590,18 @@ RSpec.describe Booking::Web::App do
         allow(Booking::Clock).to receive(:now).and_return(Booking::Clock.local_to_utc("#{today} 22:30"))
         get "/clubs/map"
 
-        expect(last_response.body).to include('<option value="8" selected>Tomorrow · 08:00</option>')
         expect(card("kus-tba-padel")).to include(%(href="/date/#{today + 1}/club/kus-tba-padel">Hours tomorrow))
+        expect(card("kus-tba-padel")).to include("Slots tomorrow:")
       end
     end
 
-    it "keeps the hour when a chip narrows the pins, and a chip pressed again lets go" do
+    it "presses a chip, and lets go of it when pressed again" do
       at_morning
-      get "/clubs/map?at=19"
-      expect(last_response.body).to include('href="/clubs/map?at=19&amp;only=covered"')
+      get "/clubs/map"
+      expect(last_response.body).to include('href="/clubs/map?only=covered"')
 
-      get "/clubs/map?at=19&only=covered"
-      expect(last_response.body).to include('href="/clubs/map?at=19" aria-current="true">Covered')
+      get "/clubs/map?only=covered"
+      expect(last_response.body).to include('href="/clubs/map" aria-current="true">Covered')
     end
 
     it "narrows to the clubs with a roof, and says when that leaves none" do
@@ -1536,14 +1612,14 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include("No club with a roof is on the map")
     end
 
-    it "narrows to the Favourites, starred on their pins" do
+    it "narrows to the Favourites, their pins starred and yellow" do
       at_morning
       get "/clubs/map?only=favourites"
       expect(last_response.body).not_to include('data-pin="kus-tba-padel"')
 
       post "/favourites/kus-tba-padel"
       get "/clubs/map?only=favourites"
-      expect(pin("kus-tba-padel")).to include("pin__fav")
+      expect(pin("kus-tba-padel")).to include("pin--favourite")
     end
 
     it "sends a club's card to its hours, the way there and its Profile" do
@@ -1593,7 +1669,7 @@ RSpec.describe Booking::Web::App do
 
     it "puts what the courts are under beside a club with a profile, and nothing beside one without" do
       sign_in
-      get "/date/#{today + 1}"
+      get "/date/#{today + 1}?hours=18"
 
       expect(last_response.body).to include('<span class="tag tag--outdoor">outdoor</span>')
       expect(last_response.body.scan('class="tag tag--').size).to eq(1)
@@ -1827,30 +1903,31 @@ RSpec.describe Booking::Web::App do
                                  code: 3, temperature:, day: false)
     end
 
-    def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+    def club_names_in_order = last_response.body.scan(%r{<span class="(?:day-club|fold)__name">([^<]+)</span>}).flatten
 
     describe "with rain likely in the evening" do
       before do
         forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: [19, 20].include?(_1) ? 80 : 0) }, city: "Tbilisi")
       end
 
-      it "says when it will rain above the date's clubs" do
+      # A blue line under each hour the rain falls on, and a legend for it.
+      it "marks the wet hours on the strip of hours" do
         sign_in
         get "/date/#{tomorrow}"
 
-        expect(last_response.body).to include("Rain likely 19:00–21:00")
-        expect(last_response.body).to include(Booking::Messages.weather_roofed_first)
+        strip = last_response.body[%r{<nav class="hour-strip".*?</nav>}m].to_s
+        expect(strip.scan(/class="hour-chip is-rainy"[^>]*data-hour="(\d+)"/).flatten).to eq(%w[19 20])
+        expect(last_response.body).to include('<span class="when__rain">rain</span>')
       end
 
-      # Kus Tba's courts are all in the open. Starred, it would lead; on a
-      # wet evening the club with a roof — or at least not known to lack
-      # one — comes first anyway.
-      it "sinks the clubs entirely in the open, even a favourite" do
+      # Kus Tba's courts are all in the open, but a Favourite leads whatever
+      # the sky does: it is the row the eye is hunting for.
+      it "keeps a favourite first even in the rain" do
         sign_in(user_id: 42)
         favourites.add(42, "kus-tba-padel")
         get "/date/#{tomorrow}"
 
-        expect(club_names_in_order).to eq(["Padel Club 2", "Kus Tba Padel"])
+        expect(club_names_in_order).to eq(["Kus Tba Padel", "Padel Club 2"])
       end
 
       it "marks each hour wet or not beside it" do
@@ -1872,12 +1949,13 @@ RSpec.describe Booking::Web::App do
     describe "with a dry day" do
       before { forecast.replace((8..23).map { forecast_hour("#{tomorrow} #{format("%02d", _1)}:00", chance: 0) }, city: "Tbilisi") }
 
-      it "says it will stay dry, and leaves the favourites leading" do
+      it "marks no hour wet, and leaves the favourites leading" do
         sign_in(user_id: 42)
         favourites.add(42, "kus-tba-padel")
         get "/date/#{tomorrow}"
 
-        expect(last_response.body).to include("No rain expected").and include("14–14°")
+        expect(last_response.body).not_to include("is-rainy")
+        expect(last_response.body).not_to include("when__rain")
         expect(club_names_in_order).to eq(["Kus Tba Padel", "Padel Club 2"])
       end
     end
@@ -1886,7 +1964,7 @@ RSpec.describe Booking::Web::App do
     it "draws nothing where there is no forecast" do
       sign_in
       get "/date/#{tomorrow}"
-      expect(last_response.body).not_to include('class="weather')
+      expect(last_response.body).not_to include("is-rainy")
 
       get "/date/#{tomorrow}/club/kus-tba-padel"
       expect(last_response.body).not_to include("hour__weather")
@@ -1905,13 +1983,13 @@ RSpec.describe Booking::Web::App do
       )
     end
     let(:batumi_clubs) { [*clubs, padel_port] }
-    let(:repos) { FakeRepos.new(FakeClubs.new(batumi_clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences, polls) }
+    let(:repos) { FakeRepos.new(FakeClubs.new(batumi_clubs), FakeSlots.new(free_slots), watches, favourites, forecast, visits, preferences, polls, notifications, day_opens) }
     let(:free_slots) do
       [slot(club: "padel-club-2", at: "#{day} 18:00"), slot(club: "kus-tba-padel", court: "any", at: "#{day} 18:00"),
        slot(club: "padel-port", at: "#{day} 19:00")]
     end
 
-    def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+    def club_names_in_order = last_response.body.scan(%r{<span class="(?:day-club|fold)__name">([^<]+)</span>}).flatten
 
     def switch = last_response.body[%r{<dialog class="city-sheet".*?</dialog>}m].to_s
 
@@ -2044,20 +2122,16 @@ RSpec.describe Booking::Web::App do
         expect(last_response.status).to eq(200)
       end
 
-      it "keeps the favourites chip to Batumi's favourites" do
+      # The hint goes down this person's favourites in the city on screen:
+      # a starred Tbilisi club is no answer in Batumi.
+      it "hints at Batumi's favourites alone" do
         favourites.add(42, "kus-tba-padel")
         favourites.add(42, "padel-port")
-        get "/date/#{day}?only=favourites"
+        get "/date/#{day}?hours=19"
 
-        expect(club_names_in_order).to eq(["Padel Port"])
-      end
-
-      # Padel Port has no Profile, so it is not known to have a roof.
-      it "keeps the roof chip working inside the city" do
-        get "/date/#{day}?only=covered"
-
-        expect(club_names_in_order).to be_empty
-        expect(last_response.body).to include("No club with a roof has anything on this day.")
+        hint = last_response.body[%r{<a class="day-hint.*?</a>}m].to_s
+        expect(hint).to include("Padel Port").and include("has the whole 19:00–20:00 free")
+        expect(hint).not_to include("Kus Tba")
       end
 
       it "is remembered for the next visit, and for nobody else" do
@@ -2085,13 +2159,13 @@ RSpec.describe Booking::Web::App do
         sign_in(user_id: 42)
       end
 
-      it "heads a date with the picked city's weather" do
+      it "marks a date's wet hours from the picked city's weather" do
         get "/date/#{day}"
-        expect(last_response.body).to include("No rain expected")
+        expect(last_response.body).not_to include("is-rainy")
 
         pick("Batumi")
         get "/date/#{day}"
-        expect(last_response.body).to include("Rain likely 20:00–21:00")
+        expect(last_response.body).to match(/class="hour-chip is-rainy"[^>]*data-hour="20"/)
       end
 
       it "marks the rainy date on the picked city's home screen alone" do

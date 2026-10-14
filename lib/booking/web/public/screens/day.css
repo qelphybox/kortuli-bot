@@ -1,70 +1,55 @@
 /* day screens — the week, a date's clubs, and one club's hours on it. See
    app.css for the tokens and the parts these share with other screens. */
 
-/* --- Home: today, then the week ----------------------------------------- */
+/* --- Home: the week, and a watch that fired --------------------------- */
 .lede { margin: 0 4px; font-size: 15px; line-height: 1.4; color: var(--muted); }
 
-.hero {
-  position: relative;
-  display: block;
-  overflow: hidden;
+/* A watched slot that opened and is still free: the slab, the time big. */
+.hit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 16px 14px;
   border-radius: 22px;
   background: var(--slab);
   color: var(--on-slab);
-  padding: 18px 18px 16px;
 }
-.hero__court { position: absolute; right: -40px; top: -10px; opacity: 0.18; }
-.hero__eyebrow {
-  position: relative;
-  display: flex;
+.hit__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hit__kicker {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ball);
 }
-.hero__eyebrow::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--ball);
-}
-.hero__count { position: relative; display: flex; align-items: flex-end; gap: 10px; margin-top: 6px; }
-.hero__number {
+.hit__ago { font-size: 12px; font-weight: 600; color: var(--on-slab-muted); }
+.hit__body { display: flex; flex-direction: column; gap: 4px; }
+.hit__when {
   font-family: var(--display);
   font-weight: 800;
   font-style: italic;
-  font-size: 84px;
-  line-height: 0.9;
+  font-size: 40px;
+  line-height: 0.95;
   color: var(--ball);
 }
-.hero__what { padding-bottom: 8px; font-size: 16px; line-height: 1.25; font-weight: 600; }
-.hero__what span { display: block; color: var(--on-slab-muted); font-weight: 500; }
-.hero__foot {
-  position: relative;
-  margin-top: 14px;
+.hit__club { font-size: 15px; font-weight: 700; }
+.hit__club span { color: var(--on-slab-muted); font-weight: 500; }
+.hit__watch { font-size: 12px; color: var(--on-slab-muted); }
+.hit__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.hit__book, .hit__hours {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.hero__next { font-size: 13px; color: var(--on-slab-muted); }
-.hero__go {
-  display: inline-flex;
-  align-items: center;
+  justify-content: center;
   gap: 6px;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: var(--ball);
-  color: var(--on-ball);
-  font-weight: 700;
-  font-size: 15px;
-  white-space: nowrap;
+  height: 46px;
+  border-radius: 14px;
 }
+.hit__book { background: var(--ball); color: var(--on-ball); font-weight: 800; font-size: 16px; }
+.hit__hours { border: 1.5px solid var(--slab-line); color: var(--on-slab); font-weight: 700; font-size: 14px; }
+.hit__more { align-self: center; color: var(--ball); font-size: 13px; font-weight: 700; }
 
 /* How old the newest Poll is, across from the section's title. */
 .section__aside { font-size: 12px; color: var(--muted); }
@@ -85,6 +70,18 @@
 .day-row__count { display: flex; align-items: baseline; gap: 6px; }
 .day-row__slots { font-family: var(--display); font-weight: 700; font-size: 20px; line-height: 1; }
 .day-row__clubs { font-size: 13px; color: var(--muted); }
+.today-badge {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--slab);
+  color: var(--ball);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 .day-row.is-empty .day-row__dow,
 .day-row.is-empty .day-row__slots { color: var(--faint); }
 
@@ -170,85 +167,231 @@
 .notice.is-dry .notice__title { color: var(--ink); }
 .notice--slim { gap: 8px; padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 600; }
 
-.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+/* --- A day: what the strip of hours picks ------------------------------- */
+.day-bar { gap: 10px; padding-left: 0; padding-right: 0; padding-bottom: 10px; }
+.day-bar > .bar__row, .day-bar > .strip, .day-bar > .when { padding: 0 16px; }
+.when { display: flex; align-items: center; justify-content: space-between; padding-top: 2px; }
+.when__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.when__rain { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--muted); }
+.when__rain::before { content: ""; width: 12px; height: 3px; border-radius: 2px; background: var(--rain); }
 
-/* A club on the day. The name is the link, stretched over the whole card,
-   so the star can sit in the name's row as a form of its own. */
-.club-cards { display: flex; flex-direction: column; gap: 12px; }
-.club-card {
-  position: relative;
+/* The day's hours, one row, sideways. A tap picks one or lets it go. */
+.hour-strip {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scroll-padding: 0 16px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.hour-strip::-webkit-scrollbar { display: none; }
+.hour-chip {
+  flex: none;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 18px;
+  justify-content: center;
+  width: 46px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 18px;
+}
+.hour-chip[aria-pressed="true"] { border: 1.5px solid var(--on-ball); background: var(--ball); color: var(--on-ball); }
+/* Rain is a blue line along the bottom, picked or not. */
+.hour-chip.is-rainy { box-shadow: inset 0 -3px 0 var(--rain); }
+.hour-chip:active { transform: scale(0.96); }
+
+/* --- A day: the hint, then the clubs that have every hour picked ------- */
+.day-list { gap: 10px; padding-top: 12px; }
+.day-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
   background: var(--card);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow);
   color: var(--ink);
 }
-.club-card:has(.club-card__link:active) { border-color: var(--ink); }
-.club-card__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
-.club-card__head { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.club-card__link { min-width: 0; color: inherit; }
-.club-card__link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
-.club-card__link:focus-visible { outline: none; }
-.club-card__link:focus-visible::after { outline: 2px solid var(--blue); outline-offset: 2px; }
-.club-row__name {
-  display: block;
-  font-size: 17px;
+.day-hint__icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ball);
+  color: var(--on-ball);
+}
+.day-hint__text { flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; }
+.day-hint__cta {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--cta);
+  color: var(--on-cta);
+  font-size: 13px;
+  font-weight: 800;
+}
+.day-hint--rain, .day-hint--roof { background: var(--rain-tint); border-color: transparent; color: var(--blue-deep); }
+.day-hint--rain .day-hint__icon, .day-hint--roof .day-hint__icon { background: var(--rain); color: #fff; }
+.day-hint--none { border-style: dashed; border-color: var(--line-strong); background: transparent; color: var(--muted); }
+.day-hint--none .day-hint__icon { background: var(--taken); color: var(--muted); }
+.day-hint:active { transform: scale(0.99); }
+
+.day-summary {
+  padding: 2px 2px 0;
+  font-size: 12px;
   font-weight: 700;
-  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.day-clubs { display: flex; flex-direction: column; gap: 10px; }
+/* One link, the whole card: the club's hours. The lime column is the
+   answer — "2h free" — and the way in. */
+.day-club {
+  display: flex;
+  align-items: stretch;
+  min-height: 84px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(13, 22, 17, 0.06);
+  transition: transform 0.08s;
+}
+.day-club:active { transform: scale(0.985); border-color: var(--ink); }
+.day-club__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 10px 12px 14px;
+}
+.day-club__head { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.day-club__fav { flex: none; display: flex; color: var(--ink); }
+.day-club__name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Above the stretched link, and a full tap target without making the row
-   any taller than the name. */
-.club-card .fav { position: relative; z-index: 1; display: flex; }
-.club-card .fav__star { width: 28px; height: 44px; margin: -12px -6px -12px -6px; }
-.club-card__meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.club-card__sub { font-size: 13px; color: var(--muted); }
-.club-card__tile {
+.day-club__meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.day-club__meta .tag { padding: 2px 6px; font-size: 10px; }
+.day-club__sub { font-size: 12px; color: var(--muted); }
+.day-club__hours { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.free-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--ball-tint);
+  color: var(--free-ink);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.2;
+}
+.free-chip.is-wet { box-shadow: inset 0 -2px 0 var(--rain); }
+.free-chip__more { padding-left: 2px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.day-club__wet { font-size: 12px; font-weight: 600; color: var(--blue); }
+.day-club__free {
   flex: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 14px;
+  width: 68px;
   background: var(--ball);
   color: var(--on-ball);
 }
-.club-card__left { font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1; }
-.club-card__unit { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-/* Nothing free, or nothing known: a dashed outline at the bottom. */
-.club-card.is-empty {
-  padding-block: 12px;
-  background: transparent;
-  border: 1px dashed var(--line-strong);
-  box-shadow: none;
-  color: var(--muted);
-}
-.club-card.is-empty .club-row__name { font-size: 15px; font-weight: 600; }
-.club-card__booked { flex: none; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
-.club-card.is-unknown .club-card__booked { color: var(--faint); }
+.day-club__n { font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1; }
+.day-club__unit { font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.day-club__free svg { margin-top: 4px; stroke-width: 2.8; }
 
-/* --- A club on a day: the numbers, then every hour as a tile ----------- */
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
-.stat {
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid var(--line);
+/* The clubs the hours rule out, folded into one line. */
+.fold { display: flex; flex-direction: column; gap: 8px; }
+.fold__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 18px;
+  border: 1px dashed var(--line-strong);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
 }
-.stat__n { font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1; }
-.stat__n small { font-size: 14px; }
-.stat__what { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
-.stat--slab { background: var(--slab); border-color: transparent; color: var(--on-slab); }
-.stat--slab .stat__n { color: var(--ball); }
-.stat--slab .stat__what { color: var(--on-slab-muted); }
+.fold__head::-webkit-details-marker { display: none; }
+.fold__head svg { transform: rotate(90deg); transition: transform 0.15s; }
+.fold[open] .fold__head svg { transform: rotate(-90deg); }
+.fold__list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.fold__club {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  opacity: 0.85;
+}
+.fold__name { font-size: 15px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fold__why { flex: none; font-size: 12px; }
+
+/* --- A club on a day: the header is the club, then every hour ---------- */
+.bar__link { display: block; min-width: 0; color: inherit; }
+.bar__link .bar__sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar__link:active { opacity: 0.7; }
+.fav-btn {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: transparent;
+}
+.fav-btn svg { stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.fav-btn.is-on { border: 1.5px solid var(--on-ball); background: var(--ball); color: var(--on-ball); }
+.fav-btn.is-on svg { stroke: var(--on-ball); }
+.fav-btn:active { transform: scale(0.96); }
 
 .hint-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .hint-row p { font-size: 14px; line-height: 1.35; color: var(--muted); max-width: 220px; }
@@ -325,7 +468,9 @@
   :root:not([data-theme="light"]) .hour__pick:checked { box-shadow: inset 0 0 0 1.5px var(--on-select); }
 }
 
-/* The dock's one button: the ticked stretch, ready to share. */
+/* The dock: Book, big and always there; Share my game under it once an
+   hour is ticked. */
 .game-pick { margin: 0; }
-.game-pick .btn--slab svg { color: var(--ball); }
-.game-pick .btn[disabled] svg { color: inherit; }
+.game-pick .btn--big { min-height: 56px; font-size: 17px; }
+.game-pick .btn--outline { min-height: 48px; border-radius: 14px; }
+.game-pick [data-game-pick][hidden] { display: none; }

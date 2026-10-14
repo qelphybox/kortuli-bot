@@ -9,7 +9,7 @@ require "tmpdir"
 RSpec.describe Booking::Web::App do
   include Rack::Test::Methods
 
-  DayRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences, :polls)
+  DayRepos = Struct.new(:clubs, :slots, :watches, :favourites, :forecast, :visits, :preferences, :polls, :notifications, :day_opens)
   DayClubs = Struct.new(:enabled)
   DaySlots = Struct.new(:all)
 
@@ -49,7 +49,8 @@ RSpec.describe Booking::Web::App do
   end
   let(:repos) do
     DayRepos.new(DayClubs.new(clubs), DaySlots.new(free_slots), Booking::Repo::Watches.new(db), Booking::Repo::Favourites.new(db),
-                 forecast, Booking::Repo::Visits.new(db), Booking::Repo::Preferences.new(db), polls)
+                 forecast, Booking::Repo::Visits.new(db), Booking::Repo::Preferences.new(db), polls,
+                 Booking::Repo::Notifications.new(db), Booking::Repo::DayOpens.new(db))
   end
 
   def app
@@ -75,11 +76,13 @@ RSpec.describe Booking::Web::App do
 
   def ago(seconds) = Booking::Clock.now - seconds
 
-  def cards = last_response.body.scan(%r{<li class="club-card[^"]*">.*?</li>}m)
+  def cards = last_response.body.scan(%r{<a class="day-club".*?</a>}m)
 
-  def card(name) = cards.find { _1.include?(%(<span class="club-row__name">#{name}</span>)) }.to_s
+  def card(name) = cards.find { _1.include?(%(<span class="day-club__name">#{name}</span>)) }.to_s
 
-  def club_names_in_order = last_response.body.scan(%r{<span class="club-row__name">([^<]+)</span>}).flatten
+  def folded(name) = last_response.body.scan(%r{<a class="fold__club".*?</a>}m).find { _1.include?(">#{name}<") }.to_s
+
+  def club_names_in_order = last_response.body.scan(%r{<span class="(?:day-club|fold)__name">([^<]+)</span>}).flatten
 
   # Somebody who has picked a city: with more than one, `/` would otherwise
   # ask first, and these are about the week behind it.
@@ -114,11 +117,69 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).not_to include("Updated")
     end
 
+    # Every day as good as any other: today wears a badge, and nothing more.
+    it "draws every day as an equal row, today with a badge" do
+      get "/"
+
+      expect(last_response.body.scan(/<a class="day-row[" ]/).size).to eq(Booking::Config.horizon_days)
+      expect(last_response.body.scan('class="today-badge"').size).to eq(1)
+      expect(last_response.body).not_to include('class="hero')
+    end
+
     it "draws each day's bar as a value rather than a style" do
       get "/"
 
       expect(last_response.body).to include(%(<progress class="meter-bar" max="100" value="100" aria-hidden="true">))
       expect(last_response.body).not_to include('style="width')
+    end
+  end
+
+  # Over the week, only when a watch has fired and the slot is still free.
+  describe "a watch that fired" do
+    let(:watches) { Booking::Repo::Watches.new(db) }
+    let(:notifications) { Booking::Repo::Notifications.new(db) }
+    let(:free_slots) { [slot(club: "gldani", at: "#{day} 18:00"), slot(club: "gldani", at: "#{day} 21:00")] }
+
+    def banner = last_response.body[%r{<section class="hit".*?</section>}m].to_s
+
+    def told(slot, user_id: 42, at: ago(4 * 60))
+      watch = watches.create(user_id:, club_slugs: ["gldani"], weekdays: [day.wday], from_minute: 18 * 60, to_minute: 22 * 60)
+      notifications.claim(watch_id: watch.id, slot_key: slot.key, at:)
+    end
+
+    it "shows the slot big, with the club, the watch it matched and the way to book" do
+      told(free_slots.first)
+      get "/"
+
+      expect(banner).to include("Slot opened").and include("4 min ago")
+      expect(banner).to include("#{Booking::Messages::DAY_NAMES[day.wday]} · 18:00–19:00")
+      expect(banner).to include("Padel Gldani").and include("covered + outdoor · 80 GEL/h")
+      expect(banner).to include("Matches your watch: #{Booking::Messages::DAY_NAMES[day.wday]} · 18:00–22:00")
+      expect(banner).to include('data-external href="https://example.test/book"')
+      expect(banner).to include(%(href="/date/#{day}/club/gldani">All hours))
+    end
+
+    it "is gone once the slot is taken again" do
+      told(slot(club: "gldani", at: "#{day} 19:00"))
+      get "/"
+
+      expect(banner).to be_empty
+    end
+
+    it "is nobody else's" do
+      told(free_slots.first, user_id: 7)
+      get "/"
+
+      expect(banner).to be_empty
+    end
+
+    it "shows the soonest, and the rest as a count" do
+      told(free_slots.last, at: ago(60))
+      told(free_slots.first, at: ago(600))
+      get "/"
+
+      expect(banner).to include("18:00–19:00").and include("10 min ago")
+      expect(banner).to include('<a class="hit__more" href="/watches">+1 more</a>')
     end
   end
 
@@ -135,74 +196,150 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include(%(<span class="bar__date">#{day.strftime("%b %-d")} · Tbilisi</span>))
     end
 
-    it "calls a club fully booked only when its last Poll read the source" do
-      get "/date/#{day}"
+    # Lemans was read and has nothing; Padel Academy could not be read.
+    it "folds a club with nothing free, saying so, and one it could not read, saying that" do
+      get "/date/#{day}?hours=any"
 
-      expect(card("Lemans Padel")).to include("Fully booked").and include("is-empty")
-      expect(card("Lemans Padel")).not_to include("is-unknown")
-    end
-
-    it "says there is no data for a club whose last Poll failed" do
-      get "/date/#{day}"
-
-      expect(card("Padel Academy")).to include(%(<span class="club-card__booked">No data</span>)).and include("is-unknown")
-      expect(card("Padel Academy")).not_to include("Fully booked")
+      expect(folded("Lemans Padel")).to include("nothing today")
+      expect(folded("Padel Academy")).to include("no data")
     end
 
     it "says the same for a club that has never been polled" do
       db[:polls].where(club_slug: "academy").delete
-      get "/date/#{day}"
+      get "/date/#{day}?hours=any"
 
-      expect(card("Padel Academy")).to include("No data")
+      expect(folded("Padel Academy")).to include("no data")
     end
 
     # What a failed Poll left behind is still the last thing we read.
     it "still shows the free hours a club had before its Poll failed" do
       polls.record("gldani", outcome: "failed", summary: "", at: ago(30))
-      get "/date/#{day}"
+      get "/date/#{day}?hours=18"
 
-      expect(card("Padel Gldani")).to include(%(<span class="club-card__left">1</span>))
-      expect(card("Padel Gldani")).not_to include("No data")
+      expect(card("Padel Gldani")).to include(%(<span class="day-club__n">1h</span>))
     end
 
-    it "lists the unknown after the fully booked, and counts only the open in All" do
-      favourites = Booking::Repo::Favourites.new(db)
-      favourites.add(42, "academy")
-      get "/date/#{day}"
+    it "folds the clubs in the order the list would have them, favourites first" do
+      Booking::Repo::Favourites.new(db).add(42, "academy")
+      get "/date/#{day}?hours=18"
 
-      expect(club_names_in_order).to eq(["Padel Gldani", "Lemans Padel", "Padel Academy"])
-      expect(last_response.body).to include(">All 1</a>")
+      expect(club_names_in_order).to eq(["Padel Gldani", "Padel Academy", "Lemans Padel"])
     end
 
-    it "keeps the star a form of its own beside the club's link" do
-      get "/date/#{day}"
+    # One link, the whole card, to the club's hours; the star lives there.
+    it "makes the whole card one link to the club's hours" do
+      get "/date/#{day}?hours=18"
 
-      expect(card("Padel Gldani")).to include(%(<form class="fav" method="post" action="/favourites/gldani">))
-      expect(card("Padel Gldani")).to include(%(<a class="club-card__link" href="/date/#{day}/club/gldani"><span class="club-row__name">Padel Gldani</span></a>))
+      expect(card("Padel Gldani")).to start_with(%(<a class="day-club" href="/date/#{day}/club/gldani?hours=18">))
+      expect(card("Padel Gldani")).not_to include("<form")
+    end
+
+    it "names the covers and the area beside a club with a Profile" do
+      get "/date/#{day}?hours=18"
+
+      expect(card("Padel Gldani")).to include('<span class="tag tag--covered">covered</span>').and include("Gldani · 80 GEL")
+    end
+
+    # Each opening is kept — the day, how far ahead, the hour — so the
+    # week can one day lead with the day somebody plays on.
+    describe "kept, to learn which days people play on" do
+      def opens = db[:day_opens].select_map(%i[user_id date days_ahead booked_at shared_at])
+
+      it "keeps each opening, but not a tap on its strip of hours" do
+        get "/date/#{day}"
+        header "X-Day-Swap", "1"
+        get "/date/#{day}?hours=20"
+
+        expect(opens).to eq([[42, day, 1, nil, nil]])
+      end
+
+      it "credits a Book tapped to the latest opening of that date" do
+        get "/date/#{day}"
+        post "/date/#{day}/booked"
+
+        expect(last_response.status).to eq(204)
+        expect(opens.first[3]).not_to be_nil
+      end
+
+      it "credits a Game shared, once" do
+        get "/date/#{day}"
+        get "/date/#{day}/club/gldani/game?hours[]=18"
+        first = opens.first[4]
+        get "/date/#{day}/club/gldani/game?hours[]=18"
+
+        expect(first).not_to be_nil
+        expect(opens.first[4]).to eq(first)
+      end
     end
 
     describe "under the forecast" do
-      def hour(at, chance:, temperature:)
+      def hour(at, chance:, temperature: 15)
         Booking::Weather::Hour.new(starts_at: Booking::Clock.local_to_utc(at), rain_chance: chance, rain_mm: 0.0,
                                    code: 3, temperature:, day: true)
       end
 
-      # Showers worth a mention but no reason to sink anybody: blue, with
-      # how warm it gets.
-      it "warns of possible showers in blue, with the day's temperatures" do
-        forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: (19..21).cover?(_1) ? 30 : 0, temperature: _1) }, city: "Tbilisi")
+      def hint = last_response.body[%r{<(?:a|div) class="day-hint.*?</(?:a|div)>}m].to_s
+
+      # Rain from 30%: a Wet hour is 50, but choosing between courts is not
+      # calling the evening off.
+      it "marks an hour rainy from a three-in-ten chance" do
+        forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: { 18 => 30, 19 => 20 }.fetch(_1, 0)) }, city: "Tbilisi")
         get "/date/#{day}"
 
-        banner = last_response.body[%r{<div class="weather notice[^"]*">.*?</div>}m]
-        expect(banner).to start_with('<div class="weather notice">')
-        expect(banner).to include("Showers possible 19:00–22:00").and include("8–23°")
+        expect(last_response.body).to match(/class="hour-chip is-rainy"[^>]*data-hour="18"/)
+        expect(last_response.body).not_to match(/class="hour-chip is-rainy"[^>]*data-hour="19"/)
       end
 
-      it "stays a plain card on a dry day" do
-        forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: 0, temperature: 15) }, city: "Tbilisi")
-        get "/date/#{day}"
+      # Lemans is indoors, and has the evening; Gldani is a favourite with a
+      # court in the open and a roof over the other.
+      describe "with rain over the evening" do
+        let(:free_slots) do
+          [slot(club: "gldani", at: "#{day} 18:00"), slot(club: "gldani", at: "#{day} 19:00"),
+           slot(club: "lemans", at: "#{day} 18:00"), slot(club: "lemans", at: "#{day} 19:00")]
+        end
 
-        expect(last_response.body).to include('<div class="weather notice is-dry">')
+        before do
+          forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: (17..22).cover?(_1) ? 70 : 0) }, city: "Tbilisi")
+        end
+
+        it "names a favourite with a roof that has the hours, in blue" do
+          Booking::Repo::Favourites.new(db).add(42, "gldani")
+          get "/date/#{day}"
+
+          expect(hint).to start_with('<a class="day-hint day-hint--rain"')
+          expect(hint).to include("Rain 17:00–23:00.").and include("Padel Gldani (your favourite, covered) has the whole 18:00–20:00 free.")
+          expect(hint).to include(">Book<")
+        end
+
+        # Both have a roof; Lemans comes first by name.
+        it "names the first roof when no favourite stays dry" do
+          get "/date/#{day}"
+
+          expect(hint).to start_with(%(<a class="day-hint day-hint--roof" href="/date/#{day}/club/lemans">))
+          expect(hint).to include("Nearest roof: Lemans Padel, has the whole 18:00–20:00 free.").and include(">See<")
+        end
+      end
+
+      it "names the first favourite with the hours free on a dry day" do
+        Booking::Repo::Favourites.new(db).add(42, "gldani")
+        get "/date/#{day}?hours=18"
+
+        expect(hint).to start_with(%(<a class="day-hint day-hint--dry" href="/date/#{day}/club/gldani?hours=18">))
+        expect(hint).to include("<strong>Padel Gldani</strong> has the whole 18:00–19:00 free.")
+      end
+
+      it "says the favourites have nothing, and how many other clubs do" do
+        Booking::Repo::Favourites.new(db).add(42, "lemans")
+        get "/date/#{day}?hours=18"
+
+        expect(hint).to start_with('<div class="day-hint day-hint--none">')
+        expect(hint).to include("No slots at your favourites 18:00–19:00.").and include("1 other club has.")
+      end
+
+      it "says nothing without a favourite on a dry day" do
+        get "/date/#{day}?hours=18"
+
+        expect(hint).to be_empty
       end
     end
   end
@@ -232,10 +369,10 @@ RSpec.describe Booking::Web::App do
       expect(strip).not_to include("outdoor")
     end
 
-    it "names the club's area beside the date" do
+    it "names the club's area, covers and price beside the date" do
       get "/date/#{day}/club/gldani"
 
-      expect(last_response.body).to include(%(<div class="bar__sub">#{Booking::Messages::DAY_NAMES[day.wday]} · #{day.strftime("%b %-d")} · Gldani</div>))
+      expect(last_response.body).to include(%(<div class="bar__sub">#{Booking::Messages::DAY_NAMES[day.wday]} · #{day.strftime("%b %-d")} · Gldani · covered + outdoor · 80 GEL/h</div>))
     end
   end
 

@@ -33,6 +33,9 @@
   --select-dot: #d6f542;
   --blue: #2448e8;
   --blue-deep: #1a2f9e;
+  /* Rain's own mark — the line under a wet hour — and the same blue in
+     both themes: it means rain, not a link. */
+  --rain: #2448e8;
   --rain-tint: #e7ecff;
   --rain-on-slab: #9db4ff;
   --taken: #eceeea;
@@ -56,20 +59,21 @@
   --map-label: #5f6964;
   --map-label-halo: #ffffff;
   /* A pin over it: the picked one inverted and ringed in the ball's
-     yellow, a fully booked one grey. A free one is the ball in both
-     themes. */
+     yellow. A Favourite is the ball in both themes, the rest the card. */
   --pin-picked: #0d1611;
   --on-pin-picked: #d6f542;
   --pin-picked-edge: #0d1611;
-  --pin-taken: #eceeea;
-  --on-pin-taken: #6b746e;
-  --pin-taken-edge: #c3c9c0;
   --pin-ring: #ffffff;
+  --pin-plain-edge: #0d1611;
   /* The picked half of a List / Map switch, and an hour that is free on a
      tinted chip. */
   --switch-on: #0d1611;
   --on-switch-on: #ffffff;
   --free-ink: #3f5200;
+  /* A small call to act on a card: ink with the ball's yellow, turned to
+     the ball itself where ink would vanish into the ground. */
+  --cta: #0d1611;
+  --on-cta: #d6f542;
 
   --display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --text: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -114,13 +118,13 @@
   --pin-picked: #ffffff;
   --on-pin-picked: #0d1611;
   --pin-picked-edge: #d6f542;
-  --pin-taken: #26302a;
-  --on-pin-taken: #8a948e;
-  --pin-taken-edge: #3a453f;
   --pin-ring: #f1f4ef;
+  --pin-plain-edge: #4a564f;
   --switch-on: #d6f542;
   --on-switch-on: #0d1611;
   --free-ink: #d6f542;
+  --cta: #d6f542;
+  --on-cta: #0d1611;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -162,13 +166,14 @@
     --pin-picked: #ffffff;
     --on-pin-picked: #0d1611;
     --pin-picked-edge: #d6f542;
-    --pin-taken: #26302a;
-    --on-pin-taken: #8a948e;
-    --pin-taken-edge: #3a453f;
     --pin-ring: #f1f4ef;
+    --pin-plain-edge: #4a564f;
+  --pin-plain-edge: #4a564f;
     --switch-on: #d6f542;
     --on-switch-on: #0d1611;
     --free-ink: #d6f542;
+    --cta: #d6f542;
+    --on-cta: #0d1611;
   }
 }
 
@@ -328,6 +333,7 @@ html:not(.js) .js-only { display: none; }
   color: var(--ink);
 }
 .icon-btn:active { transform: scale(0.96); }
+.icon-btn--small { width: 40px; height: 40px; color: var(--muted); }
 
 .pill {
   flex: none;

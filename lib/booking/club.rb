@@ -41,6 +41,11 @@ module Booking
       named.empty? ? DEFAULT_CITY : named
     end
 
+    # What a pin on the map has room for: "KUS TBA", "GB NIN". Named per
+    # club in config, because no rule turns "Tbilisi Padel Didi Dighomi"
+    # into something a person recognises; the first word until it is.
+    def short_name = settings["short_name"] || name.split.first.to_s.upcase
+
     def court_aliases = settings.fetch("court_aliases", {})
 
     def opening_hours = OpeningHours.parse(settings["opening_hours"])

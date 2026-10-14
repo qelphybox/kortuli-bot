@@ -90,11 +90,9 @@ module Booking
       ].compact.join("\n")
     end
 
-    # The Slots screen's button, before and after anything is ticked. Without
-    # JS it is always the first; with it, the second until a tick arrives.
+    # The button under a club's hours that shares the ticked ones. With JS
+    # it waits for a tick and then names the stretch after it.
     def game_pick = "Share my game"
-
-    def game_pick_none = "Tick the hours you booked"
 
     def game_to_google = "Google Calendar ↗"
 
@@ -253,12 +251,15 @@ module Booking
 
     # Over the week: how long ago the City's newest good Poll finished, so a
     # quiet morning reads as quiet rather than as a poller that has stopped.
-    def updated_ago(seconds)
+    def updated_ago(seconds) = "Updated #{time_ago(seconds)}"
+
+    # "just now", "4 min ago", "3 h ago", "2 d ago".
+    def time_ago(seconds)
       minutes = seconds.to_i / 60
-      if minutes < 1 then "Updated just now"
-      elsif minutes < 60 then "Updated #{minutes} min ago"
-      elsif minutes < 1440 then "Updated #{minutes / 60} h ago"
-      else "Updated #{minutes / 1440} d ago"
+      if minutes < 1 then "just now"
+      elsif minutes < 60 then "#{minutes} min ago"
+      elsif minutes < 1440 then "#{minutes / 60} h ago"
+      else "#{minutes / 1440} d ago"
       end
     end
 
@@ -266,6 +267,91 @@ module Booking
     def favourite_add = "Add to favourites"
 
     def favourite_remove = "Remove from favourites"
+
+    # --- A date's clubs, against the hours picked ----------------------------
+
+    # Hours counted from the date's midnight, so 24 is "00:00" after it.
+    def hour_clock(hour) = format("%02d:00", hour % 24)
+
+    def hour_chip(hour) = format("%02d", hour % 24)
+
+    # "18:00–20:00", "18, 20, 22" when the hours are not one stretch, or
+    # "Any time" with none picked.
+    def day_span(pick)
+      return "Any time" if pick.any_time?
+      return "#{hour_clock(pick.from)}–#{hour_clock(pick.to)}" if pick.contiguous?
+
+      pick.span.map { hour_chip(_1) }.join(", ")
+    end
+
+    # Over the list: how many clubs it holds, and for when.
+    def day_summary(pick)
+      count = pick.live.size
+      clubs = count == 1 ? "1 club" : "#{count} clubs"
+      return "#{clubs} #{count == 1 ? "has" : "have"} free courts · tap hours to narrow" if pick.any_time?
+
+      "#{clubs} free #{day_span(pick)}"
+    end
+
+    # The fold under it: the clubs the hours rule out.
+    def day_folded(pick)
+      count = pick.folded.size
+      clubs = count == 1 ? "1 club" : "#{count} clubs"
+
+      pick.any_time? ? "#{clubs} fully booked today" : "#{clubs} not free #{day_span(pick)}"
+    end
+
+    # What a folded club does have, as far as the day goes.
+    def day_miss(miss)
+      case miss.why
+      when :no_data then "no data"
+      when :only then "only #{miss.hours.map { hour_clock(_1) }.join(", ")}"
+      when :next then "next free #{hour_clock(miss.hours.first)}"
+      when :last then "last free #{hour_clock(miss.hours.first)}"
+      else "nothing today"
+      end
+    end
+
+    # Under a club in the open, when the hours picked are wet there.
+    def day_wet(pick, club)
+      wet = pick.wet_hours(club)
+      return if wet.empty?
+
+      wet.size == pick.span.size ? "☂ rain on court all #{wet.size}h" : "☂ rain on court #{wet.map { hour_chip(_1) }.join(", ")}"
+    end
+
+    def day_rain(pick) = "Rain #{pick.rain_runs.map { "#{hour_clock(_1)}–#{hour_clock(_2)}" }.join(", ")}."
+
+    # "has the whole 18:00–20:00 free", or the dry hours it does have.
+    def day_has(pick, club)
+      return "has the whole #{day_span(pick)} free" if pick.whole?(club) && pick.dry_free(club).size == pick.span.size
+
+      hours = pick.dry_free(club)
+      listed = hours.first(3).map { hour_clock(_1) }.join(", ")
+      "has #{listed}#{" +#{hours.size - 3}" if hours.size > 3} free"
+    end
+
+    # The hint over the list, as [bold lead, the rest].
+    def day_hint(pick)
+      hint = pick.hint
+      club = hint.club
+      case hint.kind
+      when :rain
+        cover = ["your favourite", club.cover].compact.join(", ")
+        wet = " · #{hint.wet.name} is open-air" if hint.wet
+        [day_rain(pick), "#{club.name} (#{cover}) #{day_has(pick, club)}#{wet}."]
+      when :roof
+        why = "Your favourites are open-air. " if pick.favourites_open_air?
+        [day_rain(pick), "#{why}Nearest roof: #{club.name}, #{day_has(pick, club)}."]
+      when :dry
+        [club.name, "#{day_has(pick, club)}."]
+      else
+        others = pick.live.count { !_1.favourite? }
+        when_said = pick.any_time? ? "today" : day_span(pick)
+        ["No slots at your favourites #{when_said}.",
+         others.zero? ? "No other club has any either." : "#{others} other #{others == 1 ? "club has" : "clubs have"}."]
+      end
+    end
 
     # --- The Forecast --------------------------------------------------------
 
@@ -297,10 +383,6 @@ module Booking
 
       "#{low.round}–#{high.round}°" if low
     end
-
-    # Said whenever the list has been reordered for it, so the order does not
-    # look like a mistake.
-    def weather_roofed_first = "Clubs with a roof come first."
 
     # Beside one hour: "🌧 Rain 70% · 14°", "🌦 30% · 16°", "☀️ 21°".
     def weather_tag(hour)
