@@ -8,6 +8,8 @@ module Booking
     # "free 18:00 but not 19:00" is not a court for a two-hour game.
     #
     # Nothing picked is "any time": every club with an hour left, by how many.
+    # It is where a date opens — the hours are this person's to pick, not
+    # ours to guess.
     #
     # Hours are counted from the date's midnight, as HourSpan counts them, so
     # a club open past midnight offers 24 and 25 after 23. Only hours still to
@@ -15,11 +17,9 @@ module Booking
     # looking for a court.
     #
     # Pure, like the Grid: the clubs arrive already read, so the rules — the
-    # order, the folding, which club the hint names — are exercised without a
+    # order, the folding, which roof the hint offers — are exercised without a
     # database.
     class DayPick
-      # The evening a first look opens on, until the logs say otherwise.
-      DEFAULT_HOURS = [18, 19].freeze
       # How many of a club's free hours its card has room for, any time.
       CHIPS = 6
 
@@ -37,23 +37,18 @@ module Booking
       # `:next` or `:last` free hour either side of the span, or `:nothing`.
       Miss = Data.define(:club, :why, :hours)
 
-      # The line over the list: one club worth going to, or why there is
-      # none. `:rain` — a favourite that stays dry; `:roof` — no favourite
-      # does, here is a roof; `:dry` — a favourite, no rain to think about;
-      # `:none` — nothing at the favourites. `wet` is a favourite the rain
-      # rules out, named beside the one picked.
-      Hint = Data.define(:kind, :club, :wet)
+      # The line over the list when it rains: a club with a roof to book and
+      # the hours it has free for it — those picked, or any time the ones
+      # under the rain — or no club, when no roof fits, and the line only
+      # says when it may rain.
+      Hint = Data.define(:club, :hours)
 
       attr_reader :hours, :wanted, :rainy_hours
 
-      # The hours a link asked for, as offered on this date: absent is the
-      # default evening, "any" (or nothing) is any time, and an hour not on
-      # offer is dropped — leaving none is any time too.
-      def self.wanted(raw, offered)
-        picked = raw.nil? ? DEFAULT_HOURS : raw.to_s.split(",").filter_map { Integer(_1, exception: false) }
-
-        offered & picked
-      end
+      # The hours a link asked for, as offered on this date. Nothing asked
+      # for is any time, and so is an hour not on offer once it is dropped —
+      # as is the "any" older links carry.
+      def self.wanted(raw, offered) = offered & raw.to_s.split(",").filter_map { Integer(_1, exception: false) }
 
       def initialize(hours:, wanted:, rainy:, clubs:)
         @hours = hours
@@ -74,8 +69,8 @@ module Booking
 
       def to = span.last && span.last + 1
 
-      # Rain over the hours picked: what puts the roofs first and makes the
-      # hint about rain.
+      # Rain over the hours picked: what puts the roofs first and brings up
+      # the hint.
       def rainy? = span.any? { rainy_hours.include?(_1) }
 
       # Rain anywhere in what is left of the day, for the strip's legend.
@@ -83,25 +78,22 @@ module Booking
 
       def rainy_hour?(hour) = rainy_hours.include?(hour)
 
-      # The day's rain as stretches of hours, [first, last + 1] each.
+      # The rain over the hours picked as stretches, [first, last + 1] each.
       def rain_runs
-        hours.select { rainy_hour?(_1) }.chunk_while { |a, b| b == a + 1 }.map { [_1.first, _1.last + 1] }
+        span.select { rainy_hour?(_1) }.chunk_while { |a, b| b == a + 1 }.map { [_1.first, _1.last + 1] }
       end
 
-      # The hour strip's links: what tapping an hour leaves picked.
+      # The hour strip's links: what tapping an hour leaves picked, nil when
+      # that is nothing — any time, the bare date.
       def toggled(hour)
         now = wanted.include?(hour) ? wanted - [hour] : (wanted + [hour]).sort
 
-        now.empty? ? "any" : now.join(",")
+        now.join(",") unless now.empty?
       end
 
-      # The pick as a link carries it: nil for the default evening, so a
-      # first look stays a bare URL.
-      def param
-        return nil if wanted == self.class.wanted(nil, hours)
-
-        any_time? ? "any" : wanted.join(",")
-      end
+      # The pick as a link carries it: nil for any time, so a first look
+      # stays a bare URL.
+      def param = (wanted.join(",") unless any_time?)
 
       # Favourites first, in the order they were starred; then, when the
       # hours picked are wet, the clubs with a roof; then the rest by name.
@@ -132,43 +124,23 @@ module Booking
       # be in the open: a club we know nothing about is not said to be wet.
       def wet_hours(club) = club.open_air ? span.select { rainy_hour?(_1) } : []
 
-      # Free hours with no rain on them: under a roof, or dry outside. A club
-      # with no roof we know of is dry only where the sky is.
-      def dry_free(club) = free_in(club).reject { !club.roofed && rainy_hour?(_1) }
-
+      # Rain over the hours picked, and somewhere under a roof to play
+      # through it: the first club on the list with a roof and a free hour
+      # in the rain — a favourite before anybody else. With no roof to offer
+      # it is the rain alone; on a dry span, nothing.
       def hint
         return @hint if defined?(@hint)
 
-        favourites = sorted.select(&:favourite?)
-        @hint =
-          if (club = dry_favourite(favourites))
-            Hint.new(kind: rainy? ? :rain : :dry, club:, wet: (rained_off(favourites, club) if rainy?))
-          elsif rainy? && (club = live.find(&:roofed))
-            Hint.new(kind: :roof, club:, wet: nil)
-          elsif favourites.any?
-            Hint.new(kind: :none, club: nil, wet: nil)
-          end
+        @hint = if rainy?
+                  roof = live.select(&:roofed).find { sheltered(_1).any? }
+                  Hint.new(club: roof, hours: roof ? (any_time? ? sheltered(roof) : free_in(roof)) : [])
+                end
       end
-
-      # Every favourite in the open, which is why the hint went looking for a
-      # roof elsewhere.
-      def favourites_open_air? = sorted.select(&:favourite?).then { |all| all.any? && all.all?(&:open_air) }
 
       private
 
-      # Under rain the favourites with a roof are asked first; the first with
-      # an hour that stays dry is the one.
-      def dry_favourite(favourites)
-        ordered = rainy? ? favourites.select(&:roofed) + favourites.reject(&:roofed) : favourites
-
-        ordered.find { dry_free(_1).any? }
-      end
-
-      # Who the rain leaves out, named beside the favourite that stays dry: a
-      # favourite in the open with hours free, every one of them wet.
-      def rained_off(favourites, picked)
-        favourites.find { _1 != picked && _1.open_air && free_in(_1).any? && dry_free(_1).empty? }
-      end
+      # The free hours at a club that the rain falls on.
+      def sheltered(club) = free_in(club).select { rainy_hour?(_1) }
 
       def miss(club)
         return Miss.new(club:, why: :no_data, hours: []) if club.no_data && club.free.empty?

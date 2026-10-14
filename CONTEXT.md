@@ -112,8 +112,8 @@ _Avoid_: wet hour (that is the 50% one)
 
 **Favourite**:
 A Club one person has starred. Theirs alone, and kept in the order starred:
-it narrows a Rundown, leads the list of Clubs in that order, is where the
-hint over the list looks first, and comes pre-ticked when making a Standing
+it narrows a Rundown, leads the list of Clubs in that order, is the first
+roof the rain hint offers when it has one, and comes pre-ticked when making a Standing
 watch.
 _Avoid_: bookmark, pinned, saved club
 

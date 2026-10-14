@@ -12,10 +12,12 @@
   hour left, and its first few. Favourites lead, in the order they were
   starred; under rain the clubs with a roof come next.
 
-  Over the list, one line names a club worth going to: a favourite with the
-  hours free and dry, a roof when the rain rules the favourites out — or
-  says the favourites have nothing. A whole card is one link, to the club's
-  hours, where the star is.
+  Only when rain falls on the hours picked, one line over the list offers a
+  roof to book through it: the first club on the list that is indoors or
+  covered and has a free hour in the rain — a favourite first. With no
+  roof free, the line only says when it will rain; a dry span has no line
+  at all. A whole card is one link, to the club's hours, where
+  the star is.
 %>
 <% pick = @pick %>
 <header class="bar day-bar">
@@ -46,7 +48,7 @@
         <% on = pick.wanted.include?(hour) %>
         <a class="hour-chip<%= " is-rainy" if pick.rainy_hour?(hour) %>" role="button" aria-pressed="<%= on %>" data-hour="<%= hour %>"
            aria-label="<%= Booking::Messages.hour_clock(hour) %><%= ", rain" if pick.rainy_hour?(hour) %>"
-           href="/date/<%= @date %>?hours=<%= pick.toggled(hour) %>"><%= Booking::Messages.hour_chip(hour) %></a>
+           href="/date/<%= @date %><%= "?hours=#{pick.toggled(hour)}" if pick.toggled(hour) %>"><%= Booking::Messages.hour_chip(hour) %></a>
       <% end %>
     </nav>
   <% end %>
@@ -58,14 +60,11 @@
   <% else %>
     <% if (hint = pick.hint) %>
       <% lead, rest = Booking::Messages.day_hint(pick) %>
-      <% wet = %i[rain roof].include?(hint.kind) %>
       <% tag = hint.club ? "a" : "div" %>
-      <<%= tag %> class="day-hint day-hint--<%= hint.kind %>"<% if hint.club %> href="/date/<%= @date %>/club/<%= hint.club.slug %><%= "?hours=#{pick.param}" if pick.param %>"<% end %>>
-        <span class="day-hint__icon"><%= wet ? icon(:rain, size: 18) : star(size: 16) %></span>
-        <span class="day-hint__text"><strong><%= h(lead) %></strong> <%= h(rest) %></span>
-        <% if hint.club %>
-          <span class="day-hint__cta"><%= hint.kind == :roof ? "See" : "Book" %><%= icon(:chevron, size: 12) %></span>
-        <% end %>
+      <<%= tag %> class="day-hint"<% if hint.club %> href="/date/<%= @date %>/club/<%= hint.club.slug %><%= "?hours=#{pick.param}" if pick.param %>"<% end %>>
+        <span class="day-hint__icon"><%= icon(:rain, size: 18) %></span>
+        <span class="day-hint__text"><strong><%= h(lead) %></strong><% if rest %> <%= h(rest) %><% end %></span>
+        <% if hint.club %><span class="day-hint__cta">Book<%= icon(:chevron, size: 12) %></span><% end %>
       </<%= tag %>>
     <% end %>
 

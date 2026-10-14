@@ -370,21 +370,21 @@ RSpec.describe Booking::Web::App do
          slot(club: "kus-tba-padel", court: "any", at: "#{day} 19:00"), slot(club: "kus-tba-padel", court: "any", at: "#{day} 21:00")]
       end
 
-      it "opens on the evening, 18:00 to 20:00" do
+      # The hours are this person's to pick, not ours to guess.
+      it "opens on any time, with no hour picked" do
         sign_in
         get "/date/#{day}"
 
-        expect(chip(18)).to include('aria-pressed="true"')
-        expect(chip(19)).to include('aria-pressed="true"')
-        expect(chip(20)).to include('aria-pressed="false"')
-        expect(last_response.body).to include("When · 18:00–20:00")
+        expect(last_response.body).not_to include('aria-pressed="true"')
+        expect(last_response.body).to include("When · Any time")
+        expect(live).to eq(["Kus Tba Padel", "Padel Club 2"])
       end
 
       # Binary: Kus Tba has 19:00 but not 18:00, which is no court for a
       # two-hour game.
       it "lists only the clubs with every hour picked free, and folds the rest" do
         sign_in
-        get "/date/#{day}"
+        get "/date/#{day}?hours=18,19"
 
         expect(live).to eq(["Padel Club 2"])
         expect(last_response.body).to include("1 club free 18:00–20:00")
@@ -413,9 +413,9 @@ RSpec.describe Booking::Web::App do
       it "shows every club with anything left when no hour is picked" do
         sign_in
         get "/date/#{day}?hours=18"
-        expect(chip(18)).to include(%(href="/date/#{day}?hours=any"))
+        expect(chip(18)).to include(%(href="/date/#{day}"))
 
-        get "/date/#{day}?hours=any"
+        get "/date/#{day}"
         expect(live).to eq(["Kus Tba Padel", "Padel Club 2"])
         expect(last_response.body).to include("When · Any time")
         expect(last_response.body).to include("2 clubs have free courts · tap hours to narrow")
@@ -442,7 +442,7 @@ RSpec.describe Booking::Web::App do
       it "offers only the hours still to come today" do
         sign_in
         allow(Booking::Clock).to receive(:now).and_return(Booking::Clock.local_to_utc("#{today} 18:30"))
-        get "/date/#{today}"
+        get "/date/#{today}?hours=18,19"
 
         expect(chip(18)).to be_empty
         expect(chip(19)).to include('aria-pressed="true"')
@@ -2120,18 +2120,6 @@ RSpec.describe Booking::Web::App do
 
         get "/clubs/kus-tba-padel"
         expect(last_response.status).to eq(200)
-      end
-
-      # The hint goes down this person's favourites in the city on screen:
-      # a starred Tbilisi club is no answer in Batumi.
-      it "hints at Batumi's favourites alone" do
-        favourites.add(42, "kus-tba-padel")
-        favourites.add(42, "padel-port")
-        get "/date/#{day}?hours=19"
-
-        hint = last_response.body[%r{<a class="day-hint.*?</a>}m].to_s
-        expect(hint).to include("Padel Port").and include("has the whole 19:00–20:00 free")
-        expect(hint).not_to include("Kus Tba")
       end
 
       it "is remembered for the next visit, and for nobody else" do

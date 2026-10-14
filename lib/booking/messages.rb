@@ -320,37 +320,27 @@ module Booking
       wet.size == pick.span.size ? "☂ rain on court all #{wet.size}h" : "☂ rain on court #{wet.map { hour_chip(_1) }.join(", ")}"
     end
 
-    def day_rain(pick) = "Rain #{pick.rain_runs.map { "#{hour_clock(_1)}–#{hour_clock(_2)}" }.join(", ")}."
+    def day_rain_runs(pick) = pick.rain_runs.map { "#{hour_clock(_1)}–#{hour_clock(_2)}" }.join(", ")
 
-    # "has the whole 18:00–20:00 free", or the dry hours it does have.
-    def day_has(pick, club)
-      return "has the whole #{day_span(pick)} free" if pick.whole?(club) && pick.dry_free(club).size == pick.span.size
-
-      hours = pick.dry_free(club)
-      listed = hours.first(3).map { hour_clock(_1) }.join(", ")
-      "has #{listed}#{" +#{hours.size - 3}" if hours.size > 3} free"
-    end
-
-    # The hint over the list, as [bold lead, the rest].
+    # The hint over the list, as [bold lead, the rest]: rain may come, and a
+    # game in the open may be called off for it — so a roof that fits, when
+    # there is one. "Rain possible 19:00–21:00." "Open courts may get called
+    # off — try your PadelHub, it's covered and free 18:00–20:00."
     def day_hint(pick)
       hint = pick.hint
       club = hint.club
-      case hint.kind
-      when :rain
-        cover = ["your favourite", club.cover].compact.join(", ")
-        wet = " · #{hint.wet.name} is open-air" if hint.wet
-        [day_rain(pick), "#{club.name} (#{cover}) #{day_has(pick, club)}#{wet}."]
-      when :roof
-        why = "Your favourites are open-air. " if pick.favourites_open_air?
-        [day_rain(pick), "#{why}Nearest roof: #{club.name}, #{day_has(pick, club)}."]
-      when :dry
-        [club.name, "#{day_has(pick, club)}."]
-      else
-        others = pick.live.count { !_1.favourite? }
-        when_said = pick.any_time? ? "today" : day_span(pick)
-        ["No slots at your favourites #{when_said}.",
-         others.zero? ? "No other club has any either." : "#{others} other #{others == 1 ? "club has" : "clubs have"}."]
-      end
+      lead = "Rain possible #{day_rain_runs(pick)}."
+      return [lead, nil] unless club
+
+      shelter = club.cover == "indoor" ? "indoors" : "covered"
+      [lead, "Open courts may get called off — try #{"your " if club.favourite?}#{club.name}, it's #{shelter} and free #{day_free(hint.hours)}."]
+    end
+
+    # "18:00–20:00" for one stretch, "at 18:00, 20:00, 22:00 +2" otherwise.
+    def day_free(hours)
+      return "#{hour_clock(hours.first)}–#{hour_clock(hours.last + 1)}" if hours.last - hours.first + 1 == hours.size
+
+      "at #{hours.first(3).map { hour_clock(_1) }.join(", ")}#{" +#{hours.size - 3}" if hours.size > 3}"
     end
 
     # --- The Forecast --------------------------------------------------------

@@ -223,9 +223,8 @@
   gap: 10px;
   padding: 10px 12px;
   border-radius: 16px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  color: var(--ink);
+  background: var(--rain-tint);
+  color: var(--blue-deep);
 }
 .day-hint__icon {
   flex: none;
@@ -235,8 +234,8 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--ball);
-  color: var(--on-ball);
+  background: var(--rain);
+  color: #fff;
 }
 .day-hint__text { flex: 1; min-width: 0; font-size: 14px; line-height: 1.35; }
 .day-hint__cta {
@@ -252,10 +251,6 @@
   font-size: 13px;
   font-weight: 800;
 }
-.day-hint--rain, .day-hint--roof { background: var(--rain-tint); border-color: transparent; color: var(--blue-deep); }
-.day-hint--rain .day-hint__icon, .day-hint--roof .day-hint__icon { background: var(--rain); color: #fff; }
-.day-hint--none { border-style: dashed; border-color: var(--line-strong); background: transparent; color: var(--muted); }
-.day-hint--none .day-hint__icon { background: var(--taken); color: var(--muted); }
 .day-hint:active { transform: scale(0.99); }
 
 .day-summary {
