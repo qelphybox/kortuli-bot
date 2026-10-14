@@ -320,16 +320,18 @@ module Booking
       wet.size == pick.span.size ? "☂ rain on court all #{wet.size}h" : "☂ rain on court #{wet.map { hour_chip(_1) }.join(", ")}"
     end
 
-    def day_rain(pick) = "Rain #{pick.rain_runs.map { "#{hour_clock(_1)}–#{hour_clock(_2)}" }.join(", ")}."
+    def day_rain(pick) = "Rain #{day_rain_runs(pick)}."
+
+    def day_rain_runs(pick) = pick.rain_runs.map { "#{hour_clock(_1)}–#{hour_clock(_2)}" }.join(", ")
 
     # The hint over the list, as [bold lead, the rest]: rain, and a roof to
     # book through it — "Rain 19:00–21:00." "Your favourite PadelHub is
-    # covered and has the whole 18:00–20:00 free." With no roof free, the
-    # rain alone.
+    # covered and has the whole 18:00–20:00 free." With no roof free, just
+    # "Rain possible 19:00–21:00."
     def day_hint(pick)
       hint = pick.hint
       club = hint.club
-      return [day_rain(pick), "No court under a roof is free then."] unless club
+      return ["Rain possible #{day_rain_runs(pick)}.", nil] unless club
 
       shelter = club.cover == "indoor" ? "indoors" : "covered"
       free =

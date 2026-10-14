@@ -85,7 +85,7 @@ RSpec.describe Booking::Web::DayPick do
 
   # Only under rain, and only to offer a roof to book through it.
   describe "the hint" do
-    def said(day) = Booking::Messages.day_hint(day).join(" ")
+    def said(day) = Booking::Messages.day_hint(day).compact.join(" ")
 
     it "has nothing to say over a dry span" do
       expect(pick([club("Hub", free: [18, 19], favourite: 0, roofed: true, cover: "covered")]).hint).to be_nil
@@ -116,7 +116,7 @@ RSpec.describe Booking::Web::DayPick do
       day = pick([club("Hub", free: [18], roofed: true, cover: "covered")], rainy: [18, 19])
 
       expect(day.hint.club).to be_nil
-      expect(said(day)).to eq("Rain 18:00–20:00. No court under a roof is free then.")
+      expect(said(day)).to eq("Rain possible 18:00–20:00.")
     end
 
     it "says only when it will rain with no roof on the list" do

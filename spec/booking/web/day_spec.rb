@@ -325,7 +325,7 @@ RSpec.describe Booking::Web::App do
         get "/date/#{day}?hours=19"
 
         expect(hint).to start_with('<div class="day-hint">')
-        expect(hint).to include("<strong>Rain 19:00–20:00.</strong> No court under a roof is free then.")
+        expect(hint).to include("<strong>Rain possible 19:00–20:00.</strong></span>")
         expect(hint).not_to include("Book")
       end
 

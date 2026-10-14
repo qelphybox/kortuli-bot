@@ -63,7 +63,7 @@
       <% tag = hint.club ? "a" : "div" %>
       <<%= tag %> class="day-hint"<% if hint.club %> href="/date/<%= @date %>/club/<%= hint.club.slug %><%= "?hours=#{pick.param}" if pick.param %>"<% end %>>
         <span class="day-hint__icon"><%= icon(:rain, size: 18) %></span>
-        <span class="day-hint__text"><strong><%= h(lead) %></strong> <%= h(rest) %></span>
+        <span class="day-hint__text"><strong><%= h(lead) %></strong><% if rest %> <%= h(rest) %><% end %></span>
         <% if hint.club %><span class="day-hint__cta">Book<%= icon(:chevron, size: 12) %></span><% end %>
       </<%= tag %>>
     <% end %>
