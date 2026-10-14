@@ -74,6 +74,9 @@
      the ball itself where ink would vanish into the ground. */
   --cta: #0d1611;
   --on-cta: #d6f542;
+  /* The bar that runs along the top while a page is on its way: the ball's
+     yellow, darkened where the pale ground would swallow it. */
+  --progress: #9db33a;
 
   --display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --text: "Barlow", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -125,6 +128,7 @@
   --free-ink: #d6f542;
   --cta: #d6f542;
   --on-cta: #0d1611;
+  --progress: #d6f542;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -174,6 +178,7 @@
     --free-ink: #d6f542;
     --cta: #d6f542;
     --on-cta: #0d1611;
+    --progress: #d6f542;
   }
 }
 
@@ -450,6 +455,12 @@ html:not(.js) .js-only { display: none; }
 }
 .tab[aria-current="page"] { color: var(--ink); }
 .tab[aria-current="page"] .tab__icon { background: var(--ball); color: var(--on-ball); }
+/* A tab tapped wears the yellow at once, and the one being left lets go
+   of it, while the screen behind is still on its way. */
+.tab.is-pending { color: var(--ink); animation: none; }
+.tab.is-pending .tab__icon { background: var(--ball); color: var(--on-ball); animation: pending-pulse 1s ease-in-out infinite; }
+.tabbar:has(.is-pending) .tab[aria-current="page"]:not(.is-pending) { color: var(--muted); }
+.tabbar:has(.is-pending) .tab[aria-current="page"]:not(.is-pending) .tab__icon { background: none; color: inherit; }
 .tab__count {
   position: absolute;
   top: 0;
@@ -767,3 +778,37 @@ html:not(.js) .js-only { display: none; }
 .log mark { background: var(--ball); color: var(--on-ball); border-radius: 3px; }
 
 .waiting { display: grid; place-items: center; min-height: 60vh; color: var(--muted); }
+
+/* --- Waiting on the network --------------------------------------------- */
+/* app.js marks what was tapped with .is-pending and the page with
+   html[data-pending] until the answer lands. The tapped part dims straight
+   away, so a tap is never met with nothing; the bar along the top waits a
+   moment first, so a quick answer never flickers. */
+.is-pending { cursor: progress; animation: pending-pulse 1s ease-in-out infinite; }
+@keyframes pending-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.3; } }
+
+html[data-pending] body::before {
+  content: "";
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--progress);
+  pointer-events: none;
+  animation: pending-bar 1.1s ease-in-out 150ms infinite both;
+}
+@keyframes pending-bar {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+/* Still, with no motion: the part dimmed and the bar across the top, the
+   bar after the same pause. */
+@media (prefers-reduced-motion: reduce) {
+  .is-pending { animation: none; opacity: 0.45; }
+  html[data-pending] body::before { width: 100%; animation: pending-show 0s 150ms both; }
+}
+@keyframes pending-show { from { opacity: 0; } to { opacity: 1; } }
