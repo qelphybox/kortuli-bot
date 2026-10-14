@@ -37,10 +37,9 @@ module Booking
       # `:next` or `:last` free hour either side of the span, or `:nothing`.
       Miss = Data.define(:club, :why, :hours)
 
-      # The line over the list when it rains: a club with a roof to book and
-      # its free hours under the rain — or no club, when no roof fits, and
-      # the line only says when it will rain.
-      Hint = Data.define(:club, :hours)
+      # The line over the list when it rains: a club with a roof to book — or
+      # no club, when no roof fits, and the line only says when it may rain.
+      Hint = Data.define(:club)
 
       attr_reader :hours, :wanted, :rainy_hours
 
@@ -131,8 +130,7 @@ module Booking
         return @hint if defined?(@hint)
 
         @hint = if rainy?
-                  roof = live.select(&:roofed).find { sheltered(_1).any? }
-                  Hint.new(club: roof, hours: roof ? sheltered(roof) : [])
+                  Hint.new(club: live.select(&:roofed).find { sheltered(_1).any? })
                 end
       end
 
