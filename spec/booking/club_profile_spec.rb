@@ -39,6 +39,13 @@ RSpec.describe Booking::ClubProfile do
     expect(profile.maps_url).to eq("https://www.google.com/maps/search/?api=1&query=41.6738582,44.8262025")
   end
 
+  # Google's documented pairing: the place's card, and the query only when
+  # Google can no longer find the place.
+  it "opens the club's own place when it has one, with the pin to fall back to" do
+    expect(profile.with(place_id: "ChIJjUyxFPINREARSYG9mflWPKo").maps_url)
+      .to eq("https://www.google.com/maps/search/?api=1&query=41.6738582,44.8262025&query_place_id=ChIJjUyxFPINREARSYG9mflWPKo")
+  end
+
   it "has no map link without a pin" do
     expect(described_class.from(entry.except("lat", "lng")).maps_url).to be_nil
   end
@@ -55,6 +62,13 @@ RSpec.describe Booking::ClubProfile do
 
       expect(unpinned.directions_url(name: "Padelbade Krtsanisi", city: "Tbilisi"))
         .to eq("https://www.google.com/maps/search/?api=1&query=Padelbade+Krtsanisi%2C+7+Giorgi+Guramishvili+St%2C+Tbilisi")
+    end
+
+    it "names the club's place beside its street" do
+      unpinned = described_class.from(entry.except("lat", "lng").merge("place_id" => "ChIJjUyxFPINREARSYG9mflWPKo"))
+
+      expect(unpinned.directions_url(name: "Padelbade Krtsanisi", city: "Tbilisi"))
+        .to end_with("query=Padelbade+Krtsanisi%2C+Ortachala%2C+Tbilisi&query_place_id=ChIJjUyxFPINREARSYG9mflWPKo")
     end
 
     it "falls back from the street to the area" do
@@ -95,6 +109,19 @@ RSpec.describe Booking::ClubProfile do
       expect(described_class.pinned(profile, pin)).to eq(profile)
     end
 
+    it "gives a Profile the club's place on Google Maps" do
+      expect(described_class.pinned(profile, nil, place_id: "ChIJjUyxFPINREARSYG9mflWPKo").place_id)
+        .to eq("ChIJjUyxFPINREARSYG9mflWPKo")
+    end
+
+    it "gives a pinned club its place too" do
+      expect(described_class.pinned(nil, pin, place_id: "ChIJi-eoAAApRUAR1VbzHgEbFFQ").place_id).to eq("ChIJi-eoAAApRUAR1VbzHgEbFFQ")
+    end
+
+    it "makes no Profile out of a place alone" do
+      expect(described_class.pinned(nil, nil, place_id: "ChIJjUyxFPINREARSYG9mflWPKo")).to be_nil
+    end
+
     it "changes nothing without a whole pin" do
       expect(described_class.pinned(nil, nil)).to be_nil
       expect(described_class.pinned(nil, { "lat" => 42.46 })).to be_nil
@@ -108,6 +135,16 @@ RSpec.describe Booking::ClubProfile do
 
     expect(pins).not_to be_empty
     expect(pins).to all(satisfy { |pin| Float(pin["lat"]).between?(41, 43.6) && Float(pin["lng"]).between?(40, 46.8) })
+  end
+
+  # Written into config/clubs.yml by hand, like the pins: each one a Google
+  # place ID, and no two clubs sharing one.
+  it "is given one place on Google Maps per club wherever config/clubs.yml gives one" do
+    places = YAML.safe_load_file("config/clubs.yml").filter_map { _1.dig("settings", "place_id") }
+
+    expect(places).not_to be_empty
+    expect(places).to all(match(/\AChIJ[\w-]{23}\z/))
+    expect(places).to eq(places.uniq)
   end
 
   describe ".load" do

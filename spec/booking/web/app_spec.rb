@@ -1187,6 +1187,26 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to match(/data-external href="https:\/\/www\.google\.com\/maps/)
     end
 
+    context "when its settings name its place on Google Maps" do
+      let(:clubs) do
+        [
+          Booking::Club.new(
+            slug: "kus-tba-padel", name: "Kus Tba Padel", adapter: "kustba",
+            settings: { "opening_hours" => { "from" => "08:00", "to" => "02:00" }, "booking_url" => "https://kustba.example/book/",
+                        "place_id" => "ChIJ1RLok6sNREARKXr7JmQiu8A" }
+          )
+        ]
+      end
+
+      it "opens the club's own card there, with the pin to fall back to" do
+        sign_in
+        get "/clubs/kus-tba-padel"
+
+        expect(last_response.body)
+          .to include("https://www.google.com/maps/search/?api=1&amp;query=41.700688,44.7570599&amp;query_place_id=ChIJ1RLok6sNREARKXr7JmQiu8A")
+      end
+    end
+
     it "folds a week of the same hours into one line" do
       sign_in
       get "/clubs/kus-tba-padel"
