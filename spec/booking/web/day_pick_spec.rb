@@ -100,14 +100,14 @@ RSpec.describe Booking::Web::DayPick do
                   club("Academy", free: [18, 19], roofed: true, cover: "indoor")], rainy: (17..22).to_a)
 
       expect(day.hint.club.name).to eq("Academy")
-      expect(said(day)).to eq("Rain 18:00–20:00. Academy is indoors and has the whole 18:00–20:00 free.")
+      expect(said(day)).to eq("Rain 18:00–20:00. Stay dry at Academy — it's indoors and free the whole 18:00–20:00.")
     end
 
     it "offers a favourite with a roof before any other" do
       day = pick([club("Academy", free: [18, 19], roofed: true, cover: "indoor"),
                   club("Hub", free: [18, 19], favourite: 0, roofed: true, cover: "covered")], rainy: [19])
 
-      expect(said(day)).to eq("Rain 19:00–20:00. Your favourite Hub is covered and has the whole 18:00–20:00 free.")
+      expect(said(day)).to eq("Rain 19:00–20:00. Stay dry at your Hub — it's covered and free the whole 18:00–20:00.")
     end
 
     # A roof only fits the filter when the club is on the list for it;
@@ -129,7 +129,7 @@ RSpec.describe Booking::Web::DayPick do
                   club("Hub", free: [9, 18, 19, 20, 21, 22], roofed: true, cover: "covered")], wanted: [], rainy: (18..23).to_a)
 
       expect(day.hint.club.name).to eq("Hub")
-      expect(said(day)).to eq("Rain 18:00–00:00. Hub is covered and has 18:00, 19:00, 20:00 +2 free.")
+      expect(said(day)).to eq("Rain 18:00–00:00. Stay dry at Hub — it's covered and free at 18:00, 19:00, 20:00 +2.")
     end
   end
 

@@ -325,8 +325,8 @@ module Booking
     def day_rain_runs(pick) = pick.rain_runs.map { "#{hour_clock(_1)}–#{hour_clock(_2)}" }.join(", ")
 
     # The hint over the list, as [bold lead, the rest]: rain, and a roof to
-    # book through it — "Rain 19:00–21:00." "Your favourite PadelHub is
-    # covered and has the whole 18:00–20:00 free." With no roof free, just
+    # book through it — "Rain 19:00–21:00." "Stay dry at your PadelHub —
+    # it's covered and free the whole 18:00–20:00." With no roof free, just
     # "Rain possible 19:00–21:00."
     def day_hint(pick)
       hint = pick.hint
@@ -336,10 +336,10 @@ module Booking
       shelter = club.cover == "indoor" ? "indoors" : "covered"
       free =
         if pick.whole?(club) then "the whole #{day_span(pick)}"
-        else "#{hint.hours.first(3).map { hour_clock(_1) }.join(", ")}#{" +#{hint.hours.size - 3}" if hint.hours.size > 3}"
+        else "at #{hint.hours.first(3).map { hour_clock(_1) }.join(", ")}#{" +#{hint.hours.size - 3}" if hint.hours.size > 3}"
         end
 
-      [day_rain(pick), "#{"Your favourite " if club.favourite?}#{club.name} is #{shelter} and has #{free} free."]
+      [day_rain(pick), "Stay dry at #{"your " if club.favourite?}#{club.name} — it's #{shelter} and free #{free}."]
     end
 
     # --- The Forecast --------------------------------------------------------
