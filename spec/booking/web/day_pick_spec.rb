@@ -14,22 +14,21 @@ RSpec.describe Booking::Web::DayPick do
   def pick(clubs, wanted: [18, 19], rainy: []) = described_class.new(hours:, wanted:, rainy:, clubs:)
 
   describe "the hours a link asks for" do
-    it "opens on the evening, and keeps only hours on offer" do
-      expect(described_class.wanted(nil, hours)).to eq([18, 19])
+    # The hours are this person's to pick: nothing asked for is any time.
+    it "opens on any time, and keeps only hours on offer" do
+      expect(described_class.wanted(nil, hours)).to eq([])
       expect(described_class.wanted("21,19,99", hours)).to eq([19, 21])
       expect(described_class.wanted("any", hours)).to eq([])
-      expect(described_class.wanted(nil, [20, 21])).to eq([])
     end
 
-    it "carries the default as no parameter at all" do
-      expect(pick([]).param).to be_nil
+    it "carries any time as no parameter at all" do
+      expect(pick([], wanted: []).param).to be_nil
       expect(pick([], wanted: [20]).param).to eq("20")
-      expect(pick([], wanted: []).param).to eq("any")
     end
 
     it "toggles one hour, and the last one let go is any time" do
       expect(pick([]).toggled(20)).to eq("18,19,20")
-      expect(pick([], wanted: [18]).toggled(18)).to eq("any")
+      expect(pick([], wanted: [18]).toggled(18)).to be_nil
     end
   end
 

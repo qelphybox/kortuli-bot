@@ -8,6 +8,8 @@ module Booking
     # "free 18:00 but not 19:00" is not a court for a two-hour game.
     #
     # Nothing picked is "any time": every club with an hour left, by how many.
+    # It is where a date opens — the hours are this person's to pick, not
+    # ours to guess.
     #
     # Hours are counted from the date's midnight, as HourSpan counts them, so
     # a club open past midnight offers 24 and 25 after 23. Only hours still to
@@ -18,8 +20,6 @@ module Booking
     # order, the folding, which club the hint names — are exercised without a
     # database.
     class DayPick
-      # The evening a first look opens on, until the logs say otherwise.
-      DEFAULT_HOURS = [18, 19].freeze
       # How many of a club's free hours its card has room for, any time.
       CHIPS = 6
 
@@ -46,14 +46,10 @@ module Booking
 
       attr_reader :hours, :wanted, :rainy_hours
 
-      # The hours a link asked for, as offered on this date: absent is the
-      # default evening, "any" (or nothing) is any time, and an hour not on
-      # offer is dropped — leaving none is any time too.
-      def self.wanted(raw, offered)
-        picked = raw.nil? ? DEFAULT_HOURS : raw.to_s.split(",").filter_map { Integer(_1, exception: false) }
-
-        offered & picked
-      end
+      # The hours a link asked for, as offered on this date. Nothing asked
+      # for is any time, and so is an hour not on offer once it is dropped —
+      # as is the "any" older links carry.
+      def self.wanted(raw, offered) = offered & raw.to_s.split(",").filter_map { Integer(_1, exception: false) }
 
       def initialize(hours:, wanted:, rainy:, clubs:)
         @hours = hours
@@ -88,20 +84,17 @@ module Booking
         hours.select { rainy_hour?(_1) }.chunk_while { |a, b| b == a + 1 }.map { [_1.first, _1.last + 1] }
       end
 
-      # The hour strip's links: what tapping an hour leaves picked.
+      # The hour strip's links: what tapping an hour leaves picked, nil when
+      # that is nothing — any time, the bare date.
       def toggled(hour)
         now = wanted.include?(hour) ? wanted - [hour] : (wanted + [hour]).sort
 
-        now.empty? ? "any" : now.join(",")
+        now.join(",") unless now.empty?
       end
 
-      # The pick as a link carries it: nil for the default evening, so a
-      # first look stays a bare URL.
-      def param
-        return nil if wanted == self.class.wanted(nil, hours)
-
-        any_time? ? "any" : wanted.join(",")
-      end
+      # The pick as a link carries it: nil for any time, so a first look
+      # stays a bare URL.
+      def param = (wanted.join(",") unless any_time?)
 
       # Favourites first, in the order they were starred; then, when the
       # hours picked are wet, the clubs with a roof; then the rest by name.

@@ -46,7 +46,7 @@
         <% on = pick.wanted.include?(hour) %>
         <a class="hour-chip<%= " is-rainy" if pick.rainy_hour?(hour) %>" role="button" aria-pressed="<%= on %>" data-hour="<%= hour %>"
            aria-label="<%= Booking::Messages.hour_clock(hour) %><%= ", rain" if pick.rainy_hour?(hour) %>"
-           href="/date/<%= @date %>?hours=<%= pick.toggled(hour) %>"><%= Booking::Messages.hour_chip(hour) %></a>
+           href="/date/<%= @date %><%= "?hours=#{pick.toggled(hour)}" if pick.toggled(hour) %>"><%= Booking::Messages.hour_chip(hour) %></a>
       <% end %>
     </nav>
   <% end %>

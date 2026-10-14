@@ -117,12 +117,12 @@ other two of three **tabs** along the bottom; the owner also gets a
 **Dashboard** icon in the corner.
 
 A date's screen carries the whole week as a strip of tabs, and under it the
-day's hours still to come as a second strip: tap the hours you want to play —
-18:00 and 19:00 to begin with — and the list holds only the clubs where
-**every** hour picked is free. A two-hour game needs both, so a club with one
-of them is folded into a single line at the bottom with what it does have
-(`only 19:00`, `next free 21:00`). Pick nothing and it is any time: every
-club with an hour left, and the first few of them. The hours live in the URL
+day's hours still to come as a second strip. A date opens on any time: every
+club with an hour left, and the first few of them. Tap the hours you want to
+play, and the list holds only the clubs where **every** hour picked is free.
+A two-hour game needs both, so a club with one of them is folded into a
+single line at the bottom with what it does have (`only 19:00`,
+`next free 21:00`). Let go of the last hour and it is any time again. The hours live in the URL
 (`?hours=18,19`), so a day on the strip, a club and the way back all keep
 them; with JavaScript a tap swaps the list in place. Over the list, one line
 names a club worth going to — your first Favourite with the hours free, a

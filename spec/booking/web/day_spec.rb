@@ -304,7 +304,7 @@ RSpec.describe Booking::Web::App do
 
         it "names a favourite with a roof that has the hours, in blue" do
           Booking::Repo::Favourites.new(db).add(42, "gldani")
-          get "/date/#{day}"
+          get "/date/#{day}?hours=18,19"
 
           expect(hint).to start_with('<a class="day-hint day-hint--rain"')
           expect(hint).to include("Rain 17:00–23:00.").and include("Padel Gldani (your favourite, covered) has the whole 18:00–20:00 free.")
@@ -313,9 +313,9 @@ RSpec.describe Booking::Web::App do
 
         # Both have a roof; Lemans comes first by name.
         it "names the first roof when no favourite stays dry" do
-          get "/date/#{day}"
+          get "/date/#{day}?hours=18,19"
 
-          expect(hint).to start_with(%(<a class="day-hint day-hint--roof" href="/date/#{day}/club/lemans">))
+          expect(hint).to start_with(%(<a class="day-hint day-hint--roof" href="/date/#{day}/club/lemans?hours=18,19">))
           expect(hint).to include("Nearest roof: Lemans Padel, has the whole 18:00–20:00 free.").and include(">See<")
         end
       end
