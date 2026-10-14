@@ -182,3 +182,6 @@
   font-size: 14px;
 }
 .segment__opt[aria-current="page"] { background: var(--switch-on); color: var(--on-switch-on); }
+/* The half tapped takes the switch at once, as a tab does. */
+.segment__opt.is-pending { background: var(--switch-on); color: var(--on-switch-on); }
+.segment:has(.is-pending) .segment__opt[aria-current="page"]:not(.is-pending) { background: none; color: var(--muted); }
