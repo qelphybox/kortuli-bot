@@ -19,8 +19,7 @@ crawler policy file says:
   says about that path.
 - **We do not read** anything behind a login, a captcha, a Turnstile or other
   challenge, or a member account, and we do not forge or replay credentials to
-  get past one. Padel Island stays excluded: its grid sits behind a login and
-  a Turnstile, which is a door shut, not a sign on it. Padel Academy is the
+  get past one. Padel Academy is the
   one club read behind a login, and it is read the way a member reads it: an
   ordinary account signing in through the club's own front door, never a
   bypass of it.
@@ -51,3 +50,14 @@ is disabled the same day — removing its entry from `config/clubs.yml`
 switches it off on the next boot — and the request is recorded in
 `docs/coverage-plan.md` under "Excluded on purpose". Revisit this ADR the first
 time that happens.
+
+## Correction, 2026-10-14
+
+This record first kept Padel Island out as the example of a door shut: "its
+grid sits behind a login and a Turnstile". That was wrong. Its root URL
+redirects to a login page that carries the Turnstile, but the grid itself,
+`/Booking/Grid.aspx`, opens for anyone, and so does the JSON its own script
+reads. The 2026-07-31 recon had stopped at the robots file and never fetched
+the grid, so the login stood in for it. Under the rule above, Padel Island is
+in: a robots line, not a door. Its adapter, `matchpoint`, carries the dated
+note the rule asks for.

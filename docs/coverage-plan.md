@@ -10,14 +10,17 @@ response; nothing here is taken from a directory listing alone.
 
 ## Where we are
 
-Twenty clubs, 67 courts, four Cities:
+Twenty-four clubs, 77 courts, six Cities:
 
 - **Tbilisi** — Kus Tba, GymBreeze Ninoshvili, Radio City and Sport Palace,
   Padelbade Krtsanisi and Dighomi, PadelHub, Padel Academy, Lemans Padel,
-  Tbilisi Padel Didi Dighomi, Mtatsminda and Ilia's Garden, Padel Gldani.
+  Tbilisi Padel Didi Dighomi, Mtatsminda and Ilia's Garden, Padel Gldani,
+  Padel Island Lisi Lake and EXPO Park.
 - **Batumi** — Padel Port, Padel Port New Park, Grand Padel Batumi.
 - **Rustavi** — Padelbade Rustavi, Higgs.
 - **Kutaisi** — Love Padel, AIA Padel.
+- **Gudauri** — Padel Island Marco Polo.
+- **Kachreti** — Padel Island Ambassadori.
 
 Every club in Georgia with an online booking page that answers an anonymous
 visitor is in. What is left out is below, with the reason.
@@ -64,7 +67,8 @@ back when a directory or `discover:reservio` turns it up again.
 | Tbilisi | PadelHub | 3 | own (Supabase) | watched |
 | Tbilisi | Padel Academy | 3 | own (Laravel), member login | watched |
 | Tbilisi | Sportscape Samgori | 4 | — | no online booking found |
-| Tbilisi | Padel Island Lisi / Expo | 4 | TPC MatchPoint | **excluded, see below** |
+| Tbilisi | Padel Island Lisi Lake | 2 | TPC MatchPoint, grid 6 | watched |
+| Tbilisi | Padel Island EXPO Park | 2 | TPC MatchPoint, grid 8 | watched |
 | Tbilisi | Vera Park | 1 | — | not open |
 | Batumi | Padel Port | 4 | Reservio | watched |
 | Batumi | Padel Port New Park | 2 | Reservio (same business) | watched |
@@ -75,20 +79,13 @@ back when a directory or `discover:reservio` turns it up again.
 | Rustavi | PadelHipp | 3 | — | Instagram only (opened 2026-09-24) |
 | Kutaisi | Love Padel | 2 | Book & Go, tenant 126 | watched |
 | Kutaisi | AIA Padel | 3 active of 4 | own (Next.js) | watched |
-| Gudauri, Kachreti | Padel Island (hotels) | ? | TPC MatchPoint | **excluded, see below** |
+| Gudauri | Padel Island Marco Polo | 2 | TPC MatchPoint, grid 5 | watched |
+| Kachreti | Padel Island Ambassadori | 4 | TPC MatchPoint, grid 7 | watched |
 | Borjomi | Borjomi Park Padel | 3 | — | not open |
 | Tskneti | GPadel | 2 | — | dead domain |
 | — | Padelio | ? | own | broken upstream |
 
 ## Excluded on purpose
-
-**Padel Island (four Georgian venues: Lisi and Expo in Tbilisi, Gudauri,
-Kachreti).** `booking.padelisland.ge` runs TPC MatchPoint, and all four venues
-book through its one grid. The grid sits behind a login and a Turnstile
-challenge. Its `robots.txt` also disallows `/Booking/` and `/Services/`, which
-on its own would not keep it out (ADR-0004); the login and the challenge do.
-If those courts matter, the move is to ask the club for access — MatchPoint
-serves partners on the same backend.
 
 **Padel Mates** — the real platform, cracked and unauthenticated, but a nearby
 search centred on Tbilisi returns 309 clubs and none in Georgia. Dead end.

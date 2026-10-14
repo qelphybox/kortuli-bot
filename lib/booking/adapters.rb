@@ -19,7 +19,8 @@ module Booking
       "bookingpress" => "Bookingpress",
       "aiapadel" => "Aiapadel",
       "higgs" => "Higgs",
-      "padelgldani" => "Padelgldani"
+      "padelgldani" => "Padelgldani",
+      "matchpoint" => "Matchpoint"
     }.freeze
 
     def self.build(club, http:)
@@ -41,3 +42,4 @@ require_relative "adapters/bookingpress"
 require_relative "adapters/aiapadel"
 require_relative "adapters/higgs"
 require_relative "adapters/padelgldani"
+require_relative "adapters/matchpoint"
