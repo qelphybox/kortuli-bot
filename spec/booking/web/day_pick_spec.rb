@@ -83,48 +83,49 @@ RSpec.describe Booking::Web::DayPick do
     end
   end
 
+  # Only under rain, and only to offer a roof to book through it.
   describe "the hint" do
     def said(day) = Booking::Messages.day_hint(day).join(" ")
 
-    it "names the first favourite with the hours free on a dry day" do
-      day = pick([club("Gone", favourite: 0), club("Hub", free: [18, 19], favourite: 1, roofed: true, cover: "covered")])
-
-      expect(day.hint.kind).to eq(:dry)
-      expect(said(day)).to eq("Hub has the whole 18:00–20:00 free.")
+    it "has nothing to say over a dry span" do
+      expect(pick([club("Hub", free: [18, 19], favourite: 0, roofed: true, cover: "covered")]).hint).to be_nil
     end
 
-    it "asks the favourites with a roof first under rain, and names the one the rain rules out" do
-      day = pick([club("Kus", free: [18, 19], favourite: 0, open_air: true),
-                  club("Hub", free: [18, 19], favourite: 1, roofed: true, cover: "covered")], rainy: (17..22).to_a)
-
-      expect(day.hint.kind).to eq(:rain)
-      expect(said(day)).to eq("Rain 17:00–23:00. Hub (your favourite, covered) has the whole 18:00–20:00 free · Kus is open-air.")
+    it "has nothing to say when the rain falls outside the hours picked" do
+      expect(pick([club("Hub", free: [18, 19], roofed: true, cover: "covered")], rainy: [22]).hint).to be_nil
     end
 
-    it "sends to the first roof when every favourite is in the open and wet" do
-      day = pick([club("Kus", free: [18, 19], favourite: 0, open_air: true), club("Academy", free: [18, 19], roofed: true)],
-                 rainy: [18, 19])
+    it "offers the first roof on the list for the hours picked" do
+      day = pick([club("Kus", free: [18, 19], open_air: true), club("Zed", free: [18, 19], roofed: true, cover: "covered"),
+                  club("Academy", free: [18, 19], roofed: true, cover: "indoor")], rainy: (17..22).to_a)
 
-      expect(day.hint.kind).to eq(:roof)
-      expect(said(day)).to eq("Rain 18:00–20:00. Your favourites are open-air. Nearest roof: Academy, has the whole 18:00–20:00 free.")
+      expect(day.hint.club.name).to eq("Academy")
+      expect(said(day)).to eq("Rain 18:00–20:00. Academy is indoors and has the whole 18:00–20:00 free.")
     end
 
-    it "says the favourites have nothing, and how many others do" do
-      day = pick([club("Kus", free: [9], favourite: 0), club("Alpha", free: [18, 19]), club("Beta", free: [18, 19])])
+    it "offers a favourite with a roof before any other" do
+      day = pick([club("Academy", free: [18, 19], roofed: true, cover: "indoor"),
+                  club("Hub", free: [18, 19], favourite: 0, roofed: true, cover: "covered")], rainy: [19])
 
-      expect(day.hint.kind).to eq(:none)
-      expect(said(day)).to eq("No slots at your favourites 18:00–20:00. 2 other clubs have.")
+      expect(said(day)).to eq("Rain 19:00–20:00. Your favourite Hub is covered and has the whole 18:00–20:00 free.")
     end
 
-    it "has nothing to say without a favourite on a dry day" do
-      expect(pick([club("Alpha", free: [18, 19])]).hint).to be_nil
+    # A roof only fits the filter when the club is on the list for it.
+    it "offers no roof without every hour picked free" do
+      expect(pick([club("Hub", free: [18], roofed: true, cover: "covered")], rainy: [18, 19]).hint).to be_nil
     end
 
-    # Only the dry hours count, so an open favourite under rain lists those.
-    it "lists the dry hours a favourite in the open does have" do
-      day = pick([club("Kus", free: [18, 19, 20], favourite: 0, open_air: true)], wanted: [], rainy: [18, 19])
+    it "has nothing to say with no roof on the list" do
+      expect(pick([club("Kus", free: [18, 19], favourite: 0, open_air: true)], rainy: [18, 19]).hint).to be_nil
+    end
 
-      expect(said(day)).to eq("Rain 18:00–20:00. Kus (your favourite) has 20:00 free.")
+    # Any time, the roof is for the hours the rain falls on.
+    it "names the free hours under the rain, any time" do
+      day = pick([club("Early", free: [9, 10], roofed: true, cover: "indoor"),
+                  club("Hub", free: [9, 18, 19, 20, 21, 22], roofed: true, cover: "covered")], wanted: [], rainy: (18..23).to_a)
+
+      expect(day.hint.club.name).to eq("Hub")
+      expect(said(day)).to eq("Rain 18:00–00:00. Hub is covered and has 18:00, 19:00, 20:00 +2 free.")
     end
   end
 

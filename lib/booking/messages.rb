@@ -322,35 +322,19 @@ module Booking
 
     def day_rain(pick) = "Rain #{pick.rain_runs.map { "#{hour_clock(_1)}–#{hour_clock(_2)}" }.join(", ")}."
 
-    # "has the whole 18:00–20:00 free", or the dry hours it does have.
-    def day_has(pick, club)
-      return "has the whole #{day_span(pick)} free" if pick.whole?(club) && pick.dry_free(club).size == pick.span.size
-
-      hours = pick.dry_free(club)
-      listed = hours.first(3).map { hour_clock(_1) }.join(", ")
-      "has #{listed}#{" +#{hours.size - 3}" if hours.size > 3} free"
-    end
-
-    # The hint over the list, as [bold lead, the rest].
+    # The hint over the list, as [bold lead, the rest]: rain, and a roof to
+    # book through it — "Rain 19:00–21:00." "Your favourite PadelHub is
+    # covered and has the whole 18:00–20:00 free."
     def day_hint(pick)
       hint = pick.hint
       club = hint.club
-      case hint.kind
-      when :rain
-        cover = ["your favourite", club.cover].compact.join(", ")
-        wet = " · #{hint.wet.name} is open-air" if hint.wet
-        [day_rain(pick), "#{club.name} (#{cover}) #{day_has(pick, club)}#{wet}."]
-      when :roof
-        why = "Your favourites are open-air. " if pick.favourites_open_air?
-        [day_rain(pick), "#{why}Nearest roof: #{club.name}, #{day_has(pick, club)}."]
-      when :dry
-        [club.name, "#{day_has(pick, club)}."]
-      else
-        others = pick.live.count { !_1.favourite? }
-        when_said = pick.any_time? ? "today" : day_span(pick)
-        ["No slots at your favourites #{when_said}.",
-         others.zero? ? "No other club has any either." : "#{others} other #{others == 1 ? "club has" : "clubs have"}."]
-      end
+      shelter = club.cover == "indoor" ? "indoors" : "covered"
+      free =
+        if pick.whole?(club) then "the whole #{day_span(pick)}"
+        else "#{hint.hours.first(3).map { hour_clock(_1) }.join(", ")}#{" +#{hint.hours.size - 3}" if hint.hours.size > 3}"
+        end
+
+      [day_rain(pick), "#{"Your favourite " if club.favourite?}#{club.name} is #{shelter} and has #{free} free."]
     end
 
     # --- The Forecast --------------------------------------------------------

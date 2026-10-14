@@ -124,10 +124,7 @@ A two-hour game needs both, so a club with one of them is folded into a
 single line at the bottom with what it does have (`only 19:00`,
 `next free 21:00`). Let go of the last hour and it is any time again. The hours live in the URL
 (`?hours=18,19`), so a day on the strip, a club and the way back all keep
-them; with JavaScript a tap swaps the list in place. Over the list, one line
-names a club worth going to — your first Favourite with the hours free, a
-roof when the rain rules the Favourites out — or says the Favourites have
-nothing. Every opening of a date is kept (`day_opens`: the weekday, how far
+them; with JavaScript a tap swaps the list in place. Every opening of a date is kept (`day_opens`: the weekday, how far
 ahead, the hour, and whether it ended at a Book or a shared Game), so the
 week can one day lead with the day you actually play on.
 
@@ -152,8 +149,8 @@ so Telegram's SDK stays the only script loaded from elsewhere.
 
 The star beside a club's name on its hours, or in the corner of its Profile,
 makes it a **Favourite**: one tap, kept per person. Favourites lead a date's
-list in the order they were starred, the hint over it looks among them first,
-and they come already ticked on the form that creates a standing watch. On
+list in the order they were starred, a Favourite with a roof is the first
+roof the rain hint offers, and they come already ticked on the form that creates a standing watch. On
 the map, two chips narrow the pins to the clubs with a roof, or to the
 Favourites.
 
@@ -200,9 +197,9 @@ The **Forecast** rides along with all of it, because rain is what decides
 between an open court and a roofed one. On a date's strip of hours, an hour
 with a chance of rain of 30% or more carries a blue line along its bottom.
 When the hours picked are wet, the clubs with a roof come straight after the
-Favourites, a club in the open says `☂ rain on court`, and the hint over the
-list names a Favourite with a roof — or, when every Favourite is in the open,
-the first roof there is. Every hour on a club's
+Favourites, a club in the open says `☂ rain on court`, and one line over the
+list says when it will rain and offers a club indoors or covered with a free
+hour in it to book — a Favourite first. A dry span has no such line. Every hour on a club's
 screen carries its own mark (`☂ 75% · 19°`, or just `17°` when it stays
 dry), the home screen puts a Rain chip beside a date with rain in it, and a date's Share message
 opens with its line. A message about a freed slot carries the same mark for

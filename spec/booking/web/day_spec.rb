@@ -290,8 +290,8 @@ RSpec.describe Booking::Web::App do
         expect(last_response.body).not_to match(/class="hour-chip is-rainy"[^>]*data-hour="19"/)
       end
 
-      # Lemans is indoors, and has the evening; Gldani is a favourite with a
-      # court in the open and a roof over the other.
+      # Lemans is indoors and Gldani has a roof over one of its two courts;
+      # both have the evening.
       describe "with rain over the evening" do
         let(:free_slots) do
           [slot(club: "gldani", at: "#{day} 18:00"), slot(club: "gldani", at: "#{day} 19:00"),
@@ -302,41 +302,25 @@ RSpec.describe Booking::Web::App do
           forecast.replace((8..23).map { hour(format("%s %02d:00", day, _1), chance: (17..22).cover?(_1) ? 70 : 0) }, city: "Tbilisi")
         end
 
-        it "names a favourite with a roof that has the hours, in blue" do
-          Booking::Repo::Favourites.new(db).add(42, "gldani")
+        # Both have a roof; Lemans comes first by name.
+        it "offers the first roof on the list to book through it" do
           get "/date/#{day}?hours=18,19"
 
-          expect(hint).to start_with('<a class="day-hint day-hint--rain"')
-          expect(hint).to include("Rain 17:00–23:00.").and include("Padel Gldani (your favourite, covered) has the whole 18:00–20:00 free.")
+          expect(hint).to start_with(%(<a class="day-hint" href="/date/#{day}/club/lemans?hours=18,19">))
+          expect(hint).to include("<strong>Rain 18:00–20:00.</strong> Lemans Padel is indoors and has the whole 18:00–20:00 free.")
           expect(hint).to include(">Book<")
         end
 
-        # Both have a roof; Lemans comes first by name.
-        it "names the first roof when no favourite stays dry" do
+        it "offers a favourite with a roof first" do
+          Booking::Repo::Favourites.new(db).add(42, "gldani")
           get "/date/#{day}?hours=18,19"
 
-          expect(hint).to start_with(%(<a class="day-hint day-hint--roof" href="/date/#{day}/club/lemans?hours=18,19">))
-          expect(hint).to include("Nearest roof: Lemans Padel, has the whole 18:00–20:00 free.").and include(">See<")
+          expect(hint).to include("Your favourite Padel Gldani is covered and has the whole 18:00–20:00 free.")
         end
       end
 
-      it "names the first favourite with the hours free on a dry day" do
+      it "says nothing over a dry span, favourite or not" do
         Booking::Repo::Favourites.new(db).add(42, "gldani")
-        get "/date/#{day}?hours=18"
-
-        expect(hint).to start_with(%(<a class="day-hint day-hint--dry" href="/date/#{day}/club/gldani?hours=18">))
-        expect(hint).to include("<strong>Padel Gldani</strong> has the whole 18:00–19:00 free.")
-      end
-
-      it "says the favourites have nothing, and how many other clubs do" do
-        Booking::Repo::Favourites.new(db).add(42, "lemans")
-        get "/date/#{day}?hours=18"
-
-        expect(hint).to start_with('<div class="day-hint day-hint--none">')
-        expect(hint).to include("No slots at your favourites 18:00–19:00.").and include("1 other club has.")
-      end
-
-      it "says nothing without a favourite on a dry day" do
         get "/date/#{day}?hours=18"
 
         expect(hint).to be_empty

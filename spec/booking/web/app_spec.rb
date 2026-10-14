@@ -2122,18 +2122,6 @@ RSpec.describe Booking::Web::App do
         expect(last_response.status).to eq(200)
       end
 
-      # The hint goes down this person's favourites in the city on screen:
-      # a starred Tbilisi club is no answer in Batumi.
-      it "hints at Batumi's favourites alone" do
-        favourites.add(42, "kus-tba-padel")
-        favourites.add(42, "padel-port")
-        get "/date/#{day}?hours=19"
-
-        hint = last_response.body[%r{<a class="day-hint.*?</a>}m].to_s
-        expect(hint).to include("Padel Port").and include("has the whole 19:00–20:00 free")
-        expect(hint).not_to include("Kus Tba")
-      end
-
       it "is remembered for the next visit, and for nobody else" do
         get "/"
         expect(last_response.body).to include("courts in Batumi")
