@@ -23,8 +23,9 @@
   overflow: hidden;
   background: var(--map-land);
 }
-/* Over maplibre-gl.css, which loads later and makes its container relative. */
-.map-screen .map-canvas { position: absolute; inset: 0; }
+/* Over maplibre-gl.css, which loads later and makes its container relative.
+   Its own layer, so no pin's z-index can climb over the chips. */
+.map-screen .map-canvas { position: absolute; inset: 0; z-index: 0; }
 .map-screen ~ .tabbar { margin-top: 0; }
 
 /* --- Over the map, top: the hour, the chips, "where am I". ------------- */
