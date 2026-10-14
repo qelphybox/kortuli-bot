@@ -307,7 +307,7 @@ RSpec.describe Booking::Web::App do
           get "/date/#{day}?hours=18,19"
 
           expect(hint).to start_with(%(<a class="day-hint" href="/date/#{day}/club/lemans?hours=18,19">))
-          expect(hint).to include("<strong>Rain possible 18:00–20:00.</strong> Open courts may get called off — try Lemans Padel, it&#39;s indoors.")
+          expect(hint).to include("<strong>Rain possible 18:00–20:00.</strong> Open courts may get called off — try Lemans Padel, it&#39;s indoors and free 18:00–20:00.")
           expect(hint).to include(">Book<")
         end
 
@@ -315,7 +315,7 @@ RSpec.describe Booking::Web::App do
           Booking::Repo::Favourites.new(db).add(42, "gldani")
           get "/date/#{day}?hours=18,19"
 
-          expect(hint).to include("try your Padel Gldani, it&#39;s covered.")
+          expect(hint).to include("try your Padel Gldani, it&#39;s covered and free 18:00–20:00.")
         end
       end
 

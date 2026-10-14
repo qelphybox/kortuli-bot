@@ -325,14 +325,22 @@ module Booking
     # The hint over the list, as [bold lead, the rest]: rain may come, and a
     # game in the open may be called off for it — so a roof that fits, when
     # there is one. "Rain possible 19:00–21:00." "Open courts may get called
-    # off — try your PadelHub, it's covered."
+    # off — try your PadelHub, it's covered and free 18:00–20:00."
     def day_hint(pick)
-      club = pick.hint.club
+      hint = pick.hint
+      club = hint.club
       lead = "Rain possible #{day_rain_runs(pick)}."
       return [lead, nil] unless club
 
       shelter = club.cover == "indoor" ? "indoors" : "covered"
-      [lead, "Open courts may get called off — try #{"your " if club.favourite?}#{club.name}, it's #{shelter}."]
+      [lead, "Open courts may get called off — try #{"your " if club.favourite?}#{club.name}, it's #{shelter} and free #{day_free(hint.hours)}."]
+    end
+
+    # "18:00–20:00" for one stretch, "at 18:00, 20:00, 22:00 +2" otherwise.
+    def day_free(hours)
+      return "#{hour_clock(hours.first)}–#{hour_clock(hours.last + 1)}" if hours.last - hours.first + 1 == hours.size
+
+      "at #{hours.first(3).map { hour_clock(_1) }.join(", ")}#{" +#{hours.size - 3}" if hours.size > 3}"
     end
 
     # --- The Forecast --------------------------------------------------------
