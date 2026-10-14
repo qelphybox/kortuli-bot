@@ -1231,6 +1231,29 @@ RSpec.describe Booking::Web::App do
       expect(last_response.status).to eq(404)
     end
 
+    it "draws its pin on a still map under the link, with a drawing until it loads" do
+      sign_in
+      get "/clubs/kus-tba-padel"
+
+      expect(last_response.body).to include('data-map-preview data-lat="41.700688" data-lng="44.7570599"')
+      expect(last_response.body).to include("place__art")
+      expect(last_response.body).to include("/vendor/maplibre/maplibre-gl.js")
+    end
+
+    it "loads no map for a club the listing gives no pin" do
+      sign_in
+      get "/clubs/padel-club-2"
+
+      expect(last_response.body).not_to include("maplibre")
+    end
+
+    it "goes back to the map when it was reached from there" do
+      sign_in
+      get "/clubs/kus-tba-padel?from=map"
+
+      expect(last_response.body).to include('href="/clubs/map" aria-label="Back"')
+    end
+
     it "goes back to the directory by default" do
       sign_in
       get "/clubs/kus-tba-padel"
@@ -1252,6 +1275,214 @@ RSpec.describe Booking::Web::App do
       get "/clubs/kus-tba-padel?date=#{today + 400}"
 
       expect(last_response.body).to include('href="/clubs" aria-label="Back"')
+    end
+  end
+
+  describe "the clubs map" do
+    # The map answers for an hour still to come, so the clock is held at a
+    # morning — after signing in, which checks the real one.
+    let(:morning) { Booking::Clock.local_to_utc("#{today} 09:30") }
+
+    def at_morning
+      sign_in
+      allow(Booking::Clock).to receive(:now).and_return(morning)
+    end
+
+    def pin(slug) = last_response.body[%r{<button type="button" class="pin[^"]*" data-pin="#{slug}".*?</button>}m].to_s
+
+    def card(slug) = last_response.body[%r{<section class="map-card" data-card="#{slug}".*?</section>}m].to_s
+
+    it "is one side of a switch on the clubs directory" do
+      sign_in
+      get "/clubs"
+      expect(last_response.body).to include('href="/clubs/map"').and include('href="/clubs" aria-current="page"')
+
+      get "/clubs/map"
+      expect(last_response.body).to include('href="/clubs/map" aria-current="page"')
+    end
+
+    it "pins the clubs the listing places, and leaves the rest to the list" do
+      at_morning
+      get "/clubs/map"
+
+      expect(pin("kus-tba-padel")).to include('data-lat="41.700688"').and include('data-lng="44.7570599"')
+      expect(last_response.body).not_to include('data-pin="padel-club-2"')
+    end
+
+    it "answers for the first hour still to come" do
+      at_morning
+      get "/clubs/map"
+
+      expect(last_response.body).to include("Tap a pin · free courts at 10:00")
+      expect(last_response.body).to include('<option value="10" selected>Today · 10:00</option>')
+    end
+
+    it "offers every hour left today, a club's after midnight among them" do
+      at_morning
+      get "/clubs/map"
+
+      expect(last_response.body).to include('<option value="23">Today · 23:00</option>')
+      expect(last_response.body).to include('<option value="25">Today · 01:00</option>')
+      expect(last_response.body).not_to include('<option value="9">')
+    end
+
+    it "answers for the hour picked, and the first one left for an hour it does not offer" do
+      at_morning
+      get "/clubs/map?at=19"
+      expect(last_response.body).to include("free courts at 19:00")
+
+      get "/clubs/map?at=99"
+      expect(last_response.body).to include("free courts at 10:00")
+    end
+
+    context "with a court free at the hour" do
+      let(:free_slots) { [slot(club: "kus-tba-padel", court: "any", at: "#{today} 19:00")] }
+
+      # Kus Tba's source does not name its courts, so the pin cannot count.
+      it "ticks the pin of a club that only says something is free" do
+        at_morning
+        get "/clubs/map?at=19"
+
+        expect(pin("kus-tba-padel")).to include("pin--free").and include('<span class="pin__n">✓</span>')
+        expect(pin("kus-tba-padel")).not_to include("pin__of")
+        expect(pin("kus-tba-padel")).to include('aria-label="Kus Tba Padel, free at 19:00"')
+      end
+
+      it "says on the card which of the next hours are free too" do
+        at_morning
+        get "/clubs/map?at=19"
+
+        expect(card("kus-tba-padel")).to include("Free at 19:00")
+        expect(card("kus-tba-padel")).to include('<span class="map-card__hour is-free">19:00')
+        expect(card("kus-tba-padel")).to include('<span class="map-card__hour">20:00')
+      end
+    end
+
+    context "with a club whose source names its courts" do
+      let(:club_profiles) do
+        {
+          "padel-club-2" => Booking::ClubProfile.from({ "area" => "Vake", "lat" => 41.71, "lng" => 44.75 }, checked_on: "2026-10-11")
+        }
+      end
+      let(:free_slots) do
+        [slot(club: "padel-club-2", court: "Court 1", at: "#{today} 19:00"), slot(club: "padel-club-2", court: "Court 3", at: "#{today} 19:00")]
+      end
+
+      it "counts the free courts against all of them" do
+        at_morning
+        get "/clubs/map?at=19"
+
+        expect(pin("padel-club-2")).to include('<span class="pin__n">2</span><span class="pin__of">/4</span>')
+        expect(card("padel-club-2")).to include("2 of 4 courts free at 19:00")
+      end
+
+      it "counts none free at an hour that is taken, once the club has been read" do
+        polls.record("padel-club-2", outcome: "ok", summary: "", at: morning)
+        at_morning
+        get "/clubs/map?at=20"
+
+        expect(pin("padel-club-2")).to include("pin--taken").and include('<span class="pin__n">0</span><span class="pin__of">/4</span>')
+        expect(card("padel-club-2")).to include("Fully booked at 20:00")
+      end
+
+      # Padel Club 2 shuts at midnight; Kus Tba keeps the hour on offer.
+      it "says the club is closed at an hour outside its day" do
+        at_morning
+        get "/clubs/map?at=25"
+
+        expect(pin("padel-club-2")).to include("pin--shut").and include('<span class="pin__n">–</span>')
+        expect(card("padel-club-2")).to include("Closed at 01:00")
+      end
+
+      it "claims nothing for a club it could not read" do
+        at_morning
+        get "/clubs/map?at=20"
+
+        expect(pin("padel-club-2")).to include("pin--unknown").and include('<span class="pin__n">?</span>')
+        expect(card("padel-club-2")).to include("No data for 20:00")
+      end
+    end
+
+    context "with every club shut before midnight" do
+      let(:clubs) do
+        [Booking::Club.new(slug: "kus-tba-padel", name: "Kus Tba Padel", adapter: "kustba",
+                           settings: { "opening_hours" => { "from" => "08:00", "to" => "23:00" } })]
+      end
+
+      it "turns to tomorrow once tonight is over" do
+        sign_in
+        allow(Booking::Clock).to receive(:now).and_return(Booking::Clock.local_to_utc("#{today} 22:30"))
+        get "/clubs/map"
+
+        expect(last_response.body).to include('<option value="8" selected>Tomorrow · 08:00</option>')
+        expect(card("kus-tba-padel")).to include(%(href="/date/#{today + 1}/club/kus-tba-padel">Hours tomorrow))
+      end
+    end
+
+    it "keeps the hour when a chip narrows the pins, and a chip pressed again lets go" do
+      at_morning
+      get "/clubs/map?at=19"
+      expect(last_response.body).to include('href="/clubs/map?at=19&amp;only=covered"')
+
+      get "/clubs/map?at=19&only=covered"
+      expect(last_response.body).to include('href="/clubs/map?at=19" aria-current="true">Covered')
+    end
+
+    it "narrows to the clubs with a roof, and says when that leaves none" do
+      at_morning
+      get "/clubs/map?only=covered"
+
+      expect(last_response.body).not_to include('data-pin="kus-tba-padel"')
+      expect(last_response.body).to include("No club with a roof is on the map")
+    end
+
+    it "narrows to the Favourites, starred on their pins" do
+      at_morning
+      get "/clubs/map?only=favourites"
+      expect(last_response.body).not_to include('data-pin="kus-tba-padel"')
+
+      post "/favourites/kus-tba-padel"
+      get "/clubs/map?only=favourites"
+      expect(pin("kus-tba-padel")).to include("pin__fav")
+    end
+
+    it "sends a club's card to its hours, the way there and its Profile" do
+      at_morning
+      get "/clubs/map"
+
+      expect(card("kus-tba-padel")).to include(%(href="/date/#{today}/club/kus-tba-padel">Hours today))
+      expect(card("kus-tba-padel")).to include('data-external href="https://www.google.com/maps/search/?api=1&amp;query=41.700688,44.7570599"')
+      expect(card("kus-tba-padel")).to include('href="/clubs/kus-tba-padel?from=map"')
+    end
+
+    it "credits the map's data and tiles" do
+      sign_in
+      get "/clubs/map"
+
+      expect(last_response.body).to include("https://www.openstreetmap.org/copyright").and include("https://openfreemap.org")
+    end
+
+    it "loads the map's renderer, from the app rather than a CDN" do
+      sign_in
+      get "/clubs/map"
+      expect(last_response.body).to match(%r{<script src="/vendor/maplibre/maplibre-gl\.js\?v=\d+"></script>})
+      expect(last_response.body).to include("/map.js?v=")
+
+      get "/clubs"
+      expect(last_response.body).not_to include("maplibre")
+    end
+
+    it "says without JavaScript that the list is where to look" do
+      sign_in
+      get "/clubs/map"
+
+      expect(last_response.body).to include('<p class="map-hint no-js-only">The map needs JavaScript. <a href="/clubs">See the list</a></p>')
+    end
+
+    it "is not served to somebody without a session" do
+      get "/clubs/map"
+
+      expect(last_response.location).to end_with("/start")
     end
   end
 

@@ -23,12 +23,21 @@
     <link rel="stylesheet" href="<%= asset_url("/app.css") %>">
     <!-- One file per group of screens, so each can change without touching
          the others'. app.css holds the tokens and the parts they share. -->
-    <% %w[city day share clubs watching].each do |part| %>
+    <% %w[city day share clubs map watching].each do |part| %>
       <link rel="stylesheet" href="<%= asset_url("/screens/#{part}.css") %>">
+    <% end %>
+    <!-- The map's renderer, on the screens that draw a map and nowhere
+         else: kept with the app rather than fetched from a CDN. -->
+    <% if @map %>
+      <link rel="stylesheet" href="<%= asset_url("/vendor/maplibre/maplibre-gl.css") %>">
     <% end %>
   </head>
   <body>
     <%= yield %>
     <script src="<%= asset_url("/app.js") %>"></script>
+    <% if @map %>
+      <script src="<%= asset_url("/vendor/maplibre/maplibre-gl.js") %>"></script>
+      <script src="<%= asset_url("/map.js") %>"></script>
+    <% end %>
   </body>
 </html>

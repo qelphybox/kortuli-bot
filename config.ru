@@ -21,4 +21,7 @@ app.set :dashboard, Booking::Ops::Dashboard.new(
 
 Booking.default_logger.call("boot: web on :#{Booking::Config.web_port}")
 
+# The map's renderer is a megabyte as it lies on disk and a quarter of that
+# gzipped; nothing in front of Puma compresses it on the way out.
+use Rack::Deflater
 run app

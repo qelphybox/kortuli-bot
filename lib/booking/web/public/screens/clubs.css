@@ -161,3 +161,24 @@
 .place__name { font-size: 15px; font-weight: 700; }
 .place__address { font-size: 13px; color: var(--muted); }
 .place__go { flex: none; color: var(--blue); }
+
+/* --- List or map: the same clubs either way ----------------------------- */
+.segment {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--well);
+}
+.segment__opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  border-radius: 9px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+}
+.segment__opt[aria-current="page"] { background: var(--switch-on); color: var(--on-switch-on); }

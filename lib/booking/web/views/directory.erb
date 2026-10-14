@@ -5,7 +5,8 @@
   its initials dark. The search narrows the list as it is typed, by name or
   area, and only exists once JavaScript runs. One City's clubs at a time,
   the same one the dates show — the City pill counts them, so the header
-  needs nothing else to say how many there are.
+  needs nothing else to say how many there are. The switch over the list
+  shows the same clubs on a map.
 %>
 <header class="topbar">
   <h1 class="topbar__title">Clubs</h1>
@@ -13,6 +14,8 @@
 </header>
 
 <main class="page page--flush">
+  <%= erb :_clubs_switch, locals: { current: :list } %>
+
   <label class="search js-only">
     <%= icon(:search, size: 18) %>
     <span class="visually-hidden">Search clubs</span>

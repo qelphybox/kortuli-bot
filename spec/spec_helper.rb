@@ -5,6 +5,11 @@ RSpec.configure do |config|
   config.disable_monkey_patching!
   config.order = :random
   Kernel.srand config.seed
+
+  # Sinatra merges a Hash into the Hash a setting already holds, so the
+  # Profiles one example hands the app would outlive it into the next.
+  # Emptied first, each example's are the whole of them.
+  config.before { Booking::Web::App.set :club_profiles, nil }
 end
 
 # Build a Slot with sensible defaults; override only what the example cares about.

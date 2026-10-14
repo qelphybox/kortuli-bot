@@ -1,0 +1,349 @@
+/* map — the City's clubs on a map, and a club's own pin on its Profile.
+   The map itself is drawn by map.js from the --map-* tokens in app.css;
+   everything over it is ordinary HTML, styled here. */
+
+/* --- The screen: a header, the map filling what is left, the tabs. ----- */
+.map-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 10px;
+  background: var(--ground);
+  border-bottom: 1px solid var(--line);
+}
+.topbar--tight { padding: 14px 0 0; align-items: center; }
+.topbar--tight .topbar__title { font-size: 34px; }
+
+/* The body is a column as tall as the screen, so the map takes whatever the
+   header and the tabs leave, and the page itself never scrolls. */
+.map-screen {
+  position: relative;
+  flex: 1;
+  min-height: 320px;
+  overflow: hidden;
+  background: var(--map-land);
+}
+/* Over maplibre-gl.css, which loads later and makes its container relative. */
+.map-screen .map-canvas { position: absolute; inset: 0; }
+.map-screen ~ .tabbar { margin-top: 0; }
+
+/* --- Over the map, top: the hour, the chips, "where am I". ------------- */
+.map-tools {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.map-tools > * { pointer-events: auto; }
+.map-hour {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: var(--on-select);
+}
+.map-hour select {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 38px;
+  padding: 0 30px 0 12px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--select);
+  color: var(--on-select);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 10px rgba(13, 22, 17, 0.18);
+}
+.map-hour svg { position: absolute; right: 12px; pointer-events: none; transform: rotate(90deg); stroke-width: 3; }
+.map-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(13, 22, 17, 0.12);
+}
+.map-chip[aria-current="true"] { background: var(--select); color: var(--on-select); border-color: transparent; font-weight: 700; }
+.map-locate {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 2px 10px rgba(13, 22, 17, 0.18);
+}
+.map-locate[hidden] { display: none; }
+.map-locate[aria-busy="true"] { color: var(--muted); }
+
+/* Where the person is, once they asked. */
+.map-me {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: 3px solid var(--card);
+  box-shadow: 0 0 0 6px rgba(36, 72, 232, 0.2);
+}
+
+/* --- Over the map, bottom: the credit, then the hint or a club's card. - */
+.map-foot {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 10px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.map-foot > * { pointer-events: auto; }
+
+.map-attr { align-self: flex-start; display: flex; align-items: center; gap: 6px; margin-left: 4px; }
+.map-attr__i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  font: italic 700 13px Georgia, serif;
+}
+.map-attr__text {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 4px;
+  min-height: 26px;
+  padding: 2px 10px;
+  border-radius: 13px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+.map-attr__text[hidden] { display: none; }
+.map-attr__text a { color: inherit; }
+
+.map-hint {
+  align-self: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--select);
+  color: var(--on-select);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(13, 22, 17, 0.25);
+}
+.map-hint a { color: inherit; text-decoration: underline; }
+.map-hint[hidden] { display: none; }
+
+/* --- A club's card ------------------------------------------------------ */
+.map-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 16px 16px;
+  border-radius: 24px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 34px rgba(13, 22, 17, 0.28);
+}
+.map-card[hidden] { display: none; }
+.map-card__grip { align-self: center; width: 36px; height: 4px; border-radius: 2px; background: var(--line); }
+.map-card__head { display: flex; align-items: flex-start; gap: 10px; }
+.map-card__title { flex: 1; min-width: 0; }
+.map-card__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--display);
+  font-weight: 800;
+  font-style: italic;
+  font-size: 26px;
+  line-height: 1.05;
+}
+.map-card__name span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.map-card__meta { font-size: 13px; color: var(--muted); }
+.map-card__close {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 0;
+  background: var(--well);
+  color: var(--ink);
+}
+.map-card__now { display: flex; align-items: center; gap: 12px; }
+.map-card__stat {
+  flex: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding-top: 13px;
+  width: 64px;
+  height: 56px;
+  border-radius: 14px;
+  background: var(--pin-taken);
+  color: var(--muted);
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1;
+}
+.map-card__stat small { font-size: 15px; opacity: 0.7; }
+.map-card__stat--free { background: var(--ball); color: var(--on-ball); }
+.map-card__hours { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.map-card__hours strong { font-size: 15px; }
+.map-card__next { display: flex; flex-wrap: wrap; gap: 4px; }
+.map-card__hour {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--pin-taken);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: line-through;
+}
+.map-card__hour.is-free { background: var(--ball-tint); color: var(--free-ink); text-decoration: none; }
+.map-card__actions { display: grid; grid-template-columns: 1fr 1fr 44px; gap: 8px; }
+.map-card__btn { min-height: 48px; border-radius: 14px; font-size: 15px; gap: 4px; }
+.map-card__more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+/* --- A pin -------------------------------------------------------------- */
+/* An HTML marker: map.js hands each one to the map, which keeps it over its
+   point; everything about how it looks is here. The tail's point is the
+   club's spot. */
+.pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: var(--display);
+  cursor: pointer;
+  --pin-bg: var(--ball);
+  --pin-fg: var(--on-ball);
+  --pin-edge: var(--on-ball);
+}
+.pin__pill {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--pin-bg);
+  color: var(--pin-fg);
+  border: 2px solid var(--pin-edge);
+  box-shadow: 0 2px 6px rgba(13, 22, 17, 0.22);
+}
+.pin__n { font-weight: 800; font-size: 17px; line-height: 1; }
+.pin__of { font-weight: 700; font-size: 12px; line-height: 1; opacity: 0.7; }
+.pin__word { font-weight: 800; font-size: 14px; line-height: 1; text-transform: uppercase; }
+.pin__tail { display: block; margin-top: -5px; fill: var(--pin-edge); }
+.pin__fav {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0d1611;
+  color: var(--ball);
+  border: 1.5px solid var(--pin-ring);
+}
+.pin__name {
+  display: none;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font: 700 12px var(--text);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(13, 22, 17, 0.2);
+}
+
+.pin--taken, .pin--shut, .pin--unknown {
+  --pin-bg: var(--pin-taken);
+  --pin-fg: var(--on-pin-taken);
+  --pin-edge: var(--pin-taken-edge);
+}
+.pin--unknown .pin__pill { border-style: dashed; }
+.pin--shut { opacity: 0.75; }
+
+.pin[aria-pressed="true"], .pin--selected {
+  --pin-bg: var(--pin-picked);
+  --pin-fg: var(--on-pin-picked);
+  --pin-edge: var(--pin-picked-edge);
+}
+.pin[aria-pressed="true"] .pin__pill, .pin--selected .pin__pill {
+  padding: 7px 11px;
+  box-shadow: 0 0 0 6px rgba(214, 245, 66, 0.35), 0 6px 16px rgba(13, 22, 17, 0.35);
+}
+.pin[aria-pressed="true"] .pin__n { font-size: 20px; }
+.pin[aria-pressed="true"] .pin__name { display: block; }
+.pin[aria-pressed="true"] .pin__tail { margin-top: -1px; }
+.pin--selected .pin__tail { margin-top: -1px; }
+
+/* --- A club's Profile: its own pin on a still map ----------------------- */
+.place__map { position: relative; display: block; height: 150px; background: var(--map-land); overflow: hidden; }
+.place__map .place__art { position: absolute; inset: 0; height: 100%; }
+.place__map.is-drawn .place__art { display: none; }
+.place__pin-mark { position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -100%); cursor: inherit; }
+.place__pin-mark[hidden] { display: none; }
+.place__credit {
+  position: absolute;
+  z-index: 2;
+  right: 6px;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 500;
+}
+.place__credit[hidden] { display: none; }

@@ -28,7 +28,9 @@ module Booking
         check: [3, %(<path d="M5 12l5 5 9-10"/>)],
         close: [2.4, %(<path d="M6 6l12 12M18 6L6 18"/>)],
         locate: [2.2, %(<path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/>)],
-        gauge: [2, %(<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/>)]
+        gauge: [2, %(<path d="M4 15a8 8 0 1 1 16 0"/><path d="M12 15l4-5"/>)],
+        list: [2.2, %(<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>)],
+        map: [2.2, %(<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>)]
       }.freeze
 
       module_function
