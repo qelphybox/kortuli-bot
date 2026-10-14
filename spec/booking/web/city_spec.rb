@@ -125,6 +125,12 @@ RSpec.describe "The City picker" do
       expect(last_response.location).to end_with("/clubs")
       expect(preferences.city(42)).to eq("Batumi")
     end
+
+    it "lands back on the clubs' map when it was opened there" do
+      post "/city", city: "Batumi", back: "/clubs/map"
+
+      expect(last_response.location).to end_with("/clubs/map")
+    end
   end
 
   it "is not served to somebody without a session" do

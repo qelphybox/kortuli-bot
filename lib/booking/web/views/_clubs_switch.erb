@@ -1,0 +1,9 @@
+<%#
+  List or map: the same City's clubs either way, so the switch is two links
+  rather than a toggle the page has to remember. `current` is which of them
+  this is.
+%>
+<nav class="segment" aria-label="View">
+  <a class="segment__opt" href="/clubs"<%= ' aria-current="page"' if current == :list %>><%= icon(:list, size: 16) %>List</a>
+  <a class="segment__opt" href="/clubs/map"<%= ' aria-current="page"' if current == :map %>><%= icon(:map, size: 16) %>Map</a>
+</nav>

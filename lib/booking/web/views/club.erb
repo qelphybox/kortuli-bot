@@ -7,8 +7,9 @@
 
   Covers are the point of a Profile, so each court's tile names its Cover,
   and a court under a roof is drawn dark, as a roofed club's initials are in
-  the directory. The drawing over the Google Maps link is only a drawing:
-  the place is wherever the link lands.
+  the directory. Over the Google Maps link, map.js draws the club's own pin
+  on a still map; until it has, and without it, a drawing stands in. Either
+  way the whole card is the link, and the place is wherever it lands.
 
   The star in the corner makes the club a Favourite, as the one beside its
   name on a date's list does, and turns over here.
@@ -73,7 +74,14 @@
             the listing has one that says more, goes under it. %>
         <% place = @profile.area || @profile.address %>
         <a class="place" data-external href="<%= h(@profile.maps_url) %>" target="_blank" rel="noopener">
-          <%= place_art %>
+          <span class="place__map" data-map-preview data-lat="<%= @profile.lat %>" data-lng="<%= @profile.lng %>">
+            <%= place_art %>
+            <span class="pin pin--selected place__pin-mark" aria-hidden="true" hidden>
+              <span class="pin__pill"><span class="pin__word"><%= h(@club.name) %></span></span>
+              <svg class="pin__tail" width="12" height="7" viewBox="0 0 12 7"><path d="M0 0 L6 7 L12 0 Z"/></svg>
+            </span>
+            <span class="place__credit" hidden>© OpenStreetMap · OpenFreeMap</span>
+          </span>
           <span class="place__row">
             <span class="place__words">
               <span class="place__name"><%= h([place, "Open in Google Maps"].compact.join(" · ")) %></span>

@@ -120,6 +120,16 @@ club's opening hours is left blank rather than drawn as taken. Clubs
 whose source names the court say how many of them are free (`2/4`); the rest
 can only say that something is (`✓`).
 
+The clubs directory has a **List / Map** switch. The map pins every club of
+the City whose listing gives a location, each pin saying what it has free at
+one hour of today — `3/8` where the source names courts, a tick where it only
+says something is, grey when nothing is — and a tap opens a card with the
+next hours, directions and the club's Profile. A club's Profile shows its own
+pin on a still map. The streets are MapLibre GL over OpenFreeMap's free
+vector tiles, styled from the `--map-*` tokens in `app.css`; MapLibre is
+vendored under [lib/booking/web/public/vendor/maplibre/](lib/booking/web/public/vendor/maplibre/),
+so Telegram's SDK stays the only script loaded from elsewhere.
+
 The star beside each club on a date's list, or in the corner of its Profile,
 makes it a **Favourite**: one tap, kept per person. Favourites lead their half
 of that list, and come already ticked on the form that creates a standing

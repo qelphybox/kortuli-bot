@@ -67,7 +67,7 @@ module Booking
       # sends a person back to. Anything else lands on the dates: the path
       # arrives from the page, and a redirect to wherever it says is a
       # redirect anywhere.
-      CITY_SWITCH_BACK = %r{\A/(?:clubs)?\z}
+      CITY_SWITCH_BACK = %r{\A/(?:clubs(?:/map)?)?\z}
 
       helpers Icons
 
@@ -586,6 +586,88 @@ module Booking
           end
         end
 
+        # The date the map is about: today, or tomorrow once every club in the
+        # City has shut for the night — a map of hours that are over helps
+        # nobody.
+        def map_date = @map_date ||= horizon.first(2).find { map_hours(_1).any? } || horizon.first
+
+        # The hours of a date the map can be asked about: any club's in the
+        # City that have not started yet.
+        def map_hours(date)
+          now = Clock.now
+
+          horizon_tables.fetch(date).columns.select { _1 > now }
+        end
+
+        # The hour the map shows, counted from its date's midnight as HourSpan
+        # counts it, so 25 is 01:00 after that day. The first one left unless
+        # the page asks for another it offers.
+        def map_hour(date)
+          offered = map_hours(date)
+          asked = Integer(params[:at].to_s, exception: false)
+
+          offered.find { HourSpan.offset(date, _1) == asked } || offered.first
+        end
+
+        # "Today · 19:00", for the hour picker and for what the pins answer.
+        def map_hour_label(date, starts_at)
+          day = date == horizon.first ? "Today" : "Tomorrow"
+
+          "#{day} · #{hour_label(starts_at)}:00"
+        end
+
+        # The map with its chips changed and its hour kept.
+        def map_path(only:)
+          query = { at: @offset, only: }.compact
+
+          query.empty? ? "/clubs/map" : "/clubs/map?#{Rack::Utils.build_query(query)}"
+        end
+
+        # One dict per club of the City that has a pin, for the map at one
+        # hour: what is free then and over the next three, and the way there.
+        # A club the listing gives no pin is left off the map rather than
+        # guessed at; the list still has it.
+        def map_view(date, starts_at)
+          table = horizon_tables.fetch(date)
+          later = table.columns.select { _1 >= starts_at }.first(4)
+
+          directory_view.filter_map do |club|
+            found = profile(club[:slug])
+            next unless found&.located?
+
+            row = table.rows.find { _1.club_slug == club[:slug] }
+            club.merge(
+              lat: found.lat,
+              lng: found.lng,
+              maps_url: found.maps_url,
+              **map_pin(row.cell_at(starts_at), no_data?(club[:slug])),
+              next: later.map { |at| { label: "#{hour_label(at)}:00", free: !!row.cell_at(at)&.free? } }
+            )
+          end
+        end
+
+        # What a pin says about one hour: how many courts are free of how many
+        # when the source names them, only "something" when it does not —
+        # inventing a count would claim precision the club refused to give —
+        # and nothing at all for an hour it is shut or a club we cannot read.
+        def map_pin(cell, no_data)
+          return { state: "shut", figure: "–", total: nil } if cell.nil?
+          return { state: "free", figure: cell.counted? ? cell.free_courts.to_s : "✓", total: cell.total_courts } if cell.free?
+          return { state: "unknown", figure: "?", total: nil } if no_data
+
+          { state: "taken", figure: "0", total: cell.total_courts }
+        end
+
+        # The pin and its card, said in words: "3 of 8 courts free at 19:00".
+        def map_headline(club, time)
+          case club[:state]
+          when "free" then club[:total] ? "#{club[:figure]} of #{club[:total]} courts free at #{time}" : "Free at #{time}"
+          when "taken" then "Fully booked at #{time}"
+          when "shut" then "Closed at #{time}"
+          else "No data for #{time}"
+          end
+        end
+
         # Memoised per request: every club card on a date asks for its price.
         def enabled_clubs = @enabled_clubs ||= settings.repos.clubs.enabled
 
@@ -845,9 +927,29 @@ module Booking
         erb :directory, layout: :layout
       end
 
+      # The same clubs where they are, each pin saying what it has free at
+      # one hour of today, and a card with the way there once one is tapped.
+      # Narrowed by the same chips as a date's list. Drawn by map.js; without
+      # it the page says to use the list.
+      get "/clubs/map" do
+        require_visitor!
+
+        @map = true
+        @only = club_filter
+        @date = map_date
+        @at = map_hour(@date)
+        @offset = @at && HourSpan.offset(@date, @at)
+        @hours = map_hours(@date).map { [HourSpan.offset(@date, _1), map_hour_label(@date, _1)] }
+        @time = @at && "#{hour_label(@at)}:00"
+        @clubs = @at ? filter_clubs(map_view(@date, @at), @only) : []
+        @centre = Weather::CITIES[current_city]
+        erb :clubs_map, layout: :layout
+      end
+
       # One club's Profile: courts and their covers, a pin, Listed hours,
-      # prices. Reached from the directory, or from a club's hours on a date —
-      # `date` says which, so the back arrow returns where the tap came from.
+      # prices. Reached from the directory, its map, or a club's hours on a
+      # date — `date` or `from` says which, so the back arrow returns where
+      # the tap came from.
       get "/clubs/:slug" do
         require_visitor!
 
@@ -856,7 +958,11 @@ module Booking
 
         @profile = profile(@club.slug)
         @date = parse_date(params[:date])
-        @back = @date ? "/date/#{@date}/club/#{@club.slug}" : "/clubs"
+        @back = if @date then "/date/#{@date}/club/#{@club.slug}"
+                elsif params[:from] == "map" then "/clubs/map"
+                else "/clubs"
+                end
+        @map = !!@profile&.located?
         erb :club, layout: :layout
       end
 

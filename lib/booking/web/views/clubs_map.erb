@@ -1,0 +1,111 @@
+<%#
+  The City's clubs where they are. Each pin says what the club has free at
+  one hour of today — "3/8" when its source names the courts, a tick when it
+  only says something is, grey when nothing is — and a tap opens its card:
+  the next hours, the way there, its hours and its Profile.
+
+  The server draws every pin and every card; map.js only puts the pins on
+  the map and shows one card at a time. A club the listing gives no pin is
+  not guessed at — the list still has it. The hour and the chips are in the
+  URL, as on a date's list, so changing one keeps the other.
+
+  Without JavaScript there is no map to draw, and the page says so.
+%>
+<header class="map-head">
+  <div class="topbar topbar--tight">
+    <h1 class="topbar__title">Clubs</h1>
+    <%= erb :_city_switch, locals: { back: "/clubs/map", count: city_clubs.size } %>
+  </div>
+  <%= erb :_clubs_switch, locals: { current: :map } %>
+</header>
+
+<main class="map-screen" data-clubs-map
+      data-centre="<%= @centre&.join(",") %>"
+      aria-label="Map of <%= h(current_city) %> with padel clubs">
+  <div class="map-canvas" data-map-canvas></div>
+
+  <div class="map-tools js-only">
+    <% if @hours.any? %>
+      <form class="map-hour" method="get" action="/clubs/map" data-autosubmit>
+        <% if @only %><input type="hidden" name="only" value="<%= @only %>"><% end %>
+        <label class="visually-hidden" for="map-at">Hour</label>
+        <select id="map-at" name="at">
+          <% @hours.each do |offset, label| %>
+            <option value="<%= offset %>"<%= " selected" if offset == @offset %>><%= label %></option>
+          <% end %>
+        </select>
+        <%= icon(:chevron, size: 12) %>
+      </form>
+    <% end %>
+    <a class="map-chip" href="<%= h(map_path(only: @only == "covered" ? nil : "covered")) %>"<%= ' aria-current="true"' if @only == "covered" %>>Covered</a>
+    <a class="map-chip" href="<%= h(map_path(only: @only == "favourites" ? nil : "favourites")) %>"<%= ' aria-current="true"' if @only == "favourites" %>><%= star(size: 12) %>Favs</a>
+    <button class="map-locate" type="button" aria-label="Show my location" data-map-locate hidden><%= icon(:locate) %></button>
+  </div>
+
+  <div class="map-pins" hidden>
+    <% @clubs.each do |c| %>
+      <button type="button" class="pin pin--<%= c[:state] %>" data-pin="<%= c[:slug] %>" data-lat="<%= c[:lat] %>" data-lng="<%= c[:lng] %>"
+              aria-pressed="false" aria-label="<%= h(c[:name]) %>, <%= h(map_headline(c, @time).downcase) %>">
+        <span class="pin__name"><%= h(c[:name]) %></span>
+        <span class="pin__pill">
+          <% if c[:favourite] %><span class="pin__fav"><%= star(size: 9) %></span><% end %>
+          <span class="pin__n"><%= c[:figure] %></span><% if c[:total] %><span class="pin__of">/<%= c[:total] %></span><% end %>
+        </span>
+        <svg class="pin__tail" width="12" height="7" viewBox="0 0 12 7" aria-hidden="true"><path d="M0 0 L6 7 L12 0 Z"/></svg>
+      </button>
+    <% end %>
+  </div>
+
+  <div class="map-foot">
+    <div class="map-attr js-only">
+      <button class="map-attr__i" type="button" aria-expanded="false" aria-label="Map attribution" data-map-attr>i</button>
+      <span class="map-attr__text" hidden>
+        <a data-external href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> ·
+        <a data-external href="https://www.openmaptiles.org/" target="_blank" rel="noopener">© OpenMapTiles</a> ·
+        <a data-external href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>
+      </span>
+    </div>
+
+    <p class="map-hint js-only" data-map-hint>
+      <% if @at.nil? %>
+        Every club is shut for today
+      <% elsif @clubs.empty? %>
+        <%= @only == "favourites" ? "No favourites yet — star a club in the list" : "No club with a roof is on the map" %>
+      <% else %>
+        Tap a pin · free courts at <%= @time %>
+      <% end %>
+    </p>
+    <p class="map-hint no-js-only">The map needs JavaScript. <a href="/clubs">See the list</a></p>
+
+    <% @clubs.each do |c| %>
+      <section class="map-card" data-card="<%= c[:slug] %>" aria-label="<%= h(c[:name]) %>" hidden>
+        <span class="map-card__grip" aria-hidden="true"></span>
+        <div class="map-card__head">
+          <div class="map-card__title">
+            <h2 class="map-card__name"><span><%= h(c[:name]) %></span><% if c[:favourite] %><%= star(size: 16) %><span class="visually-hidden">Favourite</span><% end %></h2>
+            <div class="map-card__meta"><%= c[:sub].empty? ? "No directory profile yet" : h(c[:sub]) %></div>
+          </div>
+          <button class="map-card__close" type="button" aria-label="Close" data-card-close><%= icon(:close, size: 16) %></button>
+        </div>
+        <div class="map-card__now">
+          <span class="map-card__stat map-card__stat--<%= c[:state] %>"><%= c[:figure] %><% if c[:total] %><small>/<%= c[:total] %></small><% end %></span>
+          <div class="map-card__hours">
+            <strong><%= h(map_headline(c, @time)) %></strong>
+            <span class="map-card__next">
+              <% c[:next].each do |hour| %>
+                <span class="map-card__hour<%= " is-free" if hour[:free] %>"><%= hour[:label] %><span class="visually-hidden"><%= hour[:free] ? " free" : " taken" %></span></span>
+              <% end %>
+            </span>
+          </div>
+        </div>
+        <div class="map-card__actions">
+          <a class="btn btn--ball map-card__btn" href="/date/<%= @date %>/club/<%= c[:slug] %>"><%= @date == horizon.first ? "Hours today" : "Hours tomorrow" %></a>
+          <a class="btn btn--outline map-card__btn" data-external href="<%= h(c[:maps_url]) %>" target="_blank" rel="noopener">Directions <%= icon(:external, size: 13) %></a>
+          <a class="map-card__more" href="/clubs/<%= c[:slug] %>?from=map" aria-label="Club profile"><%= icon(:info, size: 18) %></a>
+        </div>
+      </section>
+    <% end %>
+  </div>
+</main>
+
+<%= erb :_tabs, locals: { current: :clubs } %>
