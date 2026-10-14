@@ -155,7 +155,7 @@ Once you have booked, every hour on a club's screen has a tick, free or
 taken alike — the booking may not have reached us yet. Tick the hours, press
 **Share my game**, and they become a **Game**: one message with
 the club, the day and the stretch (`Wed 14 Oct, 19:00–21:00`), the wettest
-hour's Forecast, the price, the pin in Google Maps and a link to add it to a
+hour's Forecast, the price, the club in Google Maps and a link to add it to a
 calendar. Ticking 19:00 and 21:00 takes 20:00 with them, since a booking is
 one stretch; two pickers on the next screen move either end. It leaves the
 way a Rundown does — share sheet or clipboard — and the same screen puts it
@@ -168,7 +168,7 @@ Nothing is stored — the URL is the whole Game.
 **Clubs**, the third tab, is every watched club whatever it has
 free: its neighbourhood and how many courts sit indoors, under a roof, or in
 the open. A club opens its **Profile** — each court and its cover, a button
-that drops the pin in Google Maps, the hours and prices it lists, a phone
+that opens the club's own place in Google Maps, the hours and prices it lists, a phone
 number and the booking page. The same screen is one tap away as **Info** on a
 club's hours for a date, and the day's list of clubs names the covers beside
 each one, which is the first thing anybody asks when it rains. Profiles come

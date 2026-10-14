@@ -10,7 +10,7 @@ module Booking
   #
   # Read from config/club_profiles.yml, which `rake sapadelo:import` writes.
   # A club with no entry there simply has no Profile.
-  ClubProfile = Data.define(:source, :checked_on, :area, :address, :phone, :lat, :lng, :courts, :hours, :prices) do
+  ClubProfile = Data.define(:source, :checked_on, :area, :address, :phone, :lat, :lng, :place_id, :courts, :hours, :prices) do
     def self.load(path = Config.club_profiles_file)
       return {} unless File.exist?(path)
 
@@ -27,6 +27,7 @@ module Booking
         phone: entry["phone"],
         lat: entry["lat"],
         lng: entry["lng"],
+        place_id: entry["place_id"],
         courts: Array(entry["courts"]).map { ClubProfile::Court.new(name: _1["name"], cover: _1["cover"]) },
         hours: entry.fetch("hours", {}),
         prices: Array(entry["prices"])
@@ -37,10 +38,17 @@ module Booking
     # `settings.pin` in config/clubs.yml places it: on the map, on its page,
     # in a Game's link. Only the place: a pin from us is not the club's
     # listing, so it never stands in for one (see #listed?).
-    def self.pinned(profile, pin)
-      return profile if profile&.located? || !pin.is_a?(Hash) || pin["lat"].nil? || pin["lng"].nil?
+    #
+    # `settings.place_id` is the club's own place on Google Maps, which the
+    # directory does not carry. It rides on whatever Profile the club ends up
+    # with, and never makes one on its own: a place with no pin has nothing to
+    # fall back to.
+    def self.pinned(profile, pin, place_id: nil)
+      if !profile&.located? && pin.is_a?(Hash) && !pin["lat"].nil? && !pin["lng"].nil?
+        profile = (profile || from({})).with(lat: Float(pin["lat"]), lng: Float(pin["lng"]))
+      end
 
-      (profile || from({})).with(lat: Float(pin["lat"]), lng: Float(pin["lng"]))
+      place_id && profile ? profile.with(place_id:) : profile
     end
 
     def located? = !lat.nil? && !lng.nil?
@@ -49,8 +57,11 @@ module Booking
     def listed? = !source.nil?
 
     # Google's documented, keyless way to open a pin — it lands in the Maps
-    # app where there is one, and on the website where there is not.
-    def maps_url = ("#{ClubProfile::MAPS_SEARCH}#{lat},#{lng}" if located?)
+    # app where there is one, and on the website where there is not. With a
+    # place ID it opens the club's own card — its name, photos, reviews and
+    # the route there — rather than a bare point; the pin stays as the query,
+    # which Google falls back to when it cannot find the place any more.
+    def maps_url = ("#{ClubProfile::MAPS_SEARCH}#{lat},#{lng}#{place_query}" if located?)
 
     # The way there for somebody who has never been: the pin when there is
     # one, else Google searching the street — with the club's name and city
@@ -60,7 +71,7 @@ module Booking
       return maps_url if located?
 
       street = address || area
-      "#{ClubProfile::MAPS_SEARCH}#{URI.encode_www_form_component([name, street, city].uniq.join(", "))}" if street
+      "#{ClubProfile::MAPS_SEARCH}#{URI.encode_www_form_component([name, street, city].uniq.join(", "))}#{place_query}" if street
     end
 
     # [["indoor", 2], ["covered", 3]]: how many courts sit under each cover.
@@ -76,6 +87,8 @@ module Booking
     end
 
     private
+
+    def place_query = ("&query_place_id=#{URI.encode_www_form_component(place_id)}" if place_id)
 
     def week_index(day) = ClubProfile::WEEK.index(day)
   end

@@ -9,6 +9,12 @@
 # where the map, the club's page and a Game's link look when the club has no
 # Profile with a pin. Say where the point came from.
 #
+# `settings.place_id` is the club's place on Google Maps, so its link opens
+# the club's own card — name, photos, reviews — rather than a bare point. The
+# pin stays the fallback, and a club with no pin gets no link from it alone.
+# Look one up by searching the club's name at its pin on maps.google.com, and
+# check the card's name and address before writing it down.
+#
 # `settings.city` is the City the club is in, and Tbilisi when it is left out.
 # The app shows one city's clubs at a time, and fetches the Forecast once per
 # city — at the point named in Weather::CITIES, so a city new to this file
@@ -25,6 +31,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJ1RLok6sNREARKXr7JmQiu8A
     booking_url: "https://kustbapadel.ge/book/"
     # The club's page on sapadelo.com, where its Profile comes from — see
     # config/club_profiles.yml and `rake sapadelo:import`.
@@ -52,6 +59,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJOQTI8tcNREARp1KD9QaOfWM
     location_id: "63f663fa-1852-5bde-bf94-dee5b176de1d"
     sapadelo: gymbreeze-ninoshvili
     booking_url: "https://gymbreeze.ge/eng"
@@ -76,6 +84,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJyR88eCVtREAR_V6NlYFdzeg
     location_id: "752155d7-39aa-53d9-bc18-682695f85244"
     sapadelo: gymbreeze-radio-city
     booking_url: "https://gymbreeze.ge/eng"
@@ -96,6 +105,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJuTulcgBzREARvhH6q4xTKIw
     location_id: "7a896411-0c3a-5336-a522-a6da08b6132c"
     sapadelo: gymbreeze-sports-palace
     booking_url: "https://gymbreeze.ge/eng"
@@ -117,6 +127,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJjUyxFPINREARSYG9mflWPKo
     location_id: 163
     sapadelo: padelbade-krtsanisi
     booking_url: "https://app.padelbade.com/"
@@ -149,6 +160,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJHwmxkkVvREARFURA6wYTnJQ
     location_id: 141
     sapadelo: padelbade-dighomi
     booking_url: "https://app.padelbade.com/"
@@ -174,6 +186,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJ4TXRtoRzREARqhNSQLiwg-w
     booking_url: "https://www.padelhub.ge/booking"
     sapadelo: padelhub
     # 40 for starts up to 14:00, then the court's own evening price: 60
@@ -203,6 +216,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJ3-6K3ThzREARHZ9Iqud0bms
     booking_url: "https://booking.padelacademy.ge/"
     sapadelo: padel-academy
     price: "80 GEL"
@@ -226,6 +240,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJX_ITaPpzREARX9uYE_6ENm4
     booking_url: "https://lemanspadel.ge/book-padel/"
     sapadelo: lemans-padel
     # 50 for weekday starts before 17:00, 70 evenings and weekends; the same
@@ -255,6 +270,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJ_S-BUwBtREARq-vCNRaLYp8
     # The adapter appends `?court=<id>`, which the page opens on.
     booking_url: "https://padelgldani.ge/booking"
     sapadelo: padel-gldani
@@ -287,6 +303,7 @@
   poll_interval_seconds: 240
   settings:
     city: Batumi
+    place_id: ChIJS7uha9WHZ0ARZZcuuKReC5o
     business_id: "1e32bd0a-0d5c-4e30-9788-ea488e713c4d"
     # One request per service per tick — the filter takes a single id.
     service_ids:
@@ -319,6 +336,7 @@
   poll_interval_seconds: 240
   settings:
     city: Batumi
+    place_id: ChIJHSG1NACHZ0AR_y_94PRMdNM
     business_id: "1e32bd0a-0d5c-4e30-9788-ea488e713c4d"
     service_ids:
       - "24481fd5-3320-4133-b762-03f13f1b200e"
@@ -346,6 +364,7 @@
   poll_interval_seconds: 240
   settings:
     city: Batumi
+    place_id: ChIJveIStQaFZ0ARobuDSlC3a_Q
     business_id: "aac3b1f5-7e80-4052-bd09-adc7396cfbec"
     service_ids:
       - "adcd4ab2-597c-4173-8090-75595b5ef390" # Court A-(08:00-13:00)
@@ -389,6 +408,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJc5mHWwBvREARFfTsVYma36M
     service_id: 6
     sapadelo: tbilisi-padel-didi-dighomi
     booking_url: "https://tbilisipadel.ge/en/"
@@ -415,6 +435,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJl872u7wNREARqMz1TfgwYds
     service_id: 4
     sapadelo: tbilisi-padel-mtatsminda
     booking_url: "https://tbilisipadel.ge/en/"
@@ -434,6 +455,9 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    # Listed on Google as "URBAN TBILISI PADEL" — the place the club's own
+    # site embeds a map of.
+    place_id: ChIJfbksMgANREARhZ1F7FybFqA
     service_id: 1
     sapadelo: tbilisi-padel-ilias-garden
     booking_url: "https://tbilisipadel.ge/en/"
@@ -454,6 +478,8 @@
   poll_interval_seconds: 240
   settings:
     city: Kutaisi
+    # Listed on Google as "AIA Arena", the complex the courts are in.
+    place_id: ChIJiQrekdPyXEAR6c5jaCJ9lew
     booking_url: "https://aiapadel.ge/book"
     sapadelo: aia-padel-club
     # The court list prices an hour at 6000 tetri on every court.
@@ -485,6 +511,7 @@
   poll_interval_seconds: 240
   settings:
     city: Rustavi
+    place_id: ChIJ2zWtQfYBREARTouInIqzFT0
     location_id: 142
     sapadelo: padelbade-rustavi
     booking_url: "https://app.padelbade.com/"
@@ -511,6 +538,7 @@
   poll_interval_seconds: 240
   settings:
     city: Rustavi
+    place_id: ChIJJen8lnEBREAR3AuPISvaNOg
     booking_url: "https://higgs.ge/booking"
     sapadelo: higgs
     # 30 for starts before 17:00, 60 from then on, every day and every court.
@@ -535,6 +563,7 @@
   poll_interval_seconds: 240
   settings:
     city: Kutaisi
+    place_id: ChIJf5wlHUeNXEARUjfGB0bHrTA
     base_url: "https://api.bookandgo.app/api/v1/apps/126"
     location_id: 246
     sapadelo: love-padel
@@ -568,6 +597,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJN3PTLGFzREARXmkCrPrjdnE
     cuadro_id: 6
     sapadelo: padel-island-lisi
     booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=6"
@@ -593,6 +623,7 @@
   poll_interval_seconds: 240
   settings:
     city: Tbilisi
+    place_id: ChIJqWg3gDBzREARoEJSG_Uni0U
     cuadro_id: 8
     sapadelo: padel-island-expo-park
     booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=8"
@@ -613,6 +644,8 @@
   poll_interval_seconds: 240
   settings:
     city: Gudauri
+    # Google's "Padel island" by the hotel, rather than the hotel itself.
+    place_id: ChIJi-eoAAApRUAR1VbzHgEbFFQ
     cuadro_id: 5
     booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=5"
     # Not on sapadelo, so no Profile: the pin is the Marco Polo hotel, where
@@ -636,6 +669,8 @@
   poll_interval_seconds: 240
   settings:
     city: Kachreti
+    # Google has no card for the courts, only the resort they are in.
+    place_id: ChIJ_-IT8KyaRkARw7w2A8IIpYE
     cuadro_id: 7
     booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=7"
     # Not on sapadelo either; OpenStreetMap has the court itself as "Padel
