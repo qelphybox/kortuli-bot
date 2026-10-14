@@ -5,6 +5,10 @@
 #
 # Removing an entry disables that club on the next boot; its row stays.
 #
+# `settings.pin` ({lat, lng}) places a club that sapadelo does not — it is
+# where the map, the club's page and a Game's link look when the club has no
+# Profile with a pin. Say where the point came from.
+#
 # `settings.city` is the City the club is in, and Tbilisi when it is left out.
 # The app shows one city's clubs at a time, and fetches the Forecast once per
 # city — at the point named in Weather::CITIES, so a city new to this file
@@ -550,4 +554,103 @@
     # Two padel courts. The location also rents two pickleball courts, which
     # the adapter leaves out.
     courts: 2
+    court_aliases: {}
+
+# Padel Island: four venues on one TPC MatchPoint site, each a grid
+# (`cuadro_id`) on the same page — the ids are the page's `cuadroCentroMap`.
+# The site's own config says 24 hours a day at Lisi and Gudauri, which is
+# nobody's evening: the hours below are the ones a person can play, and the
+# adapter clips to the site's own opening and closing as well.
+- slug: padel-island-lisi
+  name: Padel Island Lisi Lake
+  adapter: matchpoint
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Tbilisi
+    cuadro_id: 6
+    sapadelo: padel-island-lisi
+    booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=6"
+    # 40 for weekday starts 05:00–17:00, 80 evenings and weekends — the same
+    # rates sapadelo lists for EXPO.
+    price: "40–80 GEL"
+    # The grid says 00:00–23:59 and sapadelo 00:00–00:00. Taken at its word
+    # that would stretch every Tbilisi row through the night, so: from 07:00,
+    # as EXPO, the same operator's other Tbilisi venue, to a last start at
+    # 22:00 — 23:00 would run past the grid's 23:59.
+    opening_hours:
+      from: "07:00"
+      to: "23:00"
+    max_days: 14
+    # Two open-air courts, each its own column on the grid.
+    courts: 2
+    court_aliases: {}
+
+- slug: padel-island-expo
+  name: Padel Island EXPO Park
+  adapter: matchpoint
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Tbilisi
+    cuadro_id: 8
+    sapadelo: padel-island-expo-park
+    booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=8"
+    price: "40–80 GEL"
+    # The grid's own day: 07:00 to a last start at 01:00.
+    opening_hours:
+      from: "07:00"
+      to: "02:00"
+    max_days: 14
+    # One open court and one under a retractable roof.
+    courts: 2
+    court_aliases: {}
+
+- slug: padel-island-gudauri
+  name: Padel Island Marco Polo Gudauri
+  adapter: matchpoint
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Gudauri
+    cuadro_id: 5
+    booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=5"
+    # Not on sapadelo, so no Profile: the pin is the Marco Polo hotel, where
+    # OpenStreetMap puts it. The grid says 00:00–00:00 here too; a hotel's
+    # guests play by day.
+    pin:
+      lat: 42.4616226
+      lng: 44.4842351
+    opening_hours:
+      from: "08:00"
+      to: "24:00"
+    max_days: 14
+    # One indoor court and one outdoor, at the Marco Polo hotel.
+    courts: 2
+    court_aliases: {}
+
+- slug: padel-island-kachreti
+  name: Padel Island Ambassadori Kachreti
+  adapter: matchpoint
+  enabled: true
+  poll_interval_seconds: 240
+  settings:
+    city: Kachreti
+    cuadro_id: 7
+    booking_url: "https://booking.padelisland.ge/Booking/Grid.aspx?id=7"
+    # Not on sapadelo either; OpenStreetMap has the court itself as "Padel
+    # Island Kachreti", and that is the pin.
+    pin:
+      lat: 41.6330480
+      lng: 45.6823321
+    # The grid's own day: 08:00 to a last start at 22:00. Its night is
+    # blocked out court by court rather than left off.
+    opening_hours:
+      from: "08:00"
+      to: "23:00"
+    # The page offers 21 days here, 30 at the other three.
+    max_days: 14
+    # Courts 1 (retractable roof) and 2 are doubles, 3 a singles court, and
+    # the fourth the resort's academy court — all four sold on the grid.
+    courts: 4
     court_aliases: {}

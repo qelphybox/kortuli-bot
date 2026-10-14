@@ -33,7 +33,20 @@ module Booking
       )
     end
 
+    # Where the directory has no pin — or no listing at all — the club's own
+    # `settings.pin` in config/clubs.yml places it: on the map, on its page,
+    # in a Game's link. Only the place: a pin from us is not the club's
+    # listing, so it never stands in for one (see #listed?).
+    def self.pinned(profile, pin)
+      return profile if profile&.located? || !pin.is_a?(Hash) || pin["lat"].nil? || pin["lng"].nil?
+
+      (profile || from({})).with(lat: Float(pin["lat"]), lng: Float(pin["lng"]))
+    end
+
     def located? = !lat.nil? && !lng.nil?
+
+    # Read off a directory, rather than only placed by a pin of ours.
+    def listed? = !source.nil?
 
     # Google's documented, keyless way to open a pin — it lands in the Maps
     # app where there is one, and on the website where there is not.

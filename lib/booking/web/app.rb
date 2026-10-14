@@ -210,7 +210,7 @@ module Booking
 
         def clock(hour) = Messages.clock(hour * 60)
 
-        def profile(slug) = settings.club_profiles[slug]
+        def profile(slug) = ClubProfile.pinned(settings.club_profiles[slug], enabled_club(slug)&.settings&.dig("pin"))
 
         # Memoised per request: every club row on the screen asks for it.
         def favourites = @favourites ||= settings.repos.favourites.for_user(visitor_id)

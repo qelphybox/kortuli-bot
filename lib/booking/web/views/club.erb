@@ -121,12 +121,15 @@
         </section>
       <% end %>
 
-      <%# The directory's name is the link to the club's own page on it. %>
-      <% said = h(Booking::Messages.profile_source(@profile.checked_on)) %>
-      <% if @profile.source %>
+      <% if @profile.listed? %>
+        <%# The directory's name is the link to the club's own page on it. %>
+        <% said = h(Booking::Messages.profile_source(@profile.checked_on)) %>
         <% said = said.sub("sapadelo.com", %(<a data-external href="#{h(@profile.source)}" target="_blank" rel="noopener">sapadelo.com</a>)) %>
+        <p class="disclaimer"><%= said %></p>
+      <% else %>
+        <%# Only a pin of ours: nothing the club listed to vouch for. %>
+        <p class="note"><%= Booking::Messages.profile_missing %></p>
       <% end %>
-      <p class="disclaimer"><%= said %></p>
     <% end %>
   </div>
 </main>

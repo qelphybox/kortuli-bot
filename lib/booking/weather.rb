@@ -16,14 +16,19 @@ module Booking
     # GeoNames (Open-Meteo's own geocoder) puts it, and Tbilisi's and
     # Rustavi's within two or three kilometres of that; Batumi's is GeoNames'
     # own, because the point first proposed for it sat at the city's southern
-    # edge, three kilometres from the old town. A city missing here gets no
+    # edge, three kilometres from the old town. Gudauri's is GeoNames' too.
+    # GeoNames has no Kachreti, a village around a golf resort, so its point
+    # is the court itself, where OpenStreetMap puts Padel Island Kachreti —
+    # the resort is the only thing there. A city missing here gets no
     # Forecast, and its clubs are drawn without weather rather than with a
     # neighbour's.
     CITIES = {
       "Tbilisi" => [41.7151, 44.8271],
       "Rustavi" => [41.5495, 44.9930],
       "Batumi" => [41.6408, 41.6306],
-      "Kutaisi" => [42.2679, 42.6946]
+      "Kutaisi" => [42.2679, 42.6946],
+      "Gudauri" => [42.4780, 44.4762],
+      "Kachreti" => [41.6330, 45.6823]
     }.freeze
     # Open-Meteo refuses anything further out.
     MAX_DAYS = 16

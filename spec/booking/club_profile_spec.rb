@@ -72,6 +72,44 @@ RSpec.describe Booking::ClubProfile do
     expect(profile.checked_on).to eq(Date.new(2026, 10, 11))
   end
 
+  describe ".pinned" do
+    let(:pin) { { "lat" => 42.4616226, "lng" => 44.4842351 } }
+
+    it "places a club with no Profile, and claims nothing else about it" do
+      pinned = described_class.pinned(nil, pin)
+
+      expect([pinned.lat, pinned.lng]).to eq([42.4616226, 44.4842351])
+      expect(pinned.courts).to be_empty
+      expect(pinned).not_to be_listed
+    end
+
+    it "places a Profile the listing left without a pin, and keeps the rest of it" do
+      pinned = described_class.pinned(profile.with(lat: nil, lng: nil), pin)
+
+      expect(pinned.lat).to eq(42.4616226)
+      expect(pinned.area).to eq("Ortachala")
+      expect(pinned).to be_listed
+    end
+
+    it "leaves a pin the listing gave alone" do
+      expect(described_class.pinned(profile, pin)).to eq(profile)
+    end
+
+    it "changes nothing without a whole pin" do
+      expect(described_class.pinned(nil, nil)).to be_nil
+      expect(described_class.pinned(nil, { "lat" => 42.46 })).to be_nil
+    end
+  end
+
+  # The pins written into config/clubs.yml by hand, so checked by hand too:
+  # both halves there, and somewhere in Georgia.
+  it "is given whole pins in Georgia wherever config/clubs.yml gives one" do
+    pins = YAML.safe_load_file("config/clubs.yml").filter_map { _1.dig("settings", "pin") }
+
+    expect(pins).not_to be_empty
+    expect(pins).to all(satisfy { |pin| Float(pin["lat"]).between?(41, 43.6) && Float(pin["lng"]).between?(40, 46.8) })
+  end
+
   describe ".load" do
     it "reads every club's profile from the file the import writes" do
       Dir.mktmpdir do |dir|

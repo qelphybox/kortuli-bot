@@ -46,7 +46,28 @@ module Booking
       request(url) { @connection.get(url, params) }
     end
 
+    # For the one source whose token is good only inside the server session
+    # that issued it: the page, plus the cookies it set, already in the shape
+    # a `Cookie` header wants them back.
+    def get_page(url, params = {})
+      response = nil
+      body = request(url) { response = @connection.get(url, params) }
+
+      [body, cookies(response)]
+    end
+
     private
+
+    # Several Set-Cookie headers arrive joined with ", " — and an `expires`
+    # date has a comma of its own, so a cookie starts only where a comma is
+    # followed by `name=`. Attributes (path, HttpOnly, …) are not sent back.
+    def cookies(response)
+      response.headers["set-cookie"].to_s
+              .split(/,\s*(?=[^;,=\s]+=)/)
+              .map { _1.split(";").first.to_s.strip }
+              .reject(&:empty?)
+              .join("; ")
+    end
 
     def request(url)
       response = yield

@@ -70,7 +70,11 @@
       <% if @at.nil? %>
         Every club is shut for today
       <% elsif @clubs.empty? %>
-        <%= @only == "favourites" ? "No favourites yet — star a club in the list" : "No club with a roof is on the map" %>
+        <%= case @only
+            when "favourites" then "No favourites yet — star a club in the list"
+            when "covered" then "No club with a roof is on the map"
+            else "No club here has a pin yet — see the list"
+            end %>
       <% else %>
         Tap a pin · free courts at <%= @time %>
       <% end %>

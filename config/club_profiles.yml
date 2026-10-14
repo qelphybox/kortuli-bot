@@ -4,7 +4,7 @@
 # Each club's Profile: the cover over every court, where it is, and the
 # hours and prices it lists on sapadelo.com. For people to read; nothing
 # that decides a Cell looks at it.
-checked_on: '2026-10-13'
+checked_on: '2026-10-14'
 clubs:
   kus-tba-padel:
     source: https://sapadelo.com/georgia/clubs/kus-tba-padel
@@ -537,3 +537,61 @@ clubs:
     - gel: 40
       from: '08:00'
       to: '16:00'
+  padel-island-lisi:
+    source: https://sapadelo.com/georgia/clubs/padel-island-lisi
+    area: Lisi
+    address: 109 Fermtserta St
+    phone: "+995511133551"
+    lat: 41.7420982
+    lng: 44.7208115
+    courts:
+    - name: Court 1
+      cover: outdoor
+    - name: Court 2
+      cover: outdoor
+    hours:
+      mon: 00:00–00:00
+      tue: 00:00–00:00
+      wed: 00:00–00:00
+      thu: 00:00–00:00
+      fri: 00:00–00:00
+      sat: 00:00–00:00
+      sun: 00:00–00:00
+    prices:
+    - gel: 80
+    - gel: 40
+      from: '05:00'
+      to: '17:00'
+    - gel: 80
+      days:
+      - sat
+      - sun
+  padel-island-expo:
+    source: https://sapadelo.com/georgia/clubs/padel-island-expo-park
+    area: Didube
+    address: 118 Akaki Tsereteli Ave
+    phone: "+995511133551"
+    lat: 41.7393061
+    lng: 44.779573
+    courts:
+    - name: No Roof
+      cover: outdoor
+    - name: Roof
+      cover: covered
+    hours:
+      mon: 07:00–02:00
+      tue: 07:00–02:00
+      wed: 07:00–02:00
+      thu: 07:00–02:00
+      fri: 07:00–02:00
+      sat: 07:00–02:00
+      sun: 07:00–02:00
+    prices:
+    - gel: 80
+    - gel: 40
+      from: '07:00'
+      to: '17:00'
+    - gel: 80
+      days:
+      - sat
+      - sun

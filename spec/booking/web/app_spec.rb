@@ -1224,6 +1224,40 @@ RSpec.describe Booking::Web::App do
       expect(last_response.body).to include("https://padel-club2.example/")
     end
 
+    context "when the club has only a pin from its settings" do
+      let(:clubs) do
+        [
+          Booking::Club.new(
+            slug: "padel-club-2", name: "Padel Club 2", adapter: "reservio",
+            settings: { "opening_hours" => { "from" => "08:00", "to" => "24:00" }, "courts" => 4,
+                        "booking_url" => "https://padel-club2.example/", "pin" => { "lat" => 42.4616226, "lng" => 44.4842351 } }
+          ),
+          Booking::Club.new(
+            slug: "kus-tba-padel", name: "Kus Tba Padel", adapter: "kustba",
+            settings: { "opening_hours" => { "from" => "08:00", "to" => "02:00" }, "booking_url" => "https://kustba.example/book/",
+                        "pin" => { "lat" => 1.0, "lng" => 2.0 } }
+          )
+        ]
+      end
+
+      it "shows where it is, and says the rest is not known" do
+        sign_in
+        get "/clubs/padel-club-2"
+
+        expect(last_response.body).to include('data-map-preview data-lat="42.4616226" data-lng="44.4842351"')
+        expect(last_response.body).to include("https://www.google.com/maps/search/?api=1&amp;query=42.4616226,44.4842351")
+        expect(last_response.body).to include(Booking::Messages.profile_missing)
+      end
+
+      # A pin of ours is not the club's listing, so nothing credits one.
+      it "credits no directory" do
+        sign_in
+        get "/clubs/padel-club-2"
+
+        expect(last_response.body).not_to include("sapadelo.com")
+      end
+    end
+
     it "is 404 for a club nobody watches" do
       sign_in
       get "/clubs/no-such-club"
@@ -1307,6 +1341,52 @@ RSpec.describe Booking::Web::App do
 
       expect(pin("kus-tba-padel")).to include('data-lat="41.700688"').and include('data-lng="44.7570599"')
       expect(last_response.body).not_to include('data-pin="padel-club-2"')
+    end
+
+    # Gudauri and Kachreti are on no directory: config/clubs.yml places them.
+    context "when a club's settings give it a pin" do
+      let(:clubs) do
+        [
+          Booking::Club.new(
+            slug: "padel-club-2", name: "Padel Club 2", adapter: "reservio",
+            settings: { "opening_hours" => { "from" => "08:00", "to" => "24:00" }, "courts" => 4,
+                        "booking_url" => "https://padel-club2.example/", "pin" => { "lat" => 42.4616226, "lng" => 44.4842351 } }
+          ),
+          Booking::Club.new(
+            slug: "kus-tba-padel", name: "Kus Tba Padel", adapter: "kustba",
+            settings: { "opening_hours" => { "from" => "08:00", "to" => "02:00" }, "booking_url" => "https://kustba.example/book/",
+                        "pin" => { "lat" => 1.0, "lng" => 2.0 } }
+          )
+        ]
+      end
+
+      it "pins a club the listing does not place where its settings say" do
+        at_morning
+        get "/clubs/map"
+
+        expect(pin("padel-club-2")).to include('data-lat="42.4616226"').and include('data-lng="44.4842351"')
+      end
+
+      it "keeps the listing's pin over one from the settings" do
+        at_morning
+        get "/clubs/map"
+
+        expect(pin("kus-tba-padel")).to include('data-lat="41.700688"')
+      end
+    end
+
+    # A City whose clubs have no pin at all — no chip pressed, nothing to blame
+    # on a roof.
+    context "when no club here has a pin" do
+      let(:club_profiles) { {} }
+
+      it "says so, and sends people to the list" do
+        at_morning
+        get "/clubs/map"
+
+        expect(last_response.body).to include("No club here has a pin yet — see the list")
+        expect(last_response.body).not_to include("No club with a roof")
+      end
     end
 
     it "answers for the first hour still to come" do
@@ -1639,6 +1719,29 @@ RSpec.describe Booking::Web::App do
         expect(last_response.status).to eq(200)
         expect(last_response.body).not_to include("google.com/maps")
         expect(last_response.body).not_to include("Directions")
+      end
+
+      context "when the club has a pin in its settings" do
+        let(:clubs) do
+          [
+            Booking::Club.new(
+              slug: "padel-club-2", name: "Padel Club 2", adapter: "reservio",
+              settings: { "opening_hours" => { "from" => "08:00", "to" => "24:00" }, "courts" => 4,
+                          "booking_url" => "https://padel-club2.example/", "pin" => { "lat" => 42.4616226, "lng" => 44.4842351 } }
+            ),
+            Booking::Club.new(
+              slug: "kus-tba-padel", name: "Kus Tba Padel", adapter: "kustba",
+              settings: { "opening_hours" => { "from" => "08:00", "to" => "02:00" }, "booking_url" => "https://kustba.example/book/",
+                          "pin" => { "lat" => 1.0, "lng" => 2.0 } }
+            )
+          ]
+        end
+
+        it "points the directions at it" do
+          get "/game/padel-club-2/#{day}/19-20"
+
+          expect(last_response.body).to include("https://www.google.com/maps/search/?api=1&amp;query=42.4616226,44.4842351")
+        end
       end
 
       context "when the club's Profile has a street but no pin" do

@@ -22,6 +22,7 @@ So the three sections below are:
 - **A. Book & Go / Padelbade** — solved end to end. Easy.
 - **B1. Padel Mates** — solved end to end, but irrelevant to Georgia today.
 - **B2. TPC MatchPoint (the platform Padel Island actually runs)** — blocked. Hard.
+  **Wrong — re-probed 2026-10-14 (B2.4): the grid is public and reads as JSON. Easy.**
 
 ---
 
@@ -425,22 +426,58 @@ interfaces. The app almost certainly speaks a cleaner mobile JSON API than the w
 **UNVERIFIED / open:** whether MatchPoint exposes any public, unauthenticated availability
 API for its tenants at all. Nothing in the reachable HTML suggests one.
 
+### B2.4 Re-probed 2026-10-14 — the grid is public
+
+B2.2 never fetched the grid; the login it describes is only what `/` redirects
+to. Fetched directly, everything below was verified live:
+
+- `GET https://booking.padelisland.ge/Booking/Grid.aspx` answers **200** with no
+  cookie and no login, and sets `ASP.NET_SessionId`. The Turnstile is on the
+  login form only.
+- An inline script sets `hl90njda2b89k='<base64>'` — the `key` the grid's
+  `booking/js/ajax.js` (ver 2.9.6) sends on every call — and
+  `dateParameters.cuadroCentroMap` lists the venues:
+  `{"5":"Marco Polo Gudauri","6":"Lisi Lake Sports Park","7":"Ambassadori Kachreti","8":"EXPO Park Tbilisi"}`.
+- `POST /booking/srvc.aspx/ObtenerCuadro`, JSON body
+  `{"idCuadro":8,"fecha":"15/10/2026","key":"<key>"}`, answers
+  `{"d":{…CuadroReservasNuevo…}}`: per court (`Columnas[]`, `Id`,
+  `TextoPrincipal`) the *taken* spans (`Ocupaciones[]`: `StrHoraInicio`,
+  `StrHoraFin`, `Tipo` one of `reserva_individual`, `reserva_temporada`,
+  `reserva_club`, `bloqueo`), plus the day's own fence
+  (`StrHoraAperturaCentro`, `StrHoraCierreCentro`), the bookable window and the
+  horizon (`StrFechaMax`: 30 days ahead, 21 at Kachreti). Half-hour grid.
+- **It never refuses.** The key is good only with the session cookie it came
+  with, and the server also wants `Referer: …/Booking/Grid.aspx`; get either
+  wrong, or ask past the horizon, and the answer is still 200 with `Id: 0` and
+  no courts. A wrong key does not kill the session. A session was still good
+  seven minutes later.
+- The `/Date(ms)/` timestamps are serialised on the server's own clock
+  (UTC+2, Madrid): 20:00 in Tbilisi came back as 18:00 UTC. Read the `Str*`
+  wall-clock strings.
+- `Grid.aspx?id=<cuadro>` opens the page on that venue. No date parameter was
+  found (`fecha`, `dia`, `date` all ignored).
+- Hours the grid declares: EXPO 07:00–02:00, Kachreti 08:00–23:00, Lisi
+  00:00–23:59 and Marco Polo 00:00–00:00 (round the clock, on paper).
+
+Under ADR-0004 that is a robots line, not a door, and the four venues are
+watched by `lib/booking/adapters/matchpoint.rb`.
+
 ---
 
 ## Summary table
 
 | | Padelbade (Book & Go) | Padel Mates | Padel Island (TPC MatchPoint) |
 |---|---|---|---|
-| API host | `api.bookandgo.app` ✅ | `fastapi-production-fargate.padelmates.io` ✅ | unknown ❌ |
-| Availability endpoint | `GET /api/v1/apps/58/court-bookings?date=` ✅ | `GET /player/player_booking/all_courts_slot_prices_v2?club_id&start_datetime&end_datetime` ✅ | robots-disallowed `/Booking/Grid.aspx` ❌ |
-| Auth to read | none ✅ | none ✅ | login + session ❌ |
-| Tenant id | `apps/58` + `location_id` 163/141/142 ✅ | 32-hex `club_id` ✅ | tenant `padelisland-ge` ✅ (ids unknown) |
-| Free-only? | yes, per court, 30-min grid ✅ | yes, per court ✅ | unknown |
-| Timestamps | local wall-clock + `club_timezone` ✅ | absolute ISO8601 + epoch-ms ✅ | unknown |
-| Horizon | 14 d (Dighomi, Rustavi), 22–30 d (Krtsanisi), enforced server-side ✅ | caller-chosen, unprobed | unknown |
-| Deeplink | club/date deeplink does not exist; static URL only ⚠️ | `padelmates.se/club/<slug>` ✅ | `/Booking/Grid.aspx` (gated) |
+| API host | `api.bookandgo.app` ✅ | `fastapi-production-fargate.padelmates.io` ✅ | `booking.padelisland.ge` ✅ (B2.4) |
+| Availability endpoint | `GET /api/v1/apps/58/court-bookings?date=` ✅ | `GET /player/player_booking/all_courts_slot_prices_v2?club_id&start_datetime&end_datetime` ✅ | robots-disallowed `POST /booking/srvc.aspx/ObtenerCuadro` ✅ (B2.4) |
+| Auth to read | none ✅ | none ✅ | none — an anonymous session cookie + page key ✅ (B2.4) |
+| Tenant id | `apps/58` + `location_id` 163/141/142 ✅ | 32-hex `club_id` ✅ | `idCuadro` 5/6/7/8 ✅ (B2.4) |
+| Free-only? | yes, per court, 30-min grid ✅ | yes, per court ✅ | no — taken spans per court, 30-min grid ✅ (B2.4) |
+| Timestamps | local wall-clock + `club_timezone` ✅ | absolute ISO8601 + epoch-ms ✅ | wall-clock strings; `/Date()/` is on Madrid's clock ⚠️ (B2.4) |
+| Horizon | 14 d (Dighomi, Rustavi), 22–30 d (Krtsanisi), enforced server-side ✅ | caller-chosen, unprobed | 30 d, 21 d at Kachreti ✅ (B2.4) |
+| Deeplink | club/date deeplink does not exist; static URL only ⚠️ | `padelmates.se/club/<slug>` ✅ | `/Booking/Grid.aspx?id=<cuadro>`, no date ⚠️ (B2.4) |
 | Georgian clubs | 3 ✅ | **0** | 4 |
-| Verdict | **easy** | **easy, but nothing to watch** | **hard / blocked** |
+| Verdict | **easy** | **easy, but nothing to watch** | ~~hard / blocked~~ **easy** (B2.4) |
 
 ## Sources
 
