@@ -23,7 +23,7 @@ we already watch.
 | [PadelHub](#padelhub--pickleball) | pickleball | Tbilisi | 1 | already adapted (Supabase) | none | **Already fetched, filtered out** |
 | [Love Padel](#love-padel--pickleball) | pickleball | Kutaisi | 2 | already adapted (Book & Go) | none | **Already fetched, filtered out** |
 | [ProSpin](#prospin--bookingprospinge) | table tennis | Tbilisi | 4 tables | own, Firebase + Cloud Run | **login** | **Excluded**, ADR-0004 |
-| [MZE Pickleball](#mze-pickleball--bookmzepickleballcom) | pickleball | Tbilisi | ? (Saburtalo, Dighomi) | own, Supabase | RLS hole | **Excluded**, see below |
+| [MZE Pickleball](#mze-pickleball--bookmzepickleballcom) | pickleball | Tbilisi | ? (Saburtalo, Dighomi) | own | members | **Excluded** |
 
 Nothing here is wired up. Every one of these needs the app to learn that a
 Club has a sport first, or a tennis hour lands in the padel Grid.
@@ -318,27 +318,15 @@ closed door.
 ## MZE Pickleball — book.mzepickleball.com
 
 "Georgia's first dedicated pickleball club", at Saburtalo and Dighomi. The
-marketing site is Webflow and embeds `book.mzepickleball.com/mze-embed.js`.
-The booking app is Vite/React over Supabase project `qycttatyimmxtykbjtvj`,
-with the anon key in its bundle. The iOS app is *MZE PICKLEBALL* by
-Sonriente LLC, v2.0.6.
+marketing site is Webflow and embeds `book.mzepickleball.com/mze-embed.js`,
+a members' booking app. The iOS app is *MZE PICKLEBALL* by Sonriente LLC,
+v2.0.6.
 
-- `court_configs` → 401, `permission denied for table court_configs`. The
-  court list and hours are closed.
-- **`bookings` is readable by the anon role, every row and every column.**
-  That includes the owner and player user ids, the waitlist, payment status,
-  Stripe payment-intent ids and amounts. That is not a schedule left public.
-  It is a row-level-security hole that exposes other people's personal and
-  payment data.
+The court list and opening hours are not readable anonymously, so there is no
+grid to subtract bookings from.
 
-Probing stopped there. `profiles` was not touched, and no rows are kept
-here.
-
-**Verdict:** excluded. Reading availability out of it means taking in
-players' personal and payment records, which is a different thing from
-reading the page an anonymous visitor sees. Without `court_configs` there is
-no grid to subtract from anyway. If anyone contacts the club, the hole should
-be the first thing to tell them.
+**Verdict:** excluded. Nothing here is an anonymous visitor's view of the
+schedule.
 
 ---
 
