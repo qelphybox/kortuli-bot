@@ -23,7 +23,10 @@ Twenty-four clubs, 77 courts, six Cities:
 - **Kachreti** — Padel Island Ambassadori.
 
 Every club in Georgia with an online booking page that answers an anonymous
-visitor is in. What is left out is below, with the reason.
+visitor was in as of 2026-10-13. A competitor sweep on 2026-10-22
+(`docs/research/competitors-padelspot-playspot.md`) turned up two since:
+PadelHipp in Rustavi and VR Krtsanisi. What is left out is below, with the
+reason.
 
 ## Decisions this plan assumes
 
@@ -70,13 +73,15 @@ back when a directory or `discover:reservio` turns it up again.
 | Tbilisi | Padel Island Lisi Lake | 2 | TPC MatchPoint, grid 6 | watched |
 | Tbilisi | Padel Island EXPO Park | 2 | TPC MatchPoint, grid 8 | watched |
 | Tbilisi | Vera Park | 1 | — | not open |
+| Tbilisi | VR Krtsanisi Resort Residence | 2 | Bookly (WordPress) | not yet watched — needs recon |
+| Tbilisi | FC Dinamo Padel Club | 9 | — | not open; `padeldinamo.ge` is a waiting list |
 | Batumi | Padel Port | 4 | Reservio | watched |
 | Batumi | Padel Port New Park | 2 | Reservio (same business) | watched |
 | Batumi | Grand Padel Batumi | 2 | Reservio | watched |
 | Batumi | Dunlop Batumi | 1 | — | WhatsApp only |
 | Rustavi | Padelbade Rustavi | 2 | Book & Go, tenant 58 | watched |
 | Rustavi | Higgs | 3 | own (ASP.NET); also on GAMO | watched |
-| Rustavi | PadelHipp | 3 | — | Instagram only (opened 2026-09-24) |
+| Rustavi | PadelHipp | 3 | own (`/api/availability`, open) | not yet watched — has a site since; see `research/competitors-padelspot-playspot.md` |
 | Kutaisi | Love Padel | 2 | Book & Go, tenant 126 | watched |
 | Kutaisi | AIA Padel | 3 active of 4 | own (Next.js) | watched |
 | Gudauri | Padel Island Marco Polo | 2 | TPC MatchPoint, grid 5 | watched |
