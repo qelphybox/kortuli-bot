@@ -1,8 +1,14 @@
-# Padel slot watcher
+# kortuli
 
-A Telegram bot that watches padel clubs across Georgia — Tbilisi, Batumi,
-Rustavi, Kutaisi, Gudauri and Kachreti — for cancellations and messages you
-when a court in your window frees up.
+Padel in Georgia for anyone: find a court that suits you, find people to play
+with, and play — even if you have never played before. See
+[ADR-0005](docs/adr/0005-find-a-court-find-a-game-play.md) for what that means
+and what it does not.
+
+What is built today is the first of those jobs: a Telegram bot and mini app
+that read padel clubs across Georgia — Tbilisi, Batumi, Rustavi, Kutaisi,
+Gudauri and Kachreti — show their free hours, and message you when a court in
+your window frees up.
 
 Evening slots go a day or two ahead and only come back when somebody cancels.
 There is no single place that shows the whole grid, so the only way to catch a

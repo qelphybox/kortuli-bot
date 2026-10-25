@@ -125,14 +125,21 @@ stand.
    it loses on the clubs it silently stops reading. A watched club that goes
    dark should be visible to us before a user notices — the ops dashboard is
    where that belongs.
-3. **The Standing watch is the one thing neither has.** PadelSpot's reminders
-   are dated, capped and go by SMS. A recurring Telegram watch with no quota
-   and no sign-up is the pitch; say it on the first screen.
+3. **The Standing watch is the one thing neither has** — keep it good, but it
+   is not the pitch. Since ADR-0005 the product is find a court, find a game,
+   play; the watch is the patient way to find a court.
 4. **Durations and half-hour starts are the real feature gap.** Both
    competitors offer 90 and 120. The coverage plan's wave 4 already notes that
    half-hour starts are half of Padelbade's inventory and that watching them is
    a Grid change first. That change now has a competitive reason.
-5. **Do not chase the social layer.** Matchmaking, ratings and tournaments are
-   PlaySpot's whole product and PadelSpot's sideline; neither is better at
-   catching a cancellation because of it. The one bridge worth a thought is
-   the moment after a slot frees up: "court's free, need a fourth".
+5. **Finding a game is in scope now; the whole social layer is not.** PlaySpot's
+   open 2v2 seats are the closest thing to our second job, and the natural
+   bridge is ours already: a Game somebody booked, one seat short, reaching
+   people they do not know. Ratings, tournaments and coaches are separate
+   decisions.
+6. **Teaching the game is barely started by either.** PadelSpot has a
+   beginner's guide page (`/rogor-davitskot-padeli`: rules, equipment, where to
+   book) and a page of its TikTok lessons (`/padelis-gakvetilebi`); PlaySpot
+   has only a questionnaire that places your level. Neither has a tutorial a
+   newcomer finishes and comes away knowing how a point is scored, who wins
+   and how to serve. That is open ground.
