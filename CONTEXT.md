@@ -145,6 +145,27 @@ How far ahead we look, ours rather than a club's. A club's own window is its
 `max_days` and can be shorter.
 _Avoid_: window, range, lookahead
 
+## Playing
+
+**Party**:
+One to four people who want to play together once: one date, a span of
+hours, how long to play, and the Clubs to play at. Made by pressing Play,
+joined by invitation or by its link, and gone once it is in a Game or its
+span can no longer be played. A Party of four needs only a Slot; a smaller
+one also needs another Party to make four.
+_Avoid_: group, team, lobby, squad
+
+**Captain**:
+The person who made a Party. Their span, length and Favourites are the
+Party's — nobody else in it is asked.
+_Avoid_: host, owner, leader, organiser
+
+**Lineup**:
+Parties that together make four, and one Slot that fits all their spans for
+the length they asked — found by the bot, not yet booked. One of its people
+books the Slot; until then it is a proposal, and the Slot can go.
+_Avoid_: match (people say that of a Game too), lobby, game
+
 ## Running it
 
 **Poll**:
