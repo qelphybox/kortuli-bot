@@ -173,7 +173,11 @@ strangers — and what they accept is the people, not the Slot: any Slot the
 Lineup could play is one they already chose. So when the proposed Slot goes
 before it is booked, the next one is proposed without asking anybody again;
 they are only told. Once all have accepted, the Captain of the Party that
-has been waiting longest books it.
+has been waiting longest books it, and says so: booked, which makes the
+Lineup a Game, or already gone, which proposes the next Slot. Only their
+word counts — a Poll seeing the Slot taken cannot tell who took it, so it
+only prompts them to say. Fifteen minutes to book; silence is a refusal,
+and the booker is a Captain.
 
 Thirty minutes to accept, ending no later than two hours before the Slot
 starts; a Slot closer than that is not offered at all. One refusal or
