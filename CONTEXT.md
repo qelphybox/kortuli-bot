@@ -152,7 +152,9 @@ One to four people who want to play together once: one date, a span of
 hours, how long to play, and the Clubs to play at. Made by pressing Play,
 joined by invitation or by its link, and gone once it is in a Game or its
 span can no longer be played. A Party of four needs only a Slot; a smaller
-one also needs another Party to make four.
+one also needs another Party to make four. Someone who does not accept a
+Lineup leaves their Party, which carries on without them — unless they are
+its Captain, and then the Party is gone.
 _Avoid_: group, team, lobby, squad
 
 **Captain**:
@@ -164,8 +166,13 @@ _Avoid_: host, owner, leader, organiser
 Parties that together make four, and one Slot that fits all their spans for
 the length they asked — found by the bot, not yet booked. Every person in it is asked to accept, a
 Party of four as much as two strangers, and has a while to; only once all
-have does one of them book the Slot. Until then it is a proposal, and the
-Slot can go.
+have does one of them book the Slot: the Captain of the Party that has been
+waiting longest. Until then it is a proposal, and the Slot can go.
+
+Thirty minutes to accept, ending no later than two hours before the Slot
+starts; a Slot closer than that is not offered at all. One refusal or
+silence ends the Lineup, and its other Parties wait on in the place they
+held, not at the back.
 _Avoid_: match (people say that of a Game too), lobby, game
 
 ## Running it
