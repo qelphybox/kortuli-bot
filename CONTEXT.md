@@ -162,8 +162,10 @@ _Avoid_: host, owner, leader, organiser
 
 **Lineup**:
 Parties that together make four, and one Slot that fits all their spans for
-the length they asked — found by the bot, not yet booked. One of its people
-books the Slot; until then it is a proposal, and the Slot can go.
+the length they asked — found by the bot, not yet booked. Every person in it is asked to accept, a
+Party of four as much as two strangers, and has a while to; only once all
+have does one of them book the Slot. Until then it is a proposal, and the
+Slot can go.
 _Avoid_: match (people say that of a Game too), lobby, game
 
 ## Running it
