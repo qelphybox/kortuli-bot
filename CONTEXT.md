@@ -71,6 +71,9 @@ A Club whose source reports only whether *some* court is free that hour. Its
 Cells say whether, not how many. Kus Tba and all three GymBreeze locations —
 for Kus Tba by our choice, for GymBreeze because its API refuses — and the two
 one-court Tbilisi Padel locations, where whether is how many.
+A Lineup needs a court, so before proposing one at Kus Tba the bot asks it
+which courts are free for just those hours; GymBreeze cannot say, and is
+proposed only for a single hour.
 _Avoid_: per-hour, coarse, aggregate
 
 **Profile**:
@@ -163,10 +166,10 @@ Party's — nobody else in it is asked.
 _Avoid_: host, owner, leader, organiser
 
 **Lineup**:
-Parties that together make four, and the Slots they could all play: hours
-inside every Party's span, at a Club every Captain has starred, for the
-length they asked. Found by the bot, not yet booked. It proposes one of
-those Slots at a time.
+Parties that together make four, and the stretches they could all play:
+as many hours in a row as they asked, on one court, inside every Party's
+span, at a Club every Captain has starred. Found by the bot, not yet booked. It proposes one of
+those stretches at a time.
 
 Every person in it is asked to accept, a Party of four as much as two
 strangers — and what they accept is the people, not the Slot: any Slot the
