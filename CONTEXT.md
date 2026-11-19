@@ -163,16 +163,22 @@ Party's — nobody else in it is asked.
 _Avoid_: host, owner, leader, organiser
 
 **Lineup**:
-Parties that together make four, and one Slot that fits all their spans for
-the length they asked — found by the bot, not yet booked. Every person in it is asked to accept, a
-Party of four as much as two strangers, and has a while to; only once all
-have does one of them book the Slot: the Captain of the Party that has been
-waiting longest. Until then it is a proposal, and the Slot can go.
+Parties that together make four, and the Slots they could all play: hours
+inside every Party's span, at a Club every Captain has starred, for the
+length they asked. Found by the bot, not yet booked. It proposes one of
+those Slots at a time.
+
+Every person in it is asked to accept, a Party of four as much as two
+strangers — and what they accept is the people, not the Slot: any Slot the
+Lineup could play is one they already chose. So when the proposed Slot goes
+before it is booked, the next one is proposed without asking anybody again;
+they are only told. Once all have accepted, the Captain of the Party that
+has been waiting longest books it.
 
 Thirty minutes to accept, ending no later than two hours before the Slot
 starts; a Slot closer than that is not offered at all. One refusal or
-silence ends the Lineup, and its other Parties wait on in the place they
-held, not at the back.
+silence ends the Lineup, and so does running out of Slots; its other
+Parties wait on in the place they held, not at the back.
 _Avoid_: match (people say that of a Game too), lobby, game
 
 ## Running it
