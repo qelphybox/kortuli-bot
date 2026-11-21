@@ -191,8 +191,11 @@ _Avoid_: match (people say that of a Game too), lobby, game
 **Level**:
 How well one person plays, in three steps only — `beginner`, `regular`,
 `pro` — because all a Lineup needs is to keep the first apart from the
-last. Said by the person themselves the first time they press Play, and
-theirs to change; nothing recalculates it after a Game.
+last. A Lineup never puts a `beginner` and a `pro` from different Parties
+together — neighbouring steps may meet — while inside a Party anyone may play
+with anyone. Every person's Level is shown to the others when they are asked
+to accept. Said by the person themselves the first time they press Play,
+and theirs to change; nothing recalculates it after a Game.
 _Avoid_: rating, rank, skill, ELO
 
 ## Running it
