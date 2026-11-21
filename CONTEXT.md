@@ -188,6 +188,13 @@ silence ends the Lineup, and so does running out of stretches; its other
 Parties wait on in the place they held, not at the back.
 _Avoid_: match (people say that of a Game too), lobby, game
 
+**Level**:
+How well one person plays, in three steps only — `beginner`, `regular`,
+`pro` — because all a Lineup needs is to keep the first apart from the
+last. Said by the person themselves the first time they press Play, and
+theirs to change; nothing recalculates it after a Game.
+_Avoid_: rating, rank, skill, ELO
+
 ## Running it
 
 **Poll**:
