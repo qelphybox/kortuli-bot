@@ -151,8 +151,11 @@ _Avoid_: window, range, lookahead
 ## Playing
 
 **Party**:
-One to four people who want to play together once: one date, a span of
-hours, how long to play, and the Clubs to play at. Made by pressing Play,
+One to four people who want to play together once: on any of a few dates,
+inside one span of hours that holds on each of them, for so many hours —
+two unless said otherwise — at the Clubs to play at. A Lineup on one date
+settles it; the others drop. A person's last span and length are kept and
+offered next time, as their City is. Made by pressing Play,
 joined by invitation or by its link, and gone once it is in a Game or its
 span can no longer be played. A Party of four needs only a Slot; a smaller
 one also needs another Party to make four. Someone who does not accept a
